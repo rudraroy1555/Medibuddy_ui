@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medibuddy - Medicine Alternatives</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slateBlue: '#23394d',
+                        deepSlate: '#1a2a3a',
+                        softGreen: '#f0fdf4',
+                        accentGreen: '#166534',
+                        mutedAmber: '#fffbeb',
+                        warningAmber: '#b45309',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative pb-24 text-slate-800">
+    <!-- Header / Navigation -->
+    <header class="w-full bg-white px-6 py-4 flex justify-between items-center shadow-sm z-10 sticky top-0">
+        <div class="flex items-center gap-2 text-slateBlue">
+            <i class="fa-solid fa-pills text-xl"></i>
+            <span class="font-bold text-xl tracking-tight">medibuddy</span>
+        </div>
+        <button class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2" aria-label="How this works">
+            <i class="fa-regular fa-circle-question text-lg"></i>
+            <span class="hidden sm:inline">How this works</span>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center px-4 pt-12 md:pt-20 w-full max-w-4xl mx-auto">
+        <!-- Hero Search Section -->
+        <div class="text-center mb-10 w-full transition-all duration-500 ease-in-out" id="hero-section">
+            <div class="inline-flex items-center gap-2 bg-softGreen text-accentGreen text-xs font-bold px-3 py-1 rounded-full mb-6 tracking-wide uppercase border border-accentGreen/20">
+                <i class="fa-solid fa-shield-halved"></i> 
+                Make an informed comparison
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-slateBlue mb-4 tracking-tight">Find a medicine that fits.</h1>
+            <p class="text-slate-500 text-sm md:text-base mb-10 max-w-lg mx-auto leading-relaxed">
+                See equivalent options and potential savings in one calm, clear view. Bring what you find here to your pharmacist or physician.
+            </p>
+            
+            <!-- Search Box -->
+            <div class="relative w-full max-w-2xl mx-auto group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg"></i>
+                </div>
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    class="w-full pl-14 pr-32 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent transition-all text-lg text-slate-700 bg-white"
+                    placeholder="Enter medicine name (e.g., Lipitor, Tylenol)..."
+                    autocomplete="off"
+                    autofocus
+                >
+                <button class="absolute inset-y-2 right-2 bg-slateBlue text-white px-6 rounded-lg font-medium hover:bg-deepSlate transition-colors shadow-sm" onclick="performSearch()">
+                    Search <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-4 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-lock text-slate-300"></i> 
+                Your search is private and for educational comparison only.
+            </p>
+        </div>
+
+        <!-- Results Container (Hidden initially) -->
+        <div id="resultsContainer" class="w-full max-w-3xl hidden flex-col gap-5 fade-in pb-8">
+            
+            <!-- Results Header -->
+            <div class="flex justify-between items-end mb-2 border-b border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Comparison for</h2>
+                    <p class="text-2xl font-bold text-slateBlue" id="searchQueryDisplay">Lipitor</p>
+                </div>
+                <div class="text-right text-xs text-slate-500">
+                    <p class="font-medium text-slate-700">3 options found</p>
+                    <p>Prices may vary by pharmacy</p>
+                </div>
+            </div>
+
+            <!-- Best Alternative Card -->
+            <div class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-accentGreen"></div>
+                
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold text-slateBlue">Atorvastatin</h3>
+                            <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-check"></i> Best Value
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2 font-medium">Generic alternative &bull; 20 mg tablet &bull; 30-day supply</p>
+                        <p class="text-xs text-slate-500">Most pharmacies</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
+                        <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
+                            <span class="font-bold text-accentGreen text-lg">Save $63.18</span>
+                        </div>
+                        <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                            <span class="font-bold text-slateBlue text-3xl">100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5 pt-4 border-t border-accentGreen/20 flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated cash price</p>
+                    <p class="font-bold text-slateBlue text-lg">$8.40</p>
+                </div>
+            </div>
+
+            <!-- Alternative Card 2 (Brand) -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow mt-1">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold text-slateBlue">Lipitor</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2 font-medium">Brand name &bull; 20 mg tablet &bull; 30-day supply</p>
+                        <p class="text-xs text-slate-500">Most pharmacies</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
+                        <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
+                            <span class="font-medium text-slate-400 text-sm">Current Price</span>
+                        </div>
+                        <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                            <span class="font-bold text-slateBlue text-3xl">100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated cash price</p>
+                    <p class="font-bold text-slateBlue text-lg">$71.58</p>
+                </div>
+            </div>
+            
+             <!-- Alternative Card 3 -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow mt-1">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-xl font-bold text-slateBlue">Pravastatin</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2 font-medium">Therapeutic alternative &bull; 20 mg tablet &bull; 30 tablets</p>
+                        <p class="text-xs text-slate-500 max-w-sm">Different statin with similar purpose. Prescriber should confirm the right dose.</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
+                        <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
+                            <span class="font-bold text-slate-600 text-lg">Save $60.33</span>
+                        </div>
+                        <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                            <span class="font-bold text-slateBlue text-3xl">74%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated cash price</p>
+                    <p class="font-bold text-slateBlue text-lg">$11.25</p>
+                </div>
+            </div>
+
+            <!-- Action Component -->
+            <div class="mt-8 mb-4 text-center">
+                <button class="bg-transparent border-2 border-slateBlue text-slateBlue hover:bg-slateBlue hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mx-auto shadow-sm">
+                    <i class="fa-regular fa-file-lines text-lg"></i>
+                    Generate Doctor Note for This Change
+                    <i class="fa-solid fa-arrow-right text-sm ml-1"></i>
+                </button>
+                <p class="text-xs text-slate-400 mt-3 font-medium">Create a simple conversation starter &mdash; never a prescription.</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Safety Compliance Footer -->
+    <footer class="fixed bottom-0 w-full bg-mutedAmber border-t border-warningAmber/20 py-3 px-6 z-20 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+        <div class="max-w-4xl mx-auto flex items-start sm:items-center gap-3 justify-center sm:justify-start">
+            <div class="bg-warningAmber/10 p-1.5 rounded-full mt-0.5 sm:mt-0 flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation text-warningAmber text-sm"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-amber-900 font-medium">
+                <strong class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Disclaimer:</strong> 
+                Always consult your physician or pharmacist before changing medications or altering dosages.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const heroSection = document.getElementById('hero-section');
+        const searchQueryDisplay = document.getElementById('searchQueryDisplay');
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            if (query) {
+                // Capitalize first letter for display
+                searchQueryDisplay.textContent = query.charAt(0).toUpperCase() + query.slice(1);
+                
+                // Animate hero section upwards and reduce margins
+                heroSection.classList.add('md:pt-0', 'mb-6', 'scale-[0.98]');
+                heroSection.classList.remove('mb-10');
+                
+                // Show results with fade in
+                resultsContainer.classList.remove('hidden');
+                resultsContainer.classList.add('flex');
+                
+                // Smooth scroll down slightly to ensure results are in view
+                setTimeout(() => {
+                    const yOffset = -80; // Offset for sticky header
+                    const element = document.getElementById('resultsContainer');
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                }, 50);
+            }
+        }
+
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
