@@ -1,0 +1,866 @@
+/* ==========================================================================
+   MEDIBUDDY ALTERNATIVE SEARCH - DESIGN SYSTEM & COMPONENT STYLES
+   Engineered for Clinical Trust, High Usability, and Indian Market Localization
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+
+:root {
+  /* Brand Clinical Palette */
+  --color-primary: #0f766e;
+  --color-primary-hover: #115e59;
+  --color-primary-light: #f0fdfa;
+  --color-primary-focus: rgba(15, 118, 110, 0.18);
+  
+  --color-accent-green: #15803d;
+  --color-accent-green-bg: #dcfce7;
+  --color-accent-green-border: #86efac;
+  
+  --color-surface-bg: #f8fafc;
+  --color-surface-card: #ffffff;
+  --color-surface-border: #e2e8f0;
+  --color-surface-border-subtle: #f1f5f9;
+  
+  --color-text-main: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
+  
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-warning: #b45309;
+  --color-warning-bg: #fffbeb;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+  --shadow-fab: 0 12px 28px -2px rgba(15, 118, 110, 0.35);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family-base: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+}
+
+/* Base Reset & Standards */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--color-surface-bg);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Header & Nav */
+.navbar {
+  background: var(--color-surface-card);
+  border-bottom: 1px solid var(--color-surface-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.875rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  color: var(--color-text-main);
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--color-primary), #0d9488);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25);
+}
+
+.cdsco-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+}
+
+/* Main Layout */
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 5rem 1.25rem;
+}
+
+/* Hero & Search Header */
+.search-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.hero-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text-main);
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.75rem;
+}
+
+/* Search Box Component */
+.search-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-card);
+  border: 2px solid var(--color-surface-border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 0.625rem 0.5rem 1.25rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+}
+
+.search-form:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-focus), var(--shadow-lg);
+}
+
+.search-icon {
+  color: var(--color-text-light);
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--color-text-main);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: var(--color-text-light);
+}
+
+.search-button {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.search-button:hover {
+  background: var(--color-primary-hover);
+}
+
+.popular-chips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.chip {
+  background: #ffffff;
+  border: 1px solid var(--color-surface-border);
+  color: var(--color-text-main);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip:hover, .chip.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Comparison Section */
+.comparison-section {
+  margin-top: 2.5rem;
+}
+
+.section-headline-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.comparison-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.comparison-header {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+}
+
+.comparison-subheader {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.api-pill {
+  font-family: var(--font-family-mono);
+  background: #e2e8f0;
+  color: #1e293b;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* Comparison Grid */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem;
+  align-items: stretch;
+}
+
+/* Drug Card Design */
+.drug-card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drug-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.drug-card.brand-card {
+  border-color: var(--color-surface-border);
+  background: #ffffff;
+}
+
+.drug-card.generic-card {
+  border: 2px solid var(--color-accent-green);
+  box-shadow: 0 8px 24px -4px rgba(22, 163, 74, 0.12), var(--shadow-sm);
+  background: #ffffff;
+}
+
+/* Best Value Badge */
+.badge-best-value {
+  position: absolute;
+  top: -14px;
+  right: 24px;
+  background: var(--color-accent-green);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.35rem 0.875rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+}
+
+.card-header-block {
+  border-bottom: 1px solid var(--color-surface-border-subtle);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.card-classification {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.generic-card .card-classification {
+  color: var(--color-accent-green);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  line-height: 1.2;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Pricing Display */
+.price-display-box {
+  margin: 1rem 0 1.5rem 0;
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-bg);
+}
+
+.generic-card .price-display-box {
+  background: var(--color-accent-green-bg);
+  border: 1px solid var(--color-accent-green-border);
+}
+
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.currency-symbol {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.generic-card .currency-symbol {
+  color: var(--color-accent-green);
+}
+
+.price-amount {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-text-main);
+}
+
+.generic-card .price-amount {
+  color: var(--color-accent-green);
+}
+
+.price-unit {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.price-subtext {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: 0.375rem;
+}
+
+.savings-highlight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-accent-green);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(22, 163, 74, 0.3);
+}
+
+/* Feature Checklist */
+.spec-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.spec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.spec-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.icon-verified {
+  color: var(--color-primary);
+}
+
+.icon-check-green {
+  color: var(--color-accent-green);
+}
+
+.spec-text strong {
+  display: block;
+  color: var(--color-text-main);
+  font-weight: 600;
+}
+
+.spec-text span {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+/* Bioequivalence Verification Banner */
+.regulatory-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+}
+
+.regulatory-badge svg {
+  color: var(--color-primary);
+}
+
+/* Action CTA */
+.btn-card-action {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btn-brand {
+  background: #f1f5f9;
+  color: var(--color-text-main);
+}
+
+.btn-brand:hover {
+  background: #e2e8f0;
+}
+
+.btn-generic {
+  background: var(--color-accent-green);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+.btn-generic:hover {
+  background: #166534;
+  transform: translateY(-1px);
+}
+
+/* Regulatory Disclaimer Footer */
+.compliance-footer-note {
+  margin-top: 2.5rem;
+  background: #ffffff;
+  border: 1px solid var(--color-surface-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+}
+
+.compliance-icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.compliance-text {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.compliance-text strong {
+  color: var(--color-text-main);
+}
+
+/* ==========================================================================
+   FLOATING ACTION BUTTON (FAB) & SLIDE-OUT CHATBOT UI
+   ========================================================================== */
+
+.chat-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), #0d9488);
+  color: #ffffff;
+  border: none;
+  box-shadow: var(--shadow-fab);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.chat-fab:hover {
+  transform: scale(1.06);
+  box-shadow: 0 16px 32px -4px rgba(15, 118, 110, 0.45);
+}
+
+.chat-fab:active {
+  transform: scale(0.96);
+}
+
+.fab-icon-chat, .fab-icon-close {
+  position: absolute;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.chat-fab.is-active .fab-icon-chat {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+.chat-fab .fab-icon-close {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+
+.chat-fab.is-active .fab-icon-close {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.fab-online-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+  border-radius: var(--radius-full);
+}
+
+/* Chatbot Modal Container */
+.chat-window {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 540px;
+  max-height: calc(100vh - 120px);
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.18), 0 0 0 1px var(--color-surface-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 999;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, visibility 0.2s;
+}
+
+.chat-window.is-open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Chat Header */
+.chat-header {
+  background: linear-gradient(135deg, var(--color-primary), #115e59);
+  color: #ffffff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.chat-title-group h4 {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.chat-status-text {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.chat-status-indicator {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+}
+
+.chat-close-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  opacity: 0.8;
+  transition: opacity 0.15s, background-color 0.15s;
+}
+
+.chat-close-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Chat Messages Stream */
+.chat-messages {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  background: #f8fafc;
+}
+
+.message-bubble {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.message-bubble.bot {
+  background: #ffffff;
+  color: var(--color-text-main);
+  align-self: flex-start;
+  border: 1px solid var(--color-surface-border);
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.message-bubble.bot .bot-disclaimer {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-surface-border-subtle);
+  padding-top: 0.375rem;
+}
+
+.message-bubble.user {
+  background: var(--color-primary);
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+/* Quick Question Prompts inside chat */
+.chat-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+}
+
+.chat-suggestion-btn {
+  background: #ffffff;
+  border: 1px solid var(--color-surface-border);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.chat-suggestion-btn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+/* Chat Input Bar */
+.chat-input-area {
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border-top: 1px solid var(--color-surface-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-input {
+  flex-grow: 1;
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--radius-full);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.chat-input:focus {
+  border-color: var(--color-primary);
+}
+
+.chat-send-btn {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.chat-send-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 1.5rem 1rem 5rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .drug-card {
+    padding: 1.5rem;
+  }
+
+  .price-amount {
+    font-size: 2.125rem;
+  }
+
+  .chat-window {
+    bottom: 84px;
+    right: 16px;
+    width: calc(100vw - 32px);
+    height: 480px;
+  }
+}
