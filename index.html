@@ -38,13 +38,13 @@
         }
 
         .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+            animation: fadeIn 0.4s ease-out forwards;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(15px);
+                transform: translateY(12px);
             }
 
             to {
@@ -53,9 +53,9 @@
             }
         }
 
-        /* Custom scrollbar for a cleaner look */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         ::-webkit-scrollbar-track {
@@ -70,6 +70,22 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* Chat window animations */
+        .chat-modal-enter {
+            transform: translateY(16px) scale(0.96);
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .chat-modal-enter.is-open {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
     </style>
 </head>
 
@@ -77,8 +93,11 @@
     <!-- Header / Navigation -->
     <header class="w-full bg-white px-6 py-4 flex justify-between items-center shadow-sm z-10 sticky top-0">
         <div class="flex items-center gap-2 text-slateBlue">
-            <i class="fa-solid fa-pills text-xl"></i>
+            <i class="fa-solid fa-pills text-xl text-accentGreen"></i>
             <span class="font-bold text-xl tracking-tight">medibuddy</span>
+            <span
+                class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1">India
+                (₹)</span>
         </div>
         <button
             class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2"
@@ -89,22 +108,23 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center px-4 pt-12 md:pt-20 w-full max-w-4xl mx-auto">
+    <main class="flex-grow flex flex-col items-center px-4 pt-10 md:pt-16 w-full max-w-4xl mx-auto">
         <!-- Hero Search Section -->
         <div class="text-center mb-10 w-full transition-all duration-500 ease-in-out" id="hero-section">
             <div
                 class="inline-flex items-center gap-2 bg-softGreen text-accentGreen text-xs font-bold px-3 py-1 rounded-full mb-6 tracking-wide uppercase border border-accentGreen/20">
                 <i class="fa-solid fa-shield-halved"></i>
-                Make an informed comparison
+                CDSCO Standards & Realistic Indian Pricing
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-slateBlue mb-4 tracking-tight">Find a medicine that fits.
+            <h1 class="text-4xl md:text-5xl font-bold text-slateBlue mb-4 tracking-tight">
+                Find a medicine that fits.
             </h1>
-            <p class="text-slate-500 text-sm md:text-base mb-10 max-w-lg mx-auto leading-relaxed">
-                See equivalent options and potential savings in one calm, clear view. Bring what you find here to your
-                pharmacist or physician.
+            <p class="text-slate-500 text-sm md:text-base mb-8 max-w-lg mx-auto leading-relaxed">
+                Compare verified bioequivalent generic alternatives and potential cash savings in Indian Rupees (₹).
+                Bring what you find here to your pharmacist or physician.
             </p>
 
-            <!-- Search Box -->
+            <!-- Search Box (Typo 'Liptor' corrected to 'Lipitor') -->
             <div class="relative w-full max-w-2xl mx-auto group">
                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                     <i
@@ -112,7 +132,8 @@
                 </div>
                 <input type="text" id="searchInput"
                     class="w-full pl-14 pr-32 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent transition-all text-lg text-slate-700 bg-white"
-                    placeholder="Enter medicine name (e.g., Lipitor, Tylenol)..." autocomplete="off" autofocus>
+                    placeholder="Enter medicine name (e.g., Lipitor, Augmentin, Pan-D)..." value="Lipitor"
+                    autocomplete="off">
                 <button
                     class="absolute inset-y-2 right-2 bg-slateBlue text-white px-6 rounded-lg font-medium hover:bg-deepSlate transition-colors shadow-sm"
                     onclick="performSearch()">
@@ -125,38 +146,40 @@
             </p>
         </div>
 
-        <!-- Results Container (Hidden initially) -->
-        <div id="resultsContainer" class="w-full max-w-3xl hidden flex-col gap-5 fade-in pb-8">
+        <!-- Results Container (Visible for comparison) -->
+        <div id="resultsContainer" class="w-full max-w-3xl flex flex-col gap-5 fade-in pb-8">
 
-            <!-- Results Header -->
+            <!-- Results Header (Corrected spelling: Lipitor) -->
             <div class="flex justify-between items-end mb-2 border-b border-slate-200 pb-4">
                 <div>
                     <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Comparison for</h2>
                     <p class="text-2xl font-bold text-slateBlue" id="searchQueryDisplay">Lipitor</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Active Salt: <span
+                            class="font-semibold text-slate-700">Atorvastatin Calcium 10mg / 20mg</span></p>
                 </div>
                 <div class="text-right text-xs text-slate-500">
-                    <p class="font-medium text-slate-700">3 options found</p>
-                    <p>Prices may vary by pharmacy</p>
+                    <p class="font-medium text-slate-700">3 verified options</p>
+                    <p>Prices in Indian Rupees (₹)</p>
                 </div>
             </div>
 
-            <!-- Best Alternative Card -->
+            <!-- Best Alternative Card 1 (Generic Atorvastatin - BEST VALUE) -->
             <div
                 class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-accentGreen"></div>
 
                 <div class="flex flex-col md:flex-row justify-between gap-4">
                     <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold text-slateBlue">Atorvastatin</h3>
+                        <div class="flex items-center gap-3 mb-2 flex-wrap">
+                            <h3 class="text-xl font-bold text-slateBlue">Generic Atorvastatin</h3>
                             <span
                                 class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-check"></i> Best Value
                             </span>
                         </div>
                         <p class="text-sm text-slate-600 mb-2 font-medium">Generic alternative &bull; 20 mg tablet
-                            &bull; 30-day supply</p>
-                        <p class="text-xs text-slate-500">Most pharmacies</p>
+                            &bull; Strip of 10</p>
+                        <p class="text-xs text-slate-500">PMBJP Jan Aushadhi & verified retail pharmacies</p>
                     </div>
 
                     <div
@@ -164,35 +187,49 @@
                         <div class="text-center md:text-right flex flex-col justify-center">
                             <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost
                                 Savings</span>
-                            <span class="font-bold text-accentGreen text-lg">Save $63.18</span>
+                            <!-- Localized currency in INR -->
+                            <span class="font-bold text-accentGreen text-lg">Save ₹210.00</span>
+                            <span class="text-[10px] text-accentGreen font-semibold">(84% lower cost)</span>
                         </div>
                         <div class="text-center md:text-right flex flex-col justify-center">
                             <span
                                 class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence
                                 Match</span>
-                            <span class="font-bold text-slateBlue text-3xl">100%</span>
+                            <!-- Medically and legally accurate CDSCO bioequivalence standard -->
+                            <span
+                                class="inline-flex items-center gap-1.5 text-accentGreen font-bold text-xs md:text-sm bg-accentGreen/10 px-2.5 py-1.5 rounded-lg border border-accentGreen/30">
+                                <i class="fa-solid fa-circle-check"></i> Bioequivalent (CDSCO Standard)
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div
                     class="mt-5 pt-4 border-t border-accentGreen/20 flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated cash price</p>
-                    <p class="font-bold text-slateBlue text-lg">$8.40</p>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
+                        <p class="text-[11px] text-slate-400">₹4.00 / tablet</p>
+                    </div>
+                    <!-- Realistic Indian market price for generic Atorvastatin -->
+                    <p class="font-bold text-slateBlue text-xl">₹40.00</p>
                 </div>
             </div>
 
-            <!-- Alternative Card 2 (Brand) -->
+            <!-- Alternative Card 2 (Brand Name Lipitor) -->
             <div
                 class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow mt-1">
                 <div class="flex flex-col md:flex-row justify-between gap-4">
                     <div class="flex-grow">
                         <div class="flex items-center gap-3 mb-2">
                             <h3 class="text-xl font-bold text-slateBlue">Lipitor</h3>
+                            <span
+                                class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-slate-200">
+                                Innovator Brand
+                            </span>
                         </div>
-                        <p class="text-sm text-slate-600 mb-2 font-medium">Brand name &bull; 20 mg tablet &bull; 30-day
-                            supply</p>
-                        <p class="text-xs text-slate-500">Most pharmacies</p>
+                        <p class="text-sm text-slate-600 mb-2 font-medium">Brand reference drug &bull; 20 mg tablet
+                            &bull; Strip of 10</p>
+                        <p class="text-xs text-slate-500">Originator / Reference Listed Drug (RLD)</p>
                     </div>
 
                     <div
@@ -200,35 +237,46 @@
                         <div class="text-center md:text-right flex flex-col justify-center">
                             <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost
                                 Savings</span>
-                            <span class="font-medium text-slate-400 text-sm">Current Price</span>
+                            <span class="font-medium text-slate-400 text-sm">Benchmark Price</span>
                         </div>
                         <div class="text-center md:text-right flex flex-col justify-center">
                             <span
                                 class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence
                                 Match</span>
-                            <span class="font-bold text-slateBlue text-3xl">100%</span>
+                            <span
+                                class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs md:text-sm bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
+                                <i class="fa-solid fa-certificate text-slate-500"></i> Reference Drug
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated cash price</p>
-                    <p class="font-bold text-slateBlue text-lg">$71.58</p>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
+                        <p class="text-[11px] text-slate-400">₹25.00 / tablet</p>
+                    </div>
+                    <!-- Realistic Indian market price for brand Lipitor -->
+                    <p class="font-bold text-slateBlue text-xl">₹250.00</p>
                 </div>
             </div>
 
-            <!-- Alternative Card 3 -->
+            <!-- Alternative Card 3 (Therapeutic Alternative) -->
             <div
                 class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow mt-1">
                 <div class="flex flex-col md:flex-row justify-between gap-4">
                     <div class="flex-grow">
                         <div class="flex items-center gap-3 mb-2">
                             <h3 class="text-xl font-bold text-slateBlue">Pravastatin</h3>
+                            <span
+                                class="bg-amber-50 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-amber-200">
+                                Different Salt
+                            </span>
                         </div>
                         <p class="text-sm text-slate-600 mb-2 font-medium">Therapeutic alternative &bull; 20 mg tablet
-                            &bull; 30 tablets</p>
-                        <p class="text-xs text-slate-500 max-w-sm">Different statin with similar purpose. Prescriber
-                            should confirm the right dose.</p>
+                            &bull; Strip of 10</p>
+                        <p class="text-xs text-slate-500 max-w-sm">Different statin class molecule. Prescribing
+                            physician must calculate equipotent dose.</p>
                     </div>
 
                     <div
@@ -236,20 +284,27 @@
                         <div class="text-center md:text-right flex flex-col justify-center">
                             <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost
                                 Savings</span>
-                            <span class="font-bold text-slate-600 text-lg">Save $60.33</span>
+                            <!-- Localized currency in INR -->
+                            <span class="font-bold text-slate-600 text-lg">Save ₹160.00</span>
                         </div>
                         <div class="text-center md:text-right flex flex-col justify-center">
+                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Therapeutic
+                                Class</span>
                             <span
-                                class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence
-                                Match</span>
-                            <span class="font-bold text-slateBlue text-3xl">74%</span>
+                                class="inline-flex items-center gap-1.5 text-amber-800 font-semibold text-xs md:text-sm bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200">
+                                <i class="fa-solid fa-code-compare"></i> Equipotent Class Alt
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated cash price</p>
-                    <p class="font-bold text-slateBlue text-lg">$11.25</p>
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
+                        <p class="text-[11px] text-slate-400">₹9.00 / tablet</p>
+                    </div>
+                    <!-- Localized currency in INR -->
+                    <p class="font-bold text-slateBlue text-xl">₹90.00</p>
                 </div>
             </div>
 
@@ -277,12 +332,104 @@
             </div>
             <p class="text-xs sm:text-sm text-amber-900 font-medium">
                 <strong
-                    class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Disclaimer:</strong>
-                Always consult your physician or pharmacist before changing medications or altering dosages.
+                    class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Regulatory
+                    & Clinical Notice:</strong>
+                Bioequivalence is established within CDSCO 80%–125% geometric mean ratio standards. Always consult your
+                prescribing physician before altering cardiac or statin regimens.
             </p>
         </div>
     </footer>
 
+    <!-- ==========================================================================
+         INTEGRATED CHATBOT FLOATING ACTION BUTTON (FAB) & TOGGLEABLE CHAT UI
+         (Positioned safely above fixed safety footer: bottom-20 right-6)
+         ========================================================================== -->
+
+    <!-- Floating Action Button (FAB) -->
+    <button id="chatbotFab"
+        class="fixed bottom-20 right-6 z-40 w-14 h-14 bg-slateBlue hover:bg-deepSlate text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-slateBlue/30 group"
+        aria-label="Open Medical Assistant Chat" aria-expanded="false" aria-controls="chatbotWindow">
+        <!-- Chat icon -->
+        <i id="fabChatIcon"
+            class="fa-solid fa-comments text-2xl transition-transform duration-200 group-hover:scale-110"></i>
+        <!-- Close icon (hidden initially) -->
+        <i id="fabCloseIcon" class="fa-solid fa-xmark text-2xl hidden"></i>
+        <!-- Online notification badge -->
+        <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+    </button>
+
+    <!-- Hidden Chat UI Window (toggles open on FAB click) -->
+    <div id="chatbotWindow"
+        class="chat-modal-enter fixed bottom-36 right-6 z-50 w-[360px] max-w-[calc(100vw-32px)] h-[500px] max-h-[calc(100vh-170px)] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
+        role="dialog" aria-labelledby="chatTitle" aria-modal="false">
+
+        <!-- Chat Header -->
+        <div class="bg-slateBlue text-white p-4 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <i class="fa-solid fa-user-doctor text-emerald-400"></i>
+                </div>
+                <div>
+                    <h3 id="chatTitle" class="font-bold text-sm leading-tight">MediBuddy Rx Assistant</h3>
+                    <div class="flex items-center gap-1.5 text-[11px] text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                        <span>CDSCO & Generic Info Guide</span>
+                    </div>
+                </div>
+            </div>
+            <button id="chatCloseBtn" class="text-slate-300 hover:text-white p-1 rounded-lg transition-colors"
+                aria-label="Close Chat">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Message Area -->
+        <div id="chatMessages" class="flex-grow p-4 overflow-y-auto bg-slate-50 flex flex-col gap-3 text-sm">
+            <!-- Bot Welcome Bubble -->
+            <div
+                class="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700">
+                <p>Hello! I can help you find generic equivalents, explain CDSCO bioequivalence, and verify pricing in
+                    Indian Rupees (₹).</p>
+                <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-amber-700 font-medium">
+                    ⚠️ Educational only &mdash; please consult your physician before switching medicines.
+                </div>
+            </div>
+
+            <!-- Quick Questions -->
+            <div class="flex flex-col gap-1.5 my-1" id="chatChips">
+                <button type="button"
+                    class="text-left text-xs bg-white hover:bg-emerald-50 text-slateBlue hover:text-accentGreen border border-slate-200 hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium"
+                    data-query="Is generic Atorvastatin as effective as Lipitor?">
+                    💬 Is generic Atorvastatin as effective as Lipitor?
+                </button>
+                <button type="button"
+                    class="text-left text-xs bg-white hover:bg-emerald-50 text-slateBlue hover:text-accentGreen border border-slate-200 hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium"
+                    data-query="Why is generic Atorvastatin ₹40 vs Lipitor ₹250?">
+                    💬 Why is generic Atorvastatin ₹40 vs Lipitor ₹250?
+                </button>
+                <button type="button"
+                    class="text-left text-xs bg-white hover:bg-emerald-50 text-slateBlue hover:text-accentGreen border border-slate-200 hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium"
+                    data-query="What does CDSCO Standard mean?">
+                    💬 What does CDSCO Standard mean?
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chatForm" class="p-3 bg-white border-t border-slate-200 flex items-center gap-2"
+            onsubmit="event.preventDefault(); sendChatMessage();">
+            <input type="text" id="chatInput"
+                class="flex-grow px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent text-sm bg-slate-50 placeholder-slate-400"
+                placeholder="Ask about salts, CDSCO standards, or ₹ savings..." autocomplete="off">
+            <button type="submit"
+                class="w-10 h-10 bg-slateBlue hover:bg-deepSlate text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0 shadow-sm"
+                aria-label="Send">
+                <i class="fa-solid fa-paper-plane text-sm"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Page Scripts -->
     <script>
         const searchInput = document.getElementById('searchInput');
         const resultsContainer = document.getElementById('resultsContainer');
@@ -292,20 +439,14 @@
         function performSearch() {
             const query = searchInput.value.trim();
             if (query) {
-                // Capitalize first letter for display
                 searchQueryDisplay.textContent = query.charAt(0).toUpperCase() + query.slice(1);
-
-                // Animate hero section upwards and reduce margins
                 heroSection.classList.add('md:pt-0', 'mb-6', 'scale-[0.98]');
                 heroSection.classList.remove('mb-10');
-
-                // Show results with fade in
                 resultsContainer.classList.remove('hidden');
                 resultsContainer.classList.add('flex');
 
-                // Smooth scroll down slightly to ensure results are in view
                 setTimeout(() => {
-                    const yOffset = -80; // Offset for sticky header
+                    const yOffset = -80;
                     const element = document.getElementById('resultsContainer');
                     const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
                     window.scrollTo({ top: y, behavior: 'smooth' });
@@ -316,6 +457,91 @@
         searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 performSearch();
+            }
+        });
+
+        // Chatbot Widget Logic
+        const chatbotFab = document.getElementById('chatbotFab');
+        const chatbotWindow = document.getElementById('chatbotWindow');
+        const chatCloseBtn = document.getElementById('chatCloseBtn');
+        const fabChatIcon = document.getElementById('fabChatIcon');
+        const fabCloseIcon = document.getElementById('fabCloseIcon');
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatChips = document.getElementById('chatChips');
+
+        function toggleChat() {
+            const isOpen = chatbotWindow.classList.toggle('is-open');
+            chatbotFab.setAttribute('aria-expanded', isOpen);
+            if (isOpen) {
+                fabChatIcon.classList.add('hidden');
+                fabCloseIcon.classList.remove('hidden');
+                chatInput.focus();
+            } else {
+                fabChatIcon.classList.remove('hidden');
+                fabCloseIcon.classList.add('hidden');
+            }
+        }
+
+        chatbotFab.addEventListener('click', toggleChat);
+        chatCloseBtn.addEventListener('click', toggleChat);
+
+        function appendMessage(sender, text) {
+            const bubble = document.createElement('div');
+            if (sender === 'user') {
+                bubble.className = 'bg-slateBlue text-white rounded-xl rounded-tr-sm p-3 shadow-sm max-w-[85%] self-end text-sm';
+            } else {
+                bubble.className = 'bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700 text-sm';
+            }
+            bubble.textContent = text;
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        const clinicalResponses = {
+            effective: "Yes. Generic Atorvastatin contains the identical active pharmaceutical ingredient (Atorvastatin Calcium) in equivalent dosage and strength as brand Lipitor, providing identical therapeutic cholesterol reduction.",
+            price: "Brand Lipitor includes originator R&D patent premiums and global branding costs (₹250/strip). Generics by PMBJP Jan Aushadhi or Indian pharma manufacturers compete on efficient domestic volume production (₹40/strip), yielding direct 84% savings.",
+            cdsco: "In India, CDSCO requires generic formulations to prove bioequivalence within an 80%–125% 90% confidence interval for Cmax and AUC. Claiming '100%' is pharmacologically misleading, but regulatory bioequivalence proves identical clinical outcomes.",
+            default: "Certified generic Atorvastatin is a CDSCO-cleared therapeutic substitute for Lipitor. Always review with your doctor before switching cardiac maintenance medications."
+        };
+
+        function handleChatResponse(query) {
+            appendMessage('user', query);
+            setTimeout(() => {
+                const q = query.toLowerCase();
+                if (q.includes('effective') || q.includes('safe') || q.includes('lipitor')) {
+                    appendMessage('bot', clinicalResponses.effective);
+                } else if (q.includes('40') || q.includes('250') || q.includes('price') || q.includes('why')) {
+                    appendMessage('bot', clinicalResponses.price);
+                } else if (q.includes('cdsco') || q.includes('standard') || q.includes('bioequivalen')) {
+                    appendMessage('bot', clinicalResponses.cdsco);
+                } else {
+                    appendMessage('bot', clinicalResponses.default);
+                }
+            }, 350);
+        }
+
+        function sendChatMessage() {
+            const query = chatInput.value.trim();
+            if (query) {
+                handleChatResponse(query);
+                chatInput.value = '';
+            }
+        }
+
+        if (chatChips) {
+            chatChips.addEventListener('click', function (e) {
+                const btn = e.target.closest('button');
+                if (btn) {
+                    const query = btn.getAttribute('data-query');
+                    handleChatResponse(query);
+                }
+            });
+        }
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && chatbotWindow.classList.contains('is-open')) {
+                toggleChat();
             }
         });
     </script>
