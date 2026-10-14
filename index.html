@@ -106,8 +106,11 @@
                 <span>API: Connected</span>
             </div>
             <button
-                class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2"
-                aria-label="How this works">
+                id="howItWorksBtn"
+                class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2 cursor-pointer"
+                aria-label="How this works"
+                aria-haspopup="dialog"
+                type="button">
                 <i class="fa-regular fa-circle-question text-lg"></i>
                 <span class="hidden sm:inline">How this works</span>
             </button>
@@ -218,6 +221,104 @@
             </p>
         </div>
     </footer>
+
+    <!-- ==========================================================================
+         HOW IT WORKS MODAL DIALOG
+         ========================================================================== -->
+    <div id="howItWorksModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none invisible transition-all duration-300 ease-out"
+        role="dialog" aria-modal="true" aria-labelledby="howItWorksTitle">
+        
+        <!-- Modal Card Container -->
+        <div id="howItWorksDialog"
+            class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[90vh]">
+            
+            <!-- Modal Header -->
+            <div class="bg-slateBlue text-white p-5 flex items-center justify-between border-b border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-circle-info text-emerald-400 text-base"></i>
+                    </div>
+                    <div>
+                        <h3 id="howItWorksTitle" class="font-bold text-base md:text-lg leading-tight">How MediBuddy Works</h3>
+                        <p class="text-[11px] text-slate-300">CDSCO Standards & Generic Substitution Guide</p>
+                    </div>
+                </div>
+                <!-- Close 'X' Button -->
+                <button id="closeHowItWorksBtn"
+                    class="text-slate-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+                    aria-label="Close modal"
+                    type="button">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-5 md:p-6 overflow-y-auto space-y-4 text-sm text-slate-700 leading-relaxed">
+                
+                <!-- Section 1: Generic Search Engine Logic -->
+                <div class="flex items-start gap-3">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slateBlue text-sm mb-1">1. Active Ingredient (API) Mapping</h4>
+                        <p class="text-xs text-slate-600">
+                            Brand names (like <em>Lipitor</em>, <em>Augmentin</em>, or <em>Pan-D</em>) are commercial trademarks owned by pharma manufacturers. Our search engine maps trade names to their standardized <strong>Active Pharmaceutical Ingredient (API)</strong> (such as <em>Atorvastatin Calcium</em> or <em>Amoxicillin + Clavulanic Acid</em>), revealing certified generic alternatives with identical chemical strength and therapeutic intent.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section 2: CDSCO Bioequivalence Standard -->
+                <div class="flex items-start gap-3">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
+                        <i class="fa-solid fa-certificate text-xs"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slateBlue text-sm mb-1">2. CDSCO Bioequivalence Standard</h4>
+                        <p class="text-xs text-slate-600">
+                            Under India's <strong>Central Drugs Standard Control Organisation (CDSCO)</strong> and Indian Pharmacopoeia norms, generic formulations must demonstrate bioequivalence within an accepted <strong>80%–125% (90% Confidence Interval)</strong> geometric mean ratio for rate (C<sub>max</sub>) and extent (AUC) of systemic absorption relative to the innovator benchmark.
+                        </p>
+                        <p class="text-[11px] text-slate-500 mt-1 italic">
+                            *Scientifically, claiming "100% match" is medically flawed due to normal biological variance, but CDSCO bioequivalence certifies equivalent clinical efficacy and safety.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section 3: Indian Market Pricing & Savings -->
+                <div class="flex items-start gap-3">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
+                        <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slateBlue text-sm mb-1">3. Realistic Indian Market Savings</h4>
+                        <p class="text-xs text-slate-600">
+                            Innovator brand prices reflect patent development amortization and advertising. Certified generic equivalents from Indian manufacturers and <strong>PMBJP (Pradhan Mantri Bhartiya Janaushadhi Pariyojana)</strong> Kendras provide equivalent therapeutic outcomes at <strong>70% to 85% lower cost</strong> (e.g., generic Atorvastatin at ₹40 vs. brand Lipitor at ₹250).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Clinical Safety Disclaimer -->
+                <div class="bg-amber-50 border border-warningAmber/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-900 mt-1">
+                    <i class="fa-solid fa-triangle-exclamation text-warningAmber text-base mt-0.5 flex-shrink-0"></i>
+                    <p class="text-xs">
+                        <strong>Clinical Advisory:</strong> This platform is designed solely as an educational discussion aid. Never alter, discontinue, or substitute prescription medications without the direct consultation and approval of your treating physician.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-end">
+                <button id="dismissHowItWorksBtn"
+                    class="bg-slateBlue hover:bg-deepSlate text-white text-xs font-semibold py-2 px-5 rounded-lg transition-colors cursor-pointer shadow-sm"
+                    type="button">
+                    Got it, thanks!
+                </button>
+            </div>
+
+        </div>
+    </div>
 
     <!-- ==========================================================================
          INTEGRATED CHATBOT FLOATING ACTION BUTTON (FAB) & TOGGLEABLE CHAT UI
@@ -928,6 +1029,61 @@
         window.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && chatbotWindow.classList.contains('is-open')) {
                 toggleChat();
+            }
+        });
+
+        // ==========================================================================
+        // How It Works Modal Logic
+        // ==========================================================================
+        const howItWorksBtn = document.getElementById('howItWorksBtn');
+        const howItWorksModal = document.getElementById('howItWorksModal');
+        const howItWorksDialog = document.getElementById('howItWorksDialog');
+        const closeHowItWorksBtn = document.getElementById('closeHowItWorksBtn');
+        const dismissHowItWorksBtn = document.getElementById('dismissHowItWorksBtn');
+
+        function openHowItWorksModal() {
+            if (!howItWorksModal || !howItWorksDialog) return;
+            howItWorksModal.classList.remove('opacity-0', 'pointer-events-none', 'invisible');
+            howItWorksModal.classList.add('opacity-100', 'pointer-events-auto', 'visible');
+            howItWorksDialog.classList.remove('scale-95');
+            howItWorksDialog.classList.add('scale-100');
+            document.body.style.overflow = 'hidden'; // Lock background scroll
+        }
+
+        function closeHowItWorksModal() {
+            if (!howItWorksModal || !howItWorksDialog) return;
+            howItWorksModal.classList.remove('opacity-100', 'pointer-events-auto', 'visible');
+            howItWorksModal.classList.add('opacity-0', 'pointer-events-none', 'invisible');
+            howItWorksDialog.classList.remove('scale-100');
+            howItWorksDialog.classList.add('scale-95');
+            document.body.style.overflow = ''; // Unlock background scroll
+        }
+
+        if (howItWorksBtn) {
+            howItWorksBtn.addEventListener('click', openHowItWorksModal);
+        }
+        if (closeHowItWorksBtn) {
+            closeHowItWorksBtn.addEventListener('click', closeHowItWorksModal);
+        }
+        if (dismissHowItWorksBtn) {
+            dismissHowItWorksBtn.addEventListener('click', closeHowItWorksModal);
+        }
+
+        // Close when clicking outside the modal dialog (on the backdrop overlay)
+        if (howItWorksModal) {
+            howItWorksModal.addEventListener('click', function (e) {
+                if (e.target === howItWorksModal) {
+                    closeHowItWorksModal();
+                }
+            });
+        }
+
+        // Close on Escape key
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                if (howItWorksModal && !howItWorksModal.classList.contains('invisible')) {
+                    closeHowItWorksModal();
+                }
             }
         });
     </script>
