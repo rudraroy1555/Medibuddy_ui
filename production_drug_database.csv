@@ -1,0 +1,111 @@
+s_no,drug_name,indication,approval_date,source_year,clean_generic_api
+1.0,Ephedrine Resonate 50Mg Tablet,"Same as ephedrine, longer duration of action.",January-1961,1961,Ephedrine Resonate
+2.0,Vasolastine Ampoule (2Ml),Enzyme complexes exert a normalising influence on lipid metabolism.,January-1961,1961,Vasolastine
+3.0,Methychlothiazide 2.5Mg/5Mg Tablet,Oral diuretic agent. longest duration: more sodium excretion.,February-1961,1961,Methychlothiazide
+4.0,O-Ethoxybenzamide 200Mg/500Mg Dragees,"Analgesic, antiphlogistic, & antipyretic.",February-1961,1961,O-Ethoxybenzamide
+5.0,Methocarbamol 1Gm/1.5Gm I.V Injection & Tablet,Skeletal muscle relaxant.,February-1961,1961,Methocarbamol
+6.0,Metronidazole 250Mg Oral Tablet & 500Mg Vaginal Tablet,Treatment of trichomonal infestations & amoebiasis.,March-1961,1961,Metronidazole
+7.0,Spironolactone 100Mg Tablet,Promotes diuresis in patients with oedema or ascites.,March-1961,1961,Spironolactone
+8.0,Xylometazoline Nasal Drops (0.05% & 0.11% ) Solution,Nasal decongestant.,March-1961,1961,Xylometazoline
+9.0,Chlorthalidone 100/200Mg Tablet,A long acting oral diuretic for hypertension.,March-1961,1961,Chlorthalidone
+10.0,Metformin Hcl. 500Mg Tablet,Oral hypoglycemic agent for Type 2 diabetes.,September-1961,1961,Metformin Hydrochloride
+11.0,Betamethasone 0.5Mg Tablet,A potent systemic corticosteroid.,August-1961,1961,Betamethasone
+12.0,Diazepam 5Mg Tablet & 10Mg Injection,Anxiolytic and skeletal muscle relaxant.,March-1966,1966,Diazepam
+13.0,Ibuprofen 200Mg/400Mg Tablet,"Anti-inflammatory, analgesic, antipyretic for rheumatoid & muscular pain.",March-1971,1971,Ibuprofen
+14.0,Ibuprofen 600Mg Controlled Release Tablet,For chronic arthritic disorders and painful musculoskeletal conditions.,March-1990,1990,Ibuprofen
+15.0,Ibuprofen Sodium Dihydrate 256/512Mg Tablet,For the symptomatic relief of mild to moderate pain and headache.,26.04.2023,2023,Ibuprofen
+16.0,Salbutamol Sulphate B.P 2Mg/4Mg Tablet,Bronchial asthma and reversible bronchospasm.,October-1971,1971,Salbutamol Sulphate
+17.0,Cephalexin 250Mg/500Mg Capsule,Broad spectrum first generation cephalosporin antibiotic.,October-1971,1971,Cephalexin
+18.0,Rifampicin 150Mg/300Mg/450Mg Capsule,First-line bactericidal anti-tuberculosis antibiotic.,June-1971,1971,Rifampicin
+19.0,Allopurinol 100Mg/300Mg Tablet,Xanthine oxidase inhibitor for gout and hyperuricemia.,March-1969,1969,Allopurinol
+20.0,Haloperidol 0.25Mg/5Mg Tablet,First generation typical antipsychotic agent.,May-1969,1969,Haloperidol
+21.0,Lithium Carbonate 300Mg Capsule,Mood stabilizer for bipolar disorder and acute mania.,August-1969,1969,Lithium Carbonate
+22.0,Cimetidine 200Mg/400Mg Tablet,H2-receptor antagonist for peptic and duodenal ulceration.,June-1980,1980,Cimetidine
+23.0,Ranitidine Hcl 150Mg/300Mg Tablet,H2 blocker for gastric ulcer and gastroesophageal reflux disease.,August-1985,1985,Ranitidine Hydrochloride
+24.0,Atenolol 50Mg/100Mg Tablet,Cardioselective beta-blocker for hypertension and angina pectoris.,September-1985,1985,Atenolol
+25.0,Diclofenac Sodium 50Mg Enteric Coated Tablet,NSAID for rheumatoid arthritis osteoarthritis and acute post-operative pain.,September-1985,1985,Diclofenac Sodium
+26.0,Diclofenac Potassium 50Mg Sugar Coated Tablet,Rapid-onset analgesic for acute musculoskeletal and dental pain.,18-3-1994,1994,Diclofenac Potassium
+27.0,Albendazole 400Mg Chewable Tablet,Broad spectrum anthelmintic for hydatid disease and neurocysticercosis.,February-1986,1986,Albendazole
+28.0,Ketoconazole 200Mg Tablet,Broad spectrum imidazole antifungal agent.,September-1986,1986,Ketoconazole
+29.0,Acyclovir 200Mg/400Mg/800Mg Tablet,Antiviral for herpes simplex and varicella zoster infections.,October-1987,1987,Acyclovir
+30.0,Norfloxacin 400Mg Tablet,Fluoroquinolone for complicated and uncomplicated urinary tract infections.,November-1987,1987,Norfloxacin
+31.0,Ciprofloxacin Hcl Monohydrate 250Mg/500Mg/750Mg Tablet,Broad spectrum fluoroquinolone antibiotic for systemic infections.,May-1989,1989,Ciprofloxacin
+32.0,Ciprofloxacin 0.3% W/V Eye Drops/Ear Drops,For external ocular and otic bacterial infections.,February-1991,1991,Ciprofloxacin
+33.0,Enalapril Maleate 2.5Mg/5Mg/10Mg/20Mg Tablet,ACE inhibitor for all grades of essential hypertension and heart failure.,August-1989,1989,Enalapril Maleate
+34.0,Ofloxacin 100Mg/200Mg/400Mg Tablet,Fluoroquinolone antibacterial for respiratory tract and pelvic infections.,February-1990,1990,Ofloxacin
+35.0,Fluoxetine Hcl 20Mg Capsule,Selective serotonin reuptake inhibitor (SSRI) for major depressive disorder.,March-1990,1990,Fluoxetine Hydrochloride
+36.0,Omeprazole 10Mg/20Mg Enteric Coated Capsule,Proton pump inhibitor (PPI) for duodenal ulcer and GERD.,April-1991,1991,Omeprazole
+37.0,Omeprazole 20Mg + Domperidone 30Mg Sr Capsule,For GERD with nausea and dyspepsia.,10-03-2005,2005,Omeprazole + Domperidone
+38.0,Ramipril 1.25Mg/2.5Mg/5Mg/10Mg Capsule,ACE inhibitor for hypertension and cardiovascular risk reduction.,August-1991,1991,Ramipril
+39.0,Amlodipine Besylate 2.5Mg/5Mg/10Mg Tablet,Calcium channel blocker for essential hypertension and chronic stable angina.,19-5-1993,1993,Amlodipine Besylate
+40.0,Amlodipine 5Mg + Telmisartan 40Mg Tablet,Dual combination for Stage II hypertension.,16.10.2020,2020,Amlodipine + Telmisartan
+41.0,Cetirizine Dihydrochloride 5Mg/10Mg Tablet,Second generation antihistamine for allergic rhinitis and urticaria.,25-6-1993,1993,Cetirizine Dihydrochloride
+42.0,Levocetirizine Dihydrochloride 5Mg Tablet,Active R-enantiomer antihistamine for seasonal allergic rhinitis.,25-07-2007,2007,Levocetirizine
+43.0,Azithromycin Dihydrate 250Mg/500Mg Tablet,Macrolide antibiotic for community-acquired pneumonia and skin infections.,13-5-1994,1994,Azithromycin
+44.0,Azithromycin 500Mg + Ambroxol Sr 75Mg Tablet,For acute respiratory tract infections with mucus congestion.,05-07-2007,2007,Azithromycin + Ambroxol
+45.0,Lansoprazole 15Mg/30Mg Delayed Release Capsule,Proton pump inhibitor for acid-peptic disorders and Zollinger-Ellison.,16-12-1994,1994,Lansoprazole
+46.0,Clonazepam 0.5Mg/1Mg/2Mg Tablet,High potency benzodiazepine for panic disorder and myoclonic seizures.,25-1-1995,1995,Clonazepam
+47.0,Clarithromycin 250Mg/500Mg Tablet,Macrolide antibiotic for H. pylori eradication and respiratory infections.,22-3-1995,1995,Clarithromycin
+48.0,Gabapentin 100Mg/300Mg/400Mg Capsule,Anticonvulsant and neuropathic pain analgesic.,3-8-1995,1995,Gabapentin
+49.0,Paracetamol 500Mg/650Mg Fast Release Tablet,Analgesic and antipyretic for fever and mild to moderate pain.,August-1996,1996,Paracetamol
+50.0,Crocin Advance 500Mg/650Mg Tablet,Fast absorbing antipyretic and analgesic for pain relief.,10.02.11,2011,Paracetamol
+51.0,Atorvastatin Calcium 10Mg/20Mg/40Mg/80Mg Film Coated Tablet,HMG-CoA reductase inhibitor statin to reduce LDL-C and cardiovascular mortality.,17-9-1999,1999,Atorvastatin Calcium
+52.0,Lipitor 10Mg/20Mg/40Mg Film Coated Tablet,Innovator brand reference drug for primary hypercholesterolemia and CAD.,17-9-1999,1999,Atorvastatin Calcium
+53.0,Generic Atorvastatin 10Mg/20Mg/40Mg Tablet,PMBJP Jan Aushadhi generic equivalent for lipid disorder management.,20-12-2000,2000,Atorvastatin Calcium
+54.0,Atorvastatin 10Mg + Fenofibrate 145Mg Tablet,For mixed dyslipidemia with high triglycerides and elevated LDL.,30-10-2007,2007,Atorvastatin + Fenofibrate
+55.0,Atorvastatin 10Mg + Aspirin 75Mg Capsule,Cardiovascular prevention in established coronary artery disease.,18.01.08,2008,Atorvastatin + Aspirin
+56.0,Pantoprazole Sodium 20Mg/40Mg Gastro Resistant Tablet,Proton pump inhibitor for reflux oesophagitis and peptic ulcers.,9-12-1998,1998,Pantoprazole Sodium
+57.0,Pan-D Capsule,Prokinetic PPI combination for GERD and acid reflux.,07.02.2007,2007,Pantoprazole + Domperidone
+58.0,Generic Pantoprazole 40Mg Tablet,CDSCO certified bioequivalent generic acid reducer.,9-12-1998,1998,Pantoprazole Sodium
+59.0,Fexofenadine Hcl 120Mg/180Mg Tablet,Non-sedating antihistamine for seasonal allergic rhinitis.,16-9-1998,1998,Fexofenadine Hydrochloride
+60.0,Allegra 120Mg/180Mg Tablet,Innovator brand for allergic rhinitis and chronic idiopathic urticaria.,16-9-1998,1998,Fexofenadine Hydrochloride
+61.0,Generic Fexofenadine 120Mg Tablet,Certified generic bioequivalent antihistaminic.,27.08.2001,2001,Fexofenadine Hydrochloride
+62.0,Fexofenadine 120Mg + Montelukast 10Mg Tablet,Dual-action leukotriene & histamine antagonist for severe allergic rhinitis.,07.07.11,2011,Fexofenadine + Montelukast
+63.0,Losartan Potassium 25Mg/50Mg/100Mg Tablet,Angiotensin II receptor antagonist (ARB) for hypertension.,16-6-1998,1998,Losartan Potassium
+64.0,Losartan 50Mg + Hydrochlorothiazide 12.5Mg Tablet,Combination ARB and thiazide diuretic for uncontrolled blood pressure.,10.11.08,2008,Losartan + Hydrochlorothiazide
+65.0,Carvedilol 3.125Mg/6.25Mg/12.5Mg/25Mg Tablet,Non-selective beta and alpha-1 blocker for congestive heart failure and hypertension.,16-10-1998,1998,Carvedilol
+66.0,Glimepiride 1Mg/2Mg/3Mg/4Mg Tablet,Third generation sulfonylurea for glycemic control in Type 2 diabetes.,24-1-1999,1999,Glimepiride
+67.0,Glimepiride 1Mg/2Mg + Metformin Sr 500Mg/1000Mg Tablet,Synergistic dual oral hypoglycemic agent for Type 2 diabetes.,08.06.07,2007,Glimepiride + Metformin
+68.0,Rosuvastatin Calcium 5Mg/10Mg/20Mg/40Mg Tablet,High-intensity statin to slow atherosclerosis progression and reduce LDL-C.,12-09-2003,2003,Rosuvastatin Calcium
+69.0,Crestor 10Mg/20Mg Tablet,Innovator statin reference formulation.,12-09-2003,2003,Rosuvastatin Calcium
+70.0,Generic Rosuvastatin 10Mg Tablet,Affordable PMBJP alternative to brand Crestor.,12-09-2003,2003,Rosuvastatin Calcium
+71.0,Augmentin 625Mg Tablet,Potentiated broad-spectrum aminopenicillin with beta-lactamase inhibitor.,04.01.2001,2001,Amoxicillin + Clavulanic Acid
+72.0,Amoxicillin 500Mg + Clavulanic Acid 125Mg Tablet,Broad spectrum antibiotic for respiratory tract and soft tissue infections.,04.01.2001,2001,Amoxicillin + Clavulanic Acid
+73.0,Generic Amox-Clav 625Mg Tablet,Jan Aushadhi generic equivalent of Augmentin 625.,04.01.2001,2001,Amoxicillin + Clavulanic Acid
+74.0,Telmisartan 20Mg/40Mg/80Mg Tablet,Long acting ARB with 24-hour blood pressure control.,25.11.2002,2002,Telmisartan
+75.0,Telma 40Mg Tablet,Innovator brand for essential hypertension.,25.11.2002,2002,Telmisartan
+76.0,Telmisartan 40Mg + Amlodipine 5Mg Tablet,Synergistic combination for severe or resistant hypertension.,15-10-2007,2007,Telmisartan + Amlodipine
+77.0,Montelukast Sodium 10Mg Tablet,Leukotriene receptor antagonist for prophylaxis and chronic asthma control.,13.02.2002,2002,Montelukast Sodium
+78.0,Montelukast 10Mg + Levocetirizine 5Mg Tablet,Comprehensive nighttime therapy for allergic asthma and rhinitis.,31.01.08,2008,Montelukast + Levocetirizine
+79.0,Clopidogrel 75Mg/300Mg Tablet,Antiplatelet P2Y12 inhibitor for prophylaxis against stroke and myocardial infarction.,22.02.2001,2001,Clopidogrel
+80.0,Clopidogrel 75Mg + Aspirin 75Mg/150Mg Capsule,Dual antiplatelet therapy (DAPT) post-coronary stent angioplasty.,22.02.2001,2001,Clopidogrel + Aspirin
+81.0,Donepezil Hcl 5Mg/10Mg/23Mg Tablet,Acetylcholinesterase inhibitor for mild to moderate Alzheimer's dementia.,20.03.2001,2001,Donepezil Hydrochloride
+82.0,Linezolid 600Mg Tablet & Injection,Oxazolidinone antibacterial for MRSA and resistant Gram-positive infections.,04.10.2001,2001,Linezolid
+83.0,Esomeprazole Magnesium 20Mg/40Mg Delayed Release Tablet,S-isomer of omeprazole for severe erosive esophagitis.,04.12.2001,2001,Esomeprazole
+84.0,Imatinib Mesylate 100Mg/400Mg Tablet,Tyrosine kinase inhibitor for Philadelphia positive Chronic Myeloid Leukemia (CML).,09.12.2001,2001,Imatinib Mesylate
+85.0,Meropenem 500Mg/1000Mg Powder For Injection,Carbapenem antibiotic for severe nosocomial and intra-abdominal sepsis.,08.01.2002,2002,Meropenem
+86.0,Tamsulosin Hcl 0.4Mg Modified Release Capsule,Alpha-1A adrenoceptor blocker for Benign Prostatic Hyperplasia (BPH).,04.04.2002,2002,Tamsulosin Hydrochloride
+87.0,Tamsulosin 0.4Mg + Dutasteride 0.5Mg Tablet,Dual alpha-blocker and 5-alpha reductase inhibitor for severe BPH.,14.06.07,2007,Tamsulosin + Dutasteride
+88.0,Escitalopram Oxalate 5Mg/10Mg/20Mg Tablet,SSRI for major depressive disorder and generalized anxiety disorder.,24.01.2003,2003,Escitalopram Oxalate
+89.0,Escitalopram 10Mg + Clonazepam 0.5Mg Tablet,Combination for comorbid depression with acute anxiety panic attacks.,12.12.07,2007,Escitalopram + Clonazepam
+90.0,Tadalafil 5Mg/10Mg/20Mg Tablet,PDE-5 inhibitor for erectile dysfunction and pulmonary arterial hypertension.,11-09-2003,2003,Tadalafil
+91.0,Aceclofenac 100Mg Tablet,NSAID for relief of pain and inflammation in osteoarthritis and ankylosing spondylitis.,15-09-2003,2003,Aceclofenac
+92.0,Aceclofenac 100Mg + Paracetamol 325Mg + Serratiopeptidase 15Mg Tablet,Triple action anti-inflammatory, analgesic, and enzymatic wound debridement.,15-09-2003,2003,Aceclofenac + Paracetamol + Serratiopeptidase
+93.0,Pregabalin 75Mg/150Mg Capsule,GABA analogue for neuropathic pain associated with diabetic neuropathy and fibromyalgia.,29.04.08,2008,Pregabalin
+94.0,Pregabalin 75Mg + Methylcobalamin 750Mcg Capsule,Comprehensive nerve rejuvenation and neuropathic pain relief.,08.05.08,2008,Pregabalin + Methylcobalamin
+95.0,Sitagliptin Phosphate 25Mg/50Mg/100Mg Tablet,DPP-4 inhibitor for type 2 diabetes glycemic control without hypoglycemia.,30-10-2007,2007,Sitagliptin
+96.0,Sitagliptin 50Mg + Metformin 500Mg/1000Mg Tablet,Combination DPP-4 inhibitor and biguanide for type 2 diabetes.,28.04.08,2008,Sitagliptin + Metformin
+97.0,Vildagliptin 50Mg Tablet,DPP-4 inhibitor for adults with type 2 diabetes mellitus.,18.01.08,2008,Vildagliptin
+98.0,Vildagliptin 50Mg + Metformin 500Mg/850Mg/1000Mg Tablet,Synergistic insulin sensitizer and incretin enhancer.,21.07.08,2008,Vildagliptin + Metformin
+99.0,Apixaban 2.5Mg/5Mg Film Coated Tablet,Direct Factor Xa inhibitor anticoagulant for stroke prevention in non-valvular AF.,03.08.2012,2012,Apixaban
+100.0,Rivaroxaban 10Mg/15Mg/20Mg Tablet,Direct oral anticoagulant (DOAC) for DVT and pulmonary embolism prevention.,13.07.15,2015,Rivaroxaban
+101.0,Remdesivir 100Mg Lyophilised Powder For Injection,Nucleoside analog antiviral indicated for hospitalized COVID-19 patients.,01.06.2020,2020,Remdesivir
+102.0,Favipiravir 200Mg/400Mg Film Coated Tablet,RNA polymerase inhibitor for mild to moderate viral infections.,19.06.2020,2020,Favipiravir
+103.0,Nirmatrelvir 150Mg + Ritonavir 100Mg Combipack,Oral protease inhibitor antiviral for high-risk COVID-19 outpatients.,21.04.2022,2022,Nirmatrelvir + Ritonavir
+104.0,Molnupiravir 200Mg Capsule,Oral ribonucleoside analog for restricted emergency viral treatment.,28.12.2021,2021,Molnupiravir
+105.0,Tirzepatide 2.5Mg/5Mg/7.5Mg/10Mg/15Mg Injection In Prefilled Pen,Dual GIP and GLP-1 receptor agonist for Type 2 diabetes and chronic weight management.,19-01-2024,2024,Tirzepatide
+106.0,Semaglutide 0.5Mg/1Mg/2Mg Injection In Prefilled Pen,GLP-1 receptor agonist for glycemic control and major adverse cardiovascular reduction.,08.05.2024,2024,Semaglutide
+107.0,Vonoprazan 10Mg/20Mg Tablet,Potassium-competitive acid blocker (P-CAB) for severe erosive esophagitis and H. pylori.,08-05-2024,2024,Vonoprazan Fumarate
+108.0,Mavacamten 2.5Mg/5Mg/10Mg/15Mg Capsule,First-in-class cardiac myosin inhibitor for symptomatic obstructive hypertrophic cardiomyopathy (oHCM).,08.10.2024,2024,Mavacamten
+109.0,Pravastatin Sodium 10Mg/20Mg/40Mg Tablet,Primary hypercholesterolemia and cardiovascular prevention.,20-12-2000,2000,Pravastatin Sodium
+110.0,Pravachol 20Mg Tablet,Innovator brand reference drug for dyslipidemia.,1991-10-31,1991,Pravastatin Sodium

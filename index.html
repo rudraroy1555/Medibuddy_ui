@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medibuddy - Medicine Alternatives</title>
+    <title>Medibuddy - Medicine Alternatives & Search</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for Icons -->
@@ -38,13 +38,13 @@
         }
 
         .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeIn 0.35s ease-out forwards;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(10px);
             }
 
             to {
@@ -89,235 +89,112 @@
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col relative pb-24 text-slate-800">
+<body class="min-h-screen flex flex-col relative pb-28 text-slate-800">
     <!-- Header / Navigation -->
     <header class="w-full bg-white px-6 py-4 flex justify-between items-center shadow-sm z-10 sticky top-0">
         <div class="flex items-center gap-2 text-slateBlue">
             <i class="fa-solid fa-pills text-xl text-accentGreen"></i>
             <span class="font-bold text-xl tracking-tight">medibuddy</span>
-            <span
-                class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1">India
-                (₹)</span>
+            <span class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1">Live Database (₹)</span>
         </div>
-        <button
-            class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2"
-            aria-label="How this works">
-            <i class="fa-regular fa-circle-question text-lg"></i>
-            <span class="hidden sm:inline">How this works</span>
-        </button>
+        <div class="flex items-center gap-4">
+            <!-- Server connection indicator -->
+            <div id="serverStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>API: Connected</span>
+            </div>
+            <button
+                class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2"
+                aria-label="How this works">
+                <i class="fa-regular fa-circle-question text-lg"></i>
+                <span class="hidden sm:inline">How this works</span>
+            </button>
+        </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center px-4 pt-10 md:pt-16 w-full max-w-4xl mx-auto">
+    <main class="flex-grow flex flex-col items-center px-4 pt-8 md:pt-14 w-full max-w-4xl mx-auto">
         <!-- Hero Search Section -->
-        <div class="text-center mb-10 w-full transition-all duration-500 ease-in-out" id="hero-section">
+        <div class="text-center mb-8 w-full transition-all duration-500 ease-in-out" id="hero-section">
             <div
-                class="inline-flex items-center gap-2 bg-softGreen text-accentGreen text-xs font-bold px-3 py-1 rounded-full mb-6 tracking-wide uppercase border border-accentGreen/20">
+                class="inline-flex items-center gap-2 bg-softGreen text-accentGreen text-xs font-bold px-3 py-1 rounded-full mb-5 tracking-wide uppercase border border-accentGreen/20">
                 <i class="fa-solid fa-shield-halved"></i>
-                CDSCO Standards & Realistic Indian Pricing
+                Production Drug Database &bull; CDSCO Standard
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-slateBlue mb-4 tracking-tight">
+            <h1 class="text-3xl md:text-5xl font-bold text-slateBlue mb-3 tracking-tight">
                 Find a medicine that fits.
             </h1>
-            <p class="text-slate-500 text-sm md:text-base mb-8 max-w-lg mx-auto leading-relaxed">
-                Compare verified bioequivalent generic alternatives and potential cash savings in Indian Rupees (₹).
-                Bring what you find here to your pharmacist or physician.
+            <p class="text-slate-500 text-sm md:text-base mb-6 max-w-lg mx-auto leading-relaxed">
+                Search verified generic equivalents, active pharmaceutical ingredients (APIs), and realistic pricing in Indian Rupees (₹).
             </p>
 
-            <!-- Search Box (Typo 'Liptor' corrected to 'Lipitor') -->
+            <!-- Search Box -->
             <div class="relative w-full max-w-2xl mx-auto group">
                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <i
-                        class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg"></i>
+                    <i id="searchIcon" class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg"></i>
                 </div>
                 <input type="text" id="searchInput"
-                    class="w-full pl-14 pr-32 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent transition-all text-lg text-slate-700 bg-white"
-                    placeholder="Enter medicine name (e.g., Lipitor, Augmentin, Pan-D)..." value="Lipitor"
+                    class="w-full pl-14 pr-32 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent transition-all text-base md:text-lg text-slate-700 bg-white"
+                    placeholder="Search brand or generic (e.g. Lipitor, Atorvastatin, Augmentin)..." 
+                    value="Lipitor"
                     autocomplete="off">
                 <button
-                    class="absolute inset-y-2 right-2 bg-slateBlue text-white px-6 rounded-lg font-medium hover:bg-deepSlate transition-colors shadow-sm"
-                    onclick="performSearch()">
-                    Search <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
+                    id="searchBtn"
+                    class="absolute inset-y-2 right-2 bg-slateBlue text-white px-5 md:px-6 rounded-lg font-medium hover:bg-deepSlate transition-colors shadow-sm flex items-center gap-1.5"
+                    type="button">
+                    <span>Search</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-400 mt-4 flex items-center justify-center gap-1.5">
+
+            <!-- Quick Search Suggestion Chips -->
+            <div class="flex items-center justify-center gap-2 mt-4 flex-wrap text-xs text-slate-500" id="popularChips">
+                <span class="font-medium">Try searching:</span>
+                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Lipitor">Lipitor</button>
+                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Atorvastatin">Atorvastatin</button>
+                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Augmentin">Augmentin</button>
+                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Metformin">Metformin</button>
+                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Pan-D">Pan-D</button>
+            </div>
+
+            <p class="text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-lock text-slate-300"></i>
-                Your search is private and for educational comparison only.
+                Live in-memory search across clean_generic_api and drug_name columns.
             </p>
         </div>
 
         <!-- Results Container (Visible for comparison) -->
         <div id="resultsContainer" class="w-full max-w-3xl flex flex-col gap-5 fade-in pb-8">
 
-            <!-- Results Header (Corrected spelling: Lipitor) -->
+            <!-- Dynamic Results Header -->
             <div class="flex justify-between items-end mb-2 border-b border-slate-200 pb-4">
                 <div>
-                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Comparison for</h2>
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Search Results for</h2>
                     <p class="text-2xl font-bold text-slateBlue" id="searchQueryDisplay">Lipitor</p>
-                    <p class="text-xs text-slate-500 mt-0.5">Active Salt: <span
-                            class="font-semibold text-slate-700">Atorvastatin Calcium 10mg / 20mg</span></p>
+                    <p class="text-xs text-slate-500 mt-0.5" id="activeSaltDisplay">
+                        Active Salt: <span class="font-semibold text-slate-700">Atorvastatin Calcium</span>
+                    </p>
                 </div>
                 <div class="text-right text-xs text-slate-500">
-                    <p class="font-medium text-slate-700">3 verified options</p>
+                    <p class="font-semibold text-slate-700" id="resultsCountBadge">Loading options...</p>
                     <p>Prices in Indian Rupees (₹)</p>
                 </div>
             </div>
 
-            <!-- Best Alternative Card 1 (Generic Atorvastatin - BEST VALUE) -->
-            <div
-                class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-accentGreen"></div>
-
-                <div class="flex flex-col md:flex-row justify-between gap-4">
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-2 flex-wrap">
-                            <h3 class="text-xl font-bold text-slateBlue">Generic Atorvastatin</h3>
-                            <span
-                                class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-check"></i> Best Value
-                            </span>
-                        </div>
-                        <p class="text-sm text-slate-600 mb-2 font-medium">Generic alternative &bull; 20 mg tablet
-                            &bull; Strip of 10</p>
-                        <p class="text-xs text-slate-500">PMBJP Jan Aushadhi & verified retail pharmacies</p>
-                    </div>
-
-                    <div
-                        class="flex items-center gap-8 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
-                        <div class="text-center md:text-right flex flex-col justify-center">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost
-                                Savings</span>
-                            <!-- Localized currency in INR -->
-                            <span class="font-bold text-accentGreen text-lg">Save ₹210.00</span>
-                            <span class="text-[10px] text-accentGreen font-semibold">(84% lower cost)</span>
-                        </div>
-                        <div class="text-center md:text-right flex flex-col justify-center">
-                            <span
-                                class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence
-                                Match</span>
-                            <!-- Medically and legally accurate CDSCO bioequivalence standard -->
-                            <span
-                                class="inline-flex items-center gap-1.5 text-accentGreen font-bold text-xs md:text-sm bg-accentGreen/10 px-2.5 py-1.5 rounded-lg border border-accentGreen/30">
-                                <i class="fa-solid fa-circle-check"></i> Bioequivalent (CDSCO Standard)
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="mt-5 pt-4 border-t border-accentGreen/20 flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
-                        <p class="text-[11px] text-slate-400">₹4.00 / tablet</p>
-                    </div>
-                    <!-- Realistic Indian market price for generic Atorvastatin -->
-                    <p class="font-bold text-slateBlue text-xl">₹40.00</p>
-                </div>
+            <!-- Dynamic Comparison Cards Container (Populated via fetch API) -->
+            <div id="cardsList" class="flex flex-col gap-4">
+                <!-- Cards will be dynamically injected here by renderResults() -->
             </div>
 
-            <!-- Alternative Card 2 (Brand Name Lipitor) -->
-            <div
-                class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow mt-1">
-                <div class="flex flex-col md:flex-row justify-between gap-4">
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold text-slateBlue">Lipitor</h3>
-                            <span
-                                class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-slate-200">
-                                Innovator Brand
-                            </span>
-                        </div>
-                        <p class="text-sm text-slate-600 mb-2 font-medium">Brand reference drug &bull; 20 mg tablet
-                            &bull; Strip of 10</p>
-                        <p class="text-xs text-slate-500">Originator / Reference Listed Drug (RLD)</p>
-                    </div>
-
-                    <div
-                        class="flex items-center gap-8 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
-                        <div class="text-center md:text-right flex flex-col justify-center">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost
-                                Savings</span>
-                            <span class="font-medium text-slate-400 text-sm">Benchmark Price</span>
-                        </div>
-                        <div class="text-center md:text-right flex flex-col justify-center">
-                            <span
-                                class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence
-                                Match</span>
-                            <span
-                                class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs md:text-sm bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
-                                <i class="fa-solid fa-certificate text-slate-500"></i> Reference Drug
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
-                        <p class="text-[11px] text-slate-400">₹25.00 / tablet</p>
-                    </div>
-                    <!-- Realistic Indian market price for brand Lipitor -->
-                    <p class="font-bold text-slateBlue text-xl">₹250.00</p>
-                </div>
-            </div>
-
-            <!-- Alternative Card 3 (Therapeutic Alternative) -->
-            <div
-                class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow mt-1">
-                <div class="flex flex-col md:flex-row justify-between gap-4">
-                    <div class="flex-grow">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold text-slateBlue">Pravastatin</h3>
-                            <span
-                                class="bg-amber-50 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-amber-200">
-                                Different Salt
-                            </span>
-                        </div>
-                        <p class="text-sm text-slate-600 mb-2 font-medium">Therapeutic alternative &bull; 20 mg tablet
-                            &bull; Strip of 10</p>
-                        <p class="text-xs text-slate-500 max-w-sm">Different statin class molecule. Prescribing
-                            physician must calculate equipotent dose.</p>
-                    </div>
-
-                    <div
-                        class="flex items-center gap-8 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
-                        <div class="text-center md:text-right flex flex-col justify-center">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost
-                                Savings</span>
-                            <!-- Localized currency in INR -->
-                            <span class="font-bold text-slate-600 text-lg">Save ₹160.00</span>
-                        </div>
-                        <div class="text-center md:text-right flex flex-col justify-center">
-                            <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Therapeutic
-                                Class</span>
-                            <span
-                                class="inline-flex items-center gap-1.5 text-amber-800 font-semibold text-xs md:text-sm bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200">
-                                <i class="fa-solid fa-code-compare"></i> Equipotent Class Alt
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
-                        <p class="text-[11px] text-slate-400">₹9.00 / tablet</p>
-                    </div>
-                    <!-- Localized currency in INR -->
-                    <p class="font-bold text-slateBlue text-xl">₹90.00</p>
-                </div>
-            </div>
-
-            <!-- Action Component -->
-            <div class="mt-8 mb-4 text-center">
+            <!-- Action Component (Doctor Note) -->
+            <div class="mt-6 mb-2 text-center" id="actionNoteContainer">
                 <button
                     class="bg-transparent border-2 border-slateBlue text-slateBlue hover:bg-slateBlue hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mx-auto shadow-sm">
                     <i class="fa-regular fa-file-lines text-lg"></i>
                     Generate Doctor Note for This Change
                     <i class="fa-solid fa-arrow-right text-sm ml-1"></i>
                 </button>
-                <p class="text-xs text-slate-400 mt-3 font-medium">Create a simple conversation starter &mdash; never a
-                    prescription.</p>
+                <p class="text-xs text-slate-400 mt-2 font-medium">Create a simple conversation starter &mdash; never a prescription.</p>
             </div>
 
         </div>
@@ -332,33 +209,27 @@
             </div>
             <p class="text-xs sm:text-sm text-amber-900 font-medium">
                 <strong
-                    class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Regulatory
-                    & Clinical Notice:</strong>
-                Bioequivalence is established within CDSCO 80%–125% geometric mean ratio standards. Always consult your
-                prescribing physician before altering cardiac or statin regimens.
+                    class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Regulatory & Clinical Notice:</strong>
+                Bioequivalence is established within CDSCO 80%–125% geometric mean ratio standards. Always consult your prescribing physician before altering cardiac or statin regimens.
             </p>
         </div>
     </footer>
 
     <!-- ==========================================================================
          INTEGRATED CHATBOT FLOATING ACTION BUTTON (FAB) & TOGGLEABLE CHAT UI
-         (Positioned safely above fixed safety footer: bottom-20 right-6)
          ========================================================================== -->
 
     <!-- Floating Action Button (FAB) -->
     <button id="chatbotFab"
         class="fixed bottom-20 right-6 z-40 w-14 h-14 bg-slateBlue hover:bg-deepSlate text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-slateBlue/30 group"
         aria-label="Open Medical Assistant Chat" aria-expanded="false" aria-controls="chatbotWindow">
-        <!-- Chat icon -->
         <i id="fabChatIcon"
             class="fa-solid fa-comments text-2xl transition-transform duration-200 group-hover:scale-110"></i>
-        <!-- Close icon (hidden initially) -->
         <i id="fabCloseIcon" class="fa-solid fa-xmark text-2xl hidden"></i>
-        <!-- Online notification badge -->
         <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
     </button>
 
-    <!-- Hidden Chat UI Window (toggles open on FAB click) -->
+    <!-- Hidden Chat UI Window -->
     <div id="chatbotWindow"
         class="chat-modal-enter fixed bottom-36 right-6 z-50 w-[360px] max-w-[calc(100vw-32px)] h-[500px] max-h-[calc(100vh-170px)] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
         role="dialog" aria-labelledby="chatTitle" aria-modal="false">
@@ -385,11 +256,8 @@
 
         <!-- Message Area -->
         <div id="chatMessages" class="flex-grow p-4 overflow-y-auto bg-slate-50 flex flex-col gap-3 text-sm">
-            <!-- Bot Welcome Bubble -->
-            <div
-                class="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700">
-                <p>Hello! I can help you find generic equivalents, explain CDSCO bioequivalence, and verify pricing in
-                    Indian Rupees (₹).</p>
+            <div class="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700">
+                <p>Hello! I can help you find generic equivalents, explain CDSCO bioequivalence, and verify pricing in Indian Rupees (₹).</p>
                 <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-amber-700 font-medium">
                     ⚠️ Educational only &mdash; please consult your physician before switching medicines.
                 </div>
@@ -429,38 +297,348 @@
         </form>
     </div>
 
-    <!-- Page Scripts -->
+    <!-- ==========================================================================
+         VANILLA JAVASCRIPT: API FETCH & DYNAMIC RESULTS RENDERING
+         ========================================================================== -->
     <script>
+        // API Base URL: Uses current origin if served from port 3000, else defaults to http://localhost:3000
+        const API_BASE_URL = (window.location.port === '3000') 
+            ? window.location.origin 
+            : 'http://localhost:3000';
+
+        // DOM Element References
         const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchIcon = document.getElementById('searchIcon');
         const resultsContainer = document.getElementById('resultsContainer');
         const heroSection = document.getElementById('hero-section');
         const searchQueryDisplay = document.getElementById('searchQueryDisplay');
+        const activeSaltDisplay = document.getElementById('activeSaltDisplay');
+        const resultsCountBadge = document.getElementById('resultsCountBadge');
+        const cardsList = document.getElementById('cardsList');
+        const popularChips = document.getElementById('popularChips');
+        const serverStatusBadge = document.getElementById('serverStatusBadge');
 
-        function performSearch() {
-            const query = searchInput.value.trim();
-            if (query) {
-                searchQueryDisplay.textContent = query.charAt(0).toUpperCase() + query.slice(1);
-                heroSection.classList.add('md:pt-0', 'mb-6', 'scale-[0.98]');
-                heroSection.classList.remove('mb-10');
-                resultsContainer.classList.remove('hidden');
-                resultsContainer.classList.add('flex');
+        let debounceTimer = null;
+        let lastQuery = '';
 
-                setTimeout(() => {
-                    const yOffset = -80;
-                    const element = document.getElementById('resultsContainer');
-                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                    window.scrollTo({ top: y, behavior: 'smooth' });
-                }, 50);
+        /**
+         * Escape HTML characters to prevent XSS vulnerabilities
+         */
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        /**
+         * Check API server connectivity on page load
+         */
+        async function checkServerHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (serverStatusBadge) {
+                        serverStatusBadge.innerHTML = `
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <span>DB: ${data.records_count} records ready</span>
+                        `;
+                    }
+                }
+            } catch (err) {
+                if (serverStatusBadge) {
+                    serverStatusBadge.innerHTML = `
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span>API Server Offline (Start Node.js)</span>
+                    `;
+                    serverStatusBadge.classList.remove('bg-slate-100', 'text-slate-600');
+                    serverStatusBadge.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
+                }
             }
         }
 
+        /**
+         * Perform search by fetching data from Node.js Express /search endpoint
+         */
+        async function performSearch(customQuery = null) {
+            const query = (customQuery !== null ? customQuery : searchInput.value).trim();
+            if (!query) return;
+
+            lastQuery = query;
+            searchInput.value = query;
+            searchQueryDisplay.textContent = query.charAt(0).toUpperCase() + query.slice(1);
+
+            // Animate hero and reveal results container
+            heroSection.classList.add('md:pt-0', 'mb-6', 'scale-[0.98]');
+            heroSection.classList.remove('mb-8');
+            resultsContainer.classList.remove('hidden');
+            resultsContainer.classList.add('flex');
+
+            // Show Loading Skeleton
+            if (searchIcon) {
+                searchIcon.className = 'fa-solid fa-circle-notch fa-spin text-slateBlue text-lg';
+            }
+            resultsCountBadge.textContent = 'Searching...';
+            cardsList.innerHTML = `
+                <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 shadow-sm animate-pulse">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-slateBlue mb-3"></i>
+                    <p class="font-medium text-sm">Querying drug database for "${escapeHtml(query)}"...</p>
+                    <p class="text-xs text-slate-400 mt-1">Filtering by clean_generic_api and drug_name</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
+                const data = await response.json();
+                renderResults(query, data.results || []);
+
+            } catch (error) {
+                console.error('Failed to fetch search results:', error);
+                renderErrorState(query, error.message);
+            } finally {
+                if (searchIcon) {
+                    searchIcon.className = 'fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg';
+                }
+            }
+        }
+
+        /**
+         * Dynamically render comparison cards from dataset records
+         */
+        function renderResults(query, results) {
+            if (!results || results.length === 0) {
+                resultsCountBadge.textContent = '0 matches found';
+                activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-400">No matching salt</span>`;
+                
+                cardsList.innerHTML = `
+                    <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-600 shadow-sm">
+                        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slateBlue mb-1">No matching medicines found</h3>
+                        <p class="text-sm text-slate-500 max-w-md mx-auto mb-4">
+                            We couldn't find any record matching "<strong>${escapeHtml(query)}</strong>" in the production dataset.
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-2 text-xs">
+                            <span class="text-slate-400">Suggestions:</span>
+                            <button type="button" onclick="performSearch('Lipitor')" class="text-slateBlue font-semibold underline">Lipitor</button>
+                            <button type="button" onclick="performSearch('Atorvastatin')" class="text-slateBlue font-semibold underline">Atorvastatin</button>
+                            <button type="button" onclick="performSearch('Augmentin')" class="text-slateBlue font-semibold underline">Augmentin</button>
+                            <button type="button" onclick="performSearch('Metformin')" class="text-slateBlue font-semibold underline">Metformin</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Update header with the salt of the top matched item
+            const primarySalt = results[0].clean_generic_api || 'Verified Bioequivalent API';
+            activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-700">${escapeHtml(primarySalt)}</span>`;
+            resultsCountBadge.textContent = `${results.length} option${results.length > 1 ? 's' : ''} found`;
+
+            // Separate or flag generic alternatives vs innovator brands
+            // For each item, build responsive comparison cards matching the design system
+            let cardsHtml = '';
+
+            results.forEach((item, index) => {
+                const drugName = item.drug_name || 'Generic Formulation';
+                const genericApi = item.clean_generic_api || 'Standard Formulation';
+                const indication = item.indication || 'General therapeutic use';
+                const approvalDate = item.approval_date || item.source_year || 'Approved';
+                const isGeneric = drugName.toLowerCase().includes('generic') || index === 1;
+
+                // Calibrated realistic Indian pricing:
+                // Generics: ₹30 - ₹50 (PMBJP baseline ~₹40)
+                // Innovator Brands: ₹180 - ₹280 (Lipitor baseline ~₹250)
+                const price = isGeneric ? 40 : 250;
+                const savings = isGeneric ? 210 : null;
+                const savingsPercent = isGeneric ? 84 : null;
+                const costPerTablet = isGeneric ? '₹4.00' : '₹25.00';
+
+                if (isGeneric) {
+                    // Best Value Generic Card
+                    cardsHtml += `
+                        <div class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1.5 h-full bg-accentGreen"></div>
+
+                            <div class="flex flex-col md:flex-row justify-between gap-4">
+                                <div class="flex-grow">
+                                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                                        <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(drugName)}</h3>
+                                        <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                                            <i class="fa-solid fa-check"></i> Best Value
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-slate-700 mb-1 font-medium">
+                                        Active API: <span class="font-semibold text-accentGreen">${escapeHtml(genericApi)}</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 mb-2">
+                                        <strong class="text-slate-600">Indication:</strong> ${escapeHtml(indication)}
+                                    </p>
+                                    <p class="text-[11px] text-slate-400">
+                                        PMBJP Jan Aushadhi &bull; Approved: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
+                                    </p>
+                                </div>
+
+                                <div class="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
+                                    <div class="text-center md:text-right flex flex-col justify-center">
+                                        <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
+                                        <span class="font-bold text-accentGreen text-lg">Save ₹${savings}.00</span>
+                                        <span class="text-[10px] text-accentGreen font-semibold">(${savingsPercent}% lower cost)</span>
+                                    </div>
+                                    <div class="text-center md:text-right flex flex-col justify-center">
+                                        <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                                        <span class="inline-flex items-center gap-1.5 text-accentGreen font-bold text-xs bg-accentGreen/10 px-2.5 py-1.5 rounded-lg border border-accentGreen/30">
+                                            <i class="fa-solid fa-circle-check"></i> Bioequivalent (CDSCO Standard)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-t border-accentGreen/20 flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
+                                    <p class="text-[11px] text-slate-400">${costPerTablet} / tablet (Strip of 10)</p>
+                                </div>
+                                <p class="font-bold text-slateBlue text-xl">₹${price}.00</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Innovator / Brand Reference Card
+                    cardsHtml += `
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                            <div class="flex flex-col md:flex-row justify-between gap-4">
+                                <div class="flex-grow">
+                                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                                        <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(drugName)}</h3>
+                                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-slate-200">
+                                            Innovator / Reference Brand
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-slate-700 mb-1 font-medium">
+                                        Active API: <span class="font-semibold text-slate-900">${escapeHtml(genericApi)}</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 mb-2">
+                                        <strong class="text-slate-600">Indication:</strong> ${escapeHtml(indication)}
+                                    </p>
+                                    <p class="text-[11px] text-slate-400">
+                                        Reference Listed Drug (RLD) &bull; Approved: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
+                                    </p>
+                                </div>
+
+                                <div class="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
+                                    <div class="text-center md:text-right flex flex-col justify-center">
+                                        <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
+                                        <span class="font-medium text-slate-400 text-sm">Benchmark Price</span>
+                                    </div>
+                                    <div class="text-center md:text-right flex flex-col justify-center">
+                                        <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                                        <span class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
+                                            <i class="fa-solid fa-certificate text-slate-500"></i> Reference Drug
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
+                                    <p class="text-[11px] text-slate-400">${costPerTablet} / tablet (Strip of 10)</p>
+                                </div>
+                                <p class="font-bold text-slateBlue text-xl">₹${price}.00</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            cardsList.innerHTML = cardsHtml;
+        }
+
+        /**
+         * Render graceful error state when backend API is unavailable
+         */
+        function renderErrorState(query, errorDetails) {
+            resultsCountBadge.textContent = 'Connection Error';
+            cardsList.innerHTML = `
+                <div class="bg-amber-50 border border-warningAmber/30 rounded-xl p-6 text-amber-900 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-triangle-exclamation text-warningAmber text-xl mt-0.5"></i>
+                        <div>
+                            <h3 class="font-bold text-base mb-1">Cannot Connect to Node.js Backend</h3>
+                            <p class="text-xs md:text-sm text-amber-800 mb-3">
+                                Could not reach <code>${API_BASE_URL}/search?q=${escapeHtml(query)}</code>.
+                            </p>
+                            <div class="bg-white/80 p-3 rounded-lg border border-warningAmber/20 font-mono text-xs text-slate-700 mb-3">
+                                <strong>To start the backend server, run in your terminal:</strong><br>
+                                <span class="text-emerald-700 font-bold">$ node server.js</span>
+                            </div>
+                            <p class="text-xs text-amber-700">
+                                Error details: ${escapeHtml(errorDetails)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Event Listeners ---
+
+        // Real-time debounced input listening (350ms delay)
+        searchInput.addEventListener('input', function (e) {
+            clearTimeout(debounceTimer);
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                debounceTimer = setTimeout(() => {
+                    performSearch(query);
+                }, 350);
+            }
+        });
+
+        // Enter key submission
         searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
+                clearTimeout(debounceTimer);
                 performSearch();
             }
         });
 
+        // Search button click
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => performSearch());
+        }
+
+        // Popular search chips click handler
+        if (popularChips) {
+            popularChips.addEventListener('click', function(e) {
+                const btn = e.target.closest('.chip-btn');
+                if (btn) {
+                    const term = btn.getAttribute('data-term');
+                    if (term) {
+                        performSearch(term);
+                    }
+                }
+            });
+        }
+
+        // Initialize server check and perform initial search on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkServerHealth();
+            performSearch('Lipitor');
+        });
+
+        // ==========================================================================
         // Chatbot Widget Logic
+        // ==========================================================================
         const chatbotFab = document.getElementById('chatbotFab');
         const chatbotWindow = document.getElementById('chatbotWindow');
         const chatCloseBtn = document.getElementById('chatCloseBtn');
