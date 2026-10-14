@@ -97,20 +97,21 @@
         <div class="flex items-center gap-2 text-slateBlue">
             <i class="fa-solid fa-pills text-xl text-accentGreen"></i>
             <span class="font-bold text-xl tracking-tight">medibuddy</span>
-            <span class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1">Live Database (₹)</span>
+            <span
+                class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1">Live
+                Database (₹)</span>
         </div>
         <div class="flex items-center gap-4">
-            <!-- Server connection indicator -->
-            <div id="serverStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>API: Connected</span>
+            <!-- Client-side system status badge -->
+            <div id="serverStatusBadge"
+                class="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium shadow-sm"
+                style="border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;">
+                <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: #22c55e;"></span>
+                <span>🟢 System Online (Local)</span>
             </div>
-            <button
-                id="howItWorksBtn"
+            <button id="howItWorksBtn"
                 class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2 cursor-pointer"
-                aria-label="How this works"
-                aria-haspopup="dialog"
-                type="button">
+                aria-label="How this works" aria-haspopup="dialog" type="button">
                 <i class="fa-regular fa-circle-question text-lg"></i>
                 <span class="hidden sm:inline">How this works</span>
             </button>
@@ -130,21 +131,21 @@
                 Find a medicine that fits.
             </h1>
             <p class="text-slate-500 text-sm md:text-base mb-6 max-w-lg mx-auto leading-relaxed">
-                Search verified generic equivalents, active pharmaceutical ingredients (APIs), and realistic pricing in Indian Rupees (₹).
+                Search verified generic equivalents, active pharmaceutical ingredients (APIs), and realistic pricing in
+                Indian Rupees (₹).
             </p>
 
             <!-- Search Box -->
             <div class="relative w-full max-w-2xl mx-auto group">
                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <i id="searchIcon" class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg"></i>
+                    <i id="searchIcon"
+                        class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg"></i>
                 </div>
                 <input type="text" id="searchInput"
                     class="w-full pl-14 pr-32 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent transition-all text-base md:text-lg text-slate-700 bg-white"
-                    placeholder="Search brand or generic (e.g. Lipitor, Atorvastatin, Augmentin)..." 
-                    value="Lipitor"
+                    placeholder="Search brand or generic (e.g. Lipitor, Atorvastatin, Augmentin)..." value="Lipitor"
                     autocomplete="off">
-                <button
-                    id="searchBtn"
+                <button id="searchBtn"
                     class="absolute inset-y-2 right-2 bg-slateBlue text-white px-5 md:px-6 rounded-lg font-medium hover:bg-deepSlate transition-colors shadow-sm flex items-center gap-1.5"
                     type="button">
                     <span>Search</span>
@@ -155,11 +156,21 @@
             <!-- Quick Search Suggestion Chips -->
             <div class="flex items-center justify-center gap-2 mt-4 flex-wrap text-xs text-slate-500" id="popularChips">
                 <span class="font-medium">Try searching:</span>
-                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Lipitor">Lipitor</button>
-                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Atorvastatin">Atorvastatin</button>
-                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Augmentin">Augmentin</button>
-                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Metformin">Metformin</button>
-                <button type="button" class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium" data-term="Pan-D">Pan-D</button>
+                <button type="button"
+                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
+                    data-term="Lipitor">Lipitor</button>
+                <button type="button"
+                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
+                    data-term="Atorvastatin">Atorvastatin</button>
+                <button type="button"
+                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
+                    data-term="Augmentin">Augmentin</button>
+                <button type="button"
+                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
+                    data-term="Metformin">Metformin</button>
+                <button type="button"
+                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
+                    data-term="Pan-D">Pan-D</button>
             </div>
 
             <p class="text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
@@ -193,15 +204,15 @@
 
             <!-- Action Component (Doctor Request Note) -->
             <div class="mt-6 mb-2 text-center" id="actionNoteContainer">
-                <button
-                    id="generateDoctorNoteBtn"
+                <button id="generateDoctorNoteBtn"
                     class="bg-transparent border-2 border-slateBlue text-slateBlue hover:bg-slateBlue hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mx-auto shadow-sm"
                     type="button">
                     <i class="fa-regular fa-file-lines text-lg"></i>
                     <span>Generate Doctor Request Note</span>
                     <i class="fa-solid fa-arrow-right text-sm ml-1"></i>
                 </button>
-                <p class="text-xs text-slate-400 mt-2 font-medium">Create a simple conversation starter &mdash; never a prescription.</p>
+                <p class="text-xs text-slate-400 mt-2 font-medium">Create a simple conversation starter &mdash; never a
+                    prescription.</p>
             </div>
 
         </div>
@@ -216,8 +227,10 @@
             </div>
             <p class="text-xs sm:text-sm text-amber-900 font-medium">
                 <strong
-                    class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Regulatory & Clinical Notice:</strong>
-                Bioequivalence is established within CDSCO 80%–125% geometric mean ratio standards. Always consult your prescribing physician before altering cardiac or statin regimens.
+                    class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Regulatory
+                    & Clinical Notice:</strong>
+                Bioequivalence is established within CDSCO 80%–125% geometric mean ratio standards. Always consult your
+                prescribing physician before altering cardiac or statin regimens.
             </p>
         </div>
     </footer>
@@ -228,11 +241,11 @@
     <div id="howItWorksModal"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none invisible transition-all duration-300 ease-out"
         role="dialog" aria-modal="true" aria-labelledby="howItWorksTitle">
-        
+
         <!-- Modal Card Container -->
         <div id="howItWorksDialog"
             class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[90vh]">
-            
+
             <!-- Modal Header -->
             <div class="bg-slateBlue text-white p-5 flex items-center justify-between border-b border-white/10">
                 <div class="flex items-center gap-2.5">
@@ -240,69 +253,88 @@
                         <i class="fa-solid fa-circle-info text-emerald-400 text-base"></i>
                     </div>
                     <div>
-                        <h3 id="howItWorksTitle" class="font-bold text-base md:text-lg leading-tight">How MediBuddy Works</h3>
+                        <h3 id="howItWorksTitle" class="font-bold text-base md:text-lg leading-tight">How MediBuddy
+                            Works</h3>
                         <p class="text-[11px] text-slate-300">CDSCO Standards & Generic Substitution Guide</p>
                     </div>
                 </div>
                 <!-- Close 'X' Button -->
                 <button id="closeHowItWorksBtn"
                     class="text-slate-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-                    aria-label="Close modal"
-                    type="button">
+                    aria-label="Close modal" type="button">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
             <!-- Modal Body (Scrollable) -->
             <div class="p-5 md:p-6 overflow-y-auto space-y-4 text-sm text-slate-700 leading-relaxed">
-                
+
                 <!-- Section 1: Generic Search Engine Logic -->
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
+                    <div
+                        class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
                     <div>
                         <h4 class="font-bold text-slateBlue text-sm mb-1">1. Active Ingredient (API) Mapping</h4>
                         <p class="text-xs text-slate-600">
-                            Brand names (like <em>Lipitor</em>, <em>Augmentin</em>, or <em>Pan-D</em>) are commercial trademarks owned by pharma manufacturers. Our search engine maps trade names to their standardized <strong>Active Pharmaceutical Ingredient (API)</strong> (such as <em>Atorvastatin Calcium</em> or <em>Amoxicillin + Clavulanic Acid</em>), revealing certified generic alternatives with identical chemical strength and therapeutic intent.
+                            Brand names (like <em>Lipitor</em>, <em>Augmentin</em>, or <em>Pan-D</em>) are commercial
+                            trademarks owned by pharma manufacturers. Our search engine maps trade names to their
+                            standardized <strong>Active Pharmaceutical Ingredient (API)</strong> (such as
+                            <em>Atorvastatin Calcium</em> or <em>Amoxicillin + Clavulanic Acid</em>), revealing
+                            certified generic alternatives with identical chemical strength and therapeutic intent.
                         </p>
                     </div>
                 </div>
 
                 <!-- Section 2: CDSCO Bioequivalence Standard -->
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
+                    <div
+                        class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
                         <i class="fa-solid fa-certificate text-xs"></i>
                     </div>
                     <div>
                         <h4 class="font-bold text-slateBlue text-sm mb-1">2. CDSCO Bioequivalence Standard</h4>
                         <p class="text-xs text-slate-600">
-                            Under India's <strong>Central Drugs Standard Control Organisation (CDSCO)</strong> and Indian Pharmacopoeia norms, generic formulations must demonstrate bioequivalence within an accepted <strong>80%–125% (90% Confidence Interval)</strong> geometric mean ratio for rate (C<sub>max</sub>) and extent (AUC) of systemic absorption relative to the innovator benchmark.
+                            Under India's <strong>Central Drugs Standard Control Organisation (CDSCO)</strong> and
+                            Indian Pharmacopoeia norms, generic formulations must demonstrate bioequivalence within an
+                            accepted <strong>80%–125% (90% Confidence Interval)</strong> geometric mean ratio for rate
+                            (C<sub>max</sub>) and extent (AUC) of systemic absorption relative to the innovator
+                            benchmark.
                         </p>
                         <p class="text-[11px] text-slate-500 mt-1 italic">
-                            *Scientifically, claiming "100% match" is medically flawed due to normal biological variance, but CDSCO bioequivalence certifies equivalent clinical efficacy and safety.
+                            *Scientifically, claiming "100% match" is medically flawed due to normal biological
+                            variance, but CDSCO bioequivalence certifies equivalent clinical efficacy and safety.
                         </p>
                     </div>
                 </div>
 
                 <!-- Section 3: Indian Market Pricing & Savings -->
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
+                    <div
+                        class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
                         <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
                     </div>
                     <div>
                         <h4 class="font-bold text-slateBlue text-sm mb-1">3. Realistic Indian Market Savings</h4>
                         <p class="text-xs text-slate-600">
-                            Innovator brand prices reflect patent development amortization and advertising. Certified generic equivalents from Indian manufacturers and <strong>PMBJP (Pradhan Mantri Bhartiya Janaushadhi Pariyojana)</strong> Kendras provide equivalent therapeutic outcomes at <strong>70% to 85% lower cost</strong> (e.g., generic Atorvastatin at ₹40 vs. brand Lipitor at ₹250).
+                            Innovator brand prices reflect patent development amortization and advertising. Certified
+                            generic equivalents from Indian manufacturers and <strong>PMBJP (Pradhan Mantri Bhartiya
+                                Janaushadhi Pariyojana)</strong> Kendras provide equivalent therapeutic outcomes at
+                            <strong>70% to 85% lower cost</strong> (e.g., generic Atorvastatin at ₹40 vs. brand Lipitor
+                            at ₹250).
                         </p>
                     </div>
                 </div>
 
                 <!-- Clinical Safety Disclaimer -->
-                <div class="bg-amber-50 border border-warningAmber/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-900 mt-1">
+                <div
+                    class="bg-amber-50 border border-warningAmber/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-900 mt-1">
                     <i class="fa-solid fa-triangle-exclamation text-warningAmber text-base mt-0.5 flex-shrink-0"></i>
                     <p class="text-xs">
-                        <strong>Clinical Advisory:</strong> This platform is designed solely as an educational discussion aid. Never alter, discontinue, or substitute prescription medications without the direct consultation and approval of your treating physician.
+                        <strong>Clinical Advisory:</strong> This platform is designed solely as an educational
+                        discussion aid. Never alter, discontinue, or substitute prescription medications without the
+                        direct consultation and approval of your treating physician.
                     </p>
                 </div>
 
@@ -361,8 +393,10 @@
 
         <!-- Message Area -->
         <div id="chatMessages" class="flex-grow p-4 overflow-y-auto bg-slate-50 flex flex-col gap-3 text-sm">
-            <div class="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700">
-                <p>Hello! I can help you find generic equivalents, explain CDSCO bioequivalence, and verify pricing in Indian Rupees (₹).</p>
+            <div
+                class="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700">
+                <p>Hello! I can help you find generic equivalents, explain CDSCO bioequivalence, and verify pricing in
+                    Indian Rupees (₹).</p>
                 <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-amber-700 font-medium">
                     ⚠️ Educational only &mdash; please consult your physician before switching medicines.
                 </div>
@@ -406,10 +440,9 @@
          VANILLA JAVASCRIPT: API FETCH & DYNAMIC RESULTS RENDERING
          ========================================================================== -->
     <script>
-        // API Base URL: Uses current origin if served from port 3000, else defaults to http://localhost:3000
-        const API_BASE_URL = (window.location.port === '3000') 
-            ? window.location.origin 
-            : 'http://localhost:3000';
+        // Client-side in-memory database storage
+        let localDrugDatabase = [];
+        let isLocalDbReady = false;
 
         // DOM Element References
         const searchInput = document.getElementById('searchInput');
@@ -441,36 +474,65 @@
         }
 
         /**
-         * Check API server connectivity on page load
+         * Initialize Client-Side In-Memory Database via PapaParse
          */
-        async function checkServerHealth() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/health`);
-                if (response.ok) {
-                    const data = await response.json();
+        function initializeLocalDatabase() {
+            if (typeof Papa === 'undefined') {
+                console.error("PapaParse library failed to load.");
+                if (serverStatusBadge) {
+                    serverStatusBadge.style.cssText = "border: 1px solid #fca5a5; color: #b91c1c; background-color: #fef2f2;";
+                    serverStatusBadge.innerHTML = `
+                        <span class="w-2 h-2 rounded-full" style="background-color: #ef4444;"></span>
+                        <span>🔴 PapaParse Library Missing</span>
+                    `;
+                }
+                return;
+            }
+
+            Papa.parse("production_drug_database.csv", {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function (results) {
+                    localDrugDatabase = (results.data || []).map(row => ({
+                        s_no: (row.s_no || '').trim(),
+                        drug_name: (row.drug_name || '').trim(),
+                        indication: (row.indication || '').trim(),
+                        approval_date: (row.approval_date || '').trim(),
+                        source_year: (row.source_year || '').trim(),
+                        clean_generic_api: (row.clean_generic_api || '').trim()
+                    })).filter(row => row.drug_name || row.clean_generic_api);
+
+                    isLocalDbReady = true;
+
                     if (serverStatusBadge) {
+                        serverStatusBadge.style.cssText = "border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;";
                         serverStatusBadge.innerHTML = `
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>DB: ${data.records_count} records ready</span>
+                            <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: #22c55e;"></span>
+                            <span>🟢 System Online (Local)</span>
+                        `;
+                    }
+
+                    // Perform initial search once in-memory dataset is ready
+                    performSearch(searchInput.value || 'Lipitor');
+                },
+                error: function (err) {
+                    console.error("Failed to parse production_drug_database.csv:", err);
+                    if (serverStatusBadge) {
+                        serverStatusBadge.style.cssText = "border: 1px solid #fcd34d; color: #b45309; background-color: #fffbeb;";
+                        serverStatusBadge.innerHTML = `
+                            <span class="w-2 h-2 rounded-full" style="background-color: #f59e0b;"></span>
+                            <span>⚠️ CSV Fetch Failed</span>
                         `;
                     }
                 }
-            } catch (err) {
-                if (serverStatusBadge) {
-                    serverStatusBadge.innerHTML = `
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        <span>API Server Offline (Start Node.js)</span>
-                    `;
-                    serverStatusBadge.classList.remove('bg-slate-100', 'text-slate-600');
-                    serverStatusBadge.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-200');
-                }
-            }
+            });
         }
 
         /**
-         * Perform search by fetching data from Node.js Express /search endpoint
+         * Perform search entirely client-side using in-memory localDrugDatabase
          */
-        async function performSearch(customQuery = null) {
+        function performSearch(customQuery = null) {
             const query = (customQuery !== null ? customQuery : searchInput.value).trim();
             if (!query) return;
 
@@ -484,37 +546,45 @@
             resultsContainer.classList.remove('hidden');
             resultsContainer.classList.add('flex');
 
-            // Show Loading Skeleton
-            if (searchIcon) {
-                searchIcon.className = 'fa-solid fa-circle-notch fa-spin text-slateBlue text-lg';
+            if (!isLocalDbReady) {
+                resultsCountBadge.textContent = 'Parsing dataset...';
+                cardsList.innerHTML = `
+                    <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 shadow-sm animate-pulse">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-slateBlue mb-3"></i>
+                        <p class="font-medium text-sm">Loading local CDSCO database into browser memory...</p>
+                    </div>
+                `;
+                return;
             }
-            resultsCountBadge.textContent = 'Searching...';
-            cardsList.innerHTML = `
-                <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 shadow-sm animate-pulse">
-                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-slateBlue mb-3"></i>
-                    <p class="font-medium text-sm">Querying drug database for "${escapeHtml(query)}"...</p>
-                    <p class="text-xs text-slate-400 mt-1">Filtering by clean_generic_api and drug_name</p>
-                </div>
-            `;
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}`);
-                
-                if (!response.ok) {
-                    throw new Error(`Server returned status ${response.status}`);
+            const qLower = query.toLowerCase();
+            const matches = [];
+
+            // Case-insensitive scored partial matching across drug_name and clean_generic_api
+            for (let i = 0; i < localDrugDatabase.length; i++) {
+                const item = localDrugDatabase[i];
+                const drugName = item.drug_name.toLowerCase();
+                const genericApi = item.clean_generic_api.toLowerCase();
+
+                let score = 0;
+                if (drugName === qLower || genericApi === qLower) {
+                    score = 3; // Exact match
+                } else if (drugName.startsWith(qLower) || genericApi.startsWith(qLower)) {
+                    score = 2; // Starts with query
+                } else if (drugName.includes(qLower) || genericApi.includes(qLower)) {
+                    score = 1; // Substring match
                 }
 
-                const data = await response.json();
-                renderResults(query, data.results || []);
-
-            } catch (error) {
-                console.error('Failed to fetch search results:', error);
-                renderErrorState(query, error.message);
-            } finally {
-                if (searchIcon) {
-                    searchIcon.className = 'fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg';
+                if (score > 0) {
+                    matches.push({ ...item, _score: score });
                 }
             }
+
+            // Rank by score descending and take top 10
+            matches.sort((a, b) => b._score - a._score);
+            const top10 = matches.slice(0, 10).map(({ _score, ...item }) => item);
+
+            renderResults(query, top10);
         }
 
         /**
@@ -524,7 +594,7 @@
             if (!results || results.length === 0) {
                 resultsCountBadge.textContent = '0 matches found';
                 activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-400">No matching salt</span>`;
-                
+
                 cardsList.innerHTML = `
                     <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-600 shadow-sm">
                         <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
@@ -670,25 +740,21 @@
         }
 
         /**
-         * Render graceful error state when backend API is unavailable
+         * Render graceful error state when local search fails
          */
         function renderErrorState(query, errorDetails) {
-            resultsCountBadge.textContent = 'Connection Error';
+            resultsCountBadge.textContent = 'Search Error';
             cardsList.innerHTML = `
                 <div class="bg-amber-50 border border-warningAmber/30 rounded-xl p-6 text-amber-900 shadow-sm">
                     <div class="flex items-start gap-3">
                         <i class="fa-solid fa-triangle-exclamation text-warningAmber text-xl mt-0.5"></i>
                         <div>
-                            <h3 class="font-bold text-base mb-1">Cannot Connect to Node.js Backend</h3>
-                            <p class="text-xs md:text-sm text-amber-800 mb-3">
-                                Could not reach <code>${API_BASE_URL}/search?q=${escapeHtml(query)}</code>.
+                            <h3 class="font-bold text-base mb-1">Local Search Issue</h3>
+                            <p class="text-xs md:text-sm text-amber-800 mb-2">
+                                An error occurred while searching for "<strong>${escapeHtml(query)}</strong>".
                             </p>
-                            <div class="bg-white/80 p-3 rounded-lg border border-warningAmber/20 font-mono text-xs text-slate-700 mb-3">
-                                <strong>To start the backend server, run in your terminal:</strong><br>
-                                <span class="text-emerald-700 font-bold">$ node server.js</span>
-                            </div>
                             <p class="text-xs text-amber-700">
-                                Error details: ${escapeHtml(errorDetails)}
+                                Details: ${escapeHtml(errorDetails)}
                             </p>
                         </div>
                     </div>
@@ -724,7 +790,7 @@
 
         // Popular search chips click handler
         if (popularChips) {
-            popularChips.addEventListener('click', function(e) {
+            popularChips.addEventListener('click', function (e) {
                 const btn = e.target.closest('.chip-btn');
                 if (btn) {
                     const term = btn.getAttribute('data-term');
@@ -735,10 +801,9 @@
             });
         }
 
-        // Initialize server check and perform initial search on load
+        // Initialize client-side in-memory database on load
         window.addEventListener('DOMContentLoaded', () => {
-            checkServerHealth();
-            performSearch('Lipitor');
+            initializeLocalDatabase();
         });
 
         // ==========================================================================
@@ -768,7 +833,7 @@
             // Extract Generic API Name from HTML DOM
             const saltElement = document.querySelector('#activeSaltDisplay span');
             let genericApiName = saltElement ? saltElement.textContent.trim() : '';
-            
+
             // Fallback: check generic card API span
             const genericCardApi = document.querySelector('.bg-softGreen .text-accentGreen');
             if (genericCardApi && (!genericApiName || genericApiName === 'None')) {
