@@ -11,6 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jsPDF Library for Doctor Request Note Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -186,12 +188,14 @@
                 <!-- Cards will be dynamically injected here by renderResults() -->
             </div>
 
-            <!-- Action Component (Doctor Note) -->
+            <!-- Action Component (Doctor Request Note) -->
             <div class="mt-6 mb-2 text-center" id="actionNoteContainer">
                 <button
-                    class="bg-transparent border-2 border-slateBlue text-slateBlue hover:bg-slateBlue hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mx-auto shadow-sm">
+                    id="generateDoctorNoteBtn"
+                    class="bg-transparent border-2 border-slateBlue text-slateBlue hover:bg-slateBlue hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mx-auto shadow-sm"
+                    type="button">
                     <i class="fa-regular fa-file-lines text-lg"></i>
-                    Generate Doctor Note for This Change
+                    <span>Generate Doctor Request Note</span>
                     <i class="fa-solid fa-arrow-right text-sm ml-1"></i>
                 </button>
                 <p class="text-xs text-slate-400 mt-2 font-medium">Create a simple conversation starter &mdash; never a prescription.</p>
@@ -635,6 +639,210 @@
             checkServerHealth();
             performSearch('Lipitor');
         });
+
+        // ==========================================================================
+        // Generate Doctor Request Note PDF (via jsPDF)
+        // ==========================================================================
+        const generateDoctorNoteBtn = document.getElementById('generateDoctorNoteBtn');
+
+        function generateDoctorRequestNotePDF() {
+            // Check if jsPDF UMD library is loaded
+            const { jsPDF } = window.jspdf || {};
+            if (!jsPDF) {
+                alert("The PDF generator library is still loading. Please check your internet connection and try again.");
+                return;
+            }
+
+            // Extract Reference Brand Name from HTML DOM
+            const brandElement = document.getElementById('searchQueryDisplay');
+            let brandName = brandElement ? brandElement.textContent.trim() : '';
+
+            // Check if there is an innovator / brand card in the results list
+            const brandCardHeader = document.querySelector('.bg-white.border-slate-200 h3');
+            if (brandCardHeader && (!brandName || brandName.toLowerCase().includes('generic'))) {
+                brandName = brandCardHeader.textContent.trim();
+            }
+            if (!brandName) brandName = 'Prescribed Medication';
+
+            // Extract Generic API Name from HTML DOM
+            const saltElement = document.querySelector('#activeSaltDisplay span');
+            let genericApiName = saltElement ? saltElement.textContent.trim() : '';
+            
+            // Fallback: check generic card API span
+            const genericCardApi = document.querySelector('.bg-softGreen .text-accentGreen');
+            if (genericCardApi && (!genericApiName || genericApiName === 'None')) {
+                genericApiName = genericCardApi.textContent.trim();
+            }
+            if (!genericApiName || genericApiName === 'None') {
+                genericApiName = 'Generic Equivalent (CDSCO Standard)';
+            }
+
+            // Visual feedback on the button
+            const originalBtnHtml = generateDoctorNoteBtn ? generateDoctorNoteBtn.innerHTML : '';
+            if (generateDoctorNoteBtn) {
+                generateDoctorNoteBtn.innerHTML = `
+                    <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                    <span>Generating PDF...</span>
+                `;
+                generateDoctorNoteBtn.disabled = true;
+            }
+
+            try {
+                // Initialize jsPDF in portrait A4 format (210mm x 297mm)
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 20;
+                const contentWidth = pageWidth - (margin * 2); // 170mm
+
+                // Top Header Banner (Deep Slate Blue)
+                doc.setFillColor(35, 57, 77); // #23394D
+                doc.rect(0, 0, pageWidth, 28, 'F');
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(15);
+                doc.setTextColor(255, 255, 255);
+                doc.text('MEDIBUDDY | CLINICAL DISCUSSION AID', margin, 13);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(203, 213, 225); // #CBD5E1
+                doc.text('Patient Request for Therapeutic Generic Alternative Evaluation', margin, 20);
+
+                // Date & Registry Metadata
+                let currentY = 40;
+                const currentDate = new Date().toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.setTextColor(100, 116, 139); // #64748B
+                doc.text(`Date: ${currentDate}`, margin, currentY);
+                doc.text(`Regulatory Alignment: CDSCO (India) Drug Standard`, pageWidth - margin, currentY, { align: 'right' });
+
+                currentY += 12;
+
+                // Subject Line
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.setTextColor(15, 23, 42); // #0F172A
+                doc.text('Subject: Request to Evaluate Generic Medication Alternative', margin, currentY);
+
+                currentY += 6;
+
+                // Dividing Line
+                doc.setDrawColor(226, 232, 240); // #E2E8F0
+                doc.setLineWidth(0.5);
+                doc.line(margin, currentY, margin + contentWidth, currentY);
+
+                currentY += 10;
+
+                // Highlighted Drug Comparison Box
+                doc.setFillColor(248, 250, 252); // #F8FAFC
+                doc.setDrawColor(203, 213, 225);
+                doc.roundedRect(margin, currentY, contentWidth, 24, 2, 2, 'FD');
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(71, 85, 105);
+                doc.text('CURRENT REFERENCE BRAND:', margin + 6, currentY + 7);
+                doc.text('CDSCO-APPROVED GENERIC API:', margin + 6, currentY + 16);
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.setTextColor(35, 57, 77); // #23394D
+                doc.text(brandName, margin + 68, currentY + 7);
+
+                doc.setTextColor(22, 101, 52); // #166534
+                doc.text(genericApiName, margin + 68, currentY + 16);
+
+                currentY += 34;
+
+                // Message Body
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(11);
+                doc.setTextColor(30, 41, 59); // #1E293B
+
+                doc.text('Dear Doctor,', margin, currentY);
+                currentY += 8;
+
+                const p1 = `I am currently reviewing my medication costs. I found a CDSCO-approved generic equivalent for ${brandName}. The generic active pharmaceutical ingredient (API) is ${genericApiName}.`;
+                const linesP1 = doc.splitTextToSize(p1, contentWidth);
+                doc.text(linesP1, margin, currentY);
+                currentY += (linesP1.length * 6) + 4;
+
+                const p2 = 'Could we please discuss if switching to this generic alternative is medically appropriate and safe for my current treatment plan?';
+                const linesP2 = doc.splitTextToSize(p2, contentWidth);
+                doc.text(linesP2, margin, currentY);
+                currentY += (linesP2.length * 6) + 8;
+
+                const p3 = 'I would appreciate your clinical evaluation regarding therapeutic efficacy, dosage equivalence, and whether any monitoring is recommended during substitution.';
+                const linesP3 = doc.splitTextToSize(p3, contentWidth);
+                doc.text(linesP3, margin, currentY);
+                currentY += (linesP3.length * 6) + 16;
+
+                // Patient Signature Section
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.setTextColor(15, 23, 42);
+                doc.text('Thank you for your guidance,', margin, currentY);
+                currentY += 16;
+
+                doc.setFont('helvetica', 'normal');
+                doc.text('Patient Signature: _________________________________________', margin, currentY);
+                currentY += 10;
+                doc.text('Printed Patient Name: _____________________________________', margin, currentY);
+                currentY += 10;
+                doc.text('Contact Phone: ____________________________________________', margin, currentY);
+
+                // Clinical Disclaimer Footer
+                const footerY = 270;
+                doc.setDrawColor(226, 232, 240);
+                doc.line(margin, footerY - 5, margin + contentWidth, footerY - 5);
+
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184); // #94A3B8
+                const disclaimer = 'Note: This document is an informational conversation starter prepared by the patient. It does not constitute a valid prescription or mandate substitution. All therapeutic decisions and dosage alterations remain solely under your physician\'s professional discretion.';
+                const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth);
+                doc.text(disclaimerLines, margin, footerY);
+
+                // Trigger PDF download in the browser
+                const sanitizedFilename = `Doctor_Request_Note_${brandName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+                doc.save(sanitizedFilename);
+
+                // Success feedback on button
+                if (generateDoctorNoteBtn) {
+                    generateDoctorNoteBtn.innerHTML = `
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+                        <span class="text-emerald-700">PDF Downloaded!</span>
+                    `;
+                    setTimeout(() => {
+                        generateDoctorNoteBtn.innerHTML = originalBtnHtml;
+                        generateDoctorNoteBtn.disabled = false;
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Error generating PDF:', err);
+                alert('An error occurred while generating the PDF. Please try again.');
+                if (generateDoctorNoteBtn) {
+                    generateDoctorNoteBtn.innerHTML = originalBtnHtml;
+                    generateDoctorNoteBtn.disabled = false;
+                }
+            }
+        }
+
+        // Attach Click Listener to Doctor Request Note Button
+        if (generateDoctorNoteBtn) {
+            generateDoctorNoteBtn.addEventListener('click', generateDoctorRequestNotePDF);
+        }
 
         // ==========================================================================
         // Chatbot Widget Logic
