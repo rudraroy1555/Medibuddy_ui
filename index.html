@@ -110,10 +110,10 @@
                 <span>🟢 System Online (Local Search)</span>
             </div>
             <button id="howItWorksBtn"
-                class="text-slate-400 hover:text-slateBlue transition-colors text-sm font-medium flex items-center gap-2 cursor-pointer"
+                class="text-slate-700 hover:text-slateBlue bg-slate-50 hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs"
                 aria-label="How this works" aria-haspopup="dialog" type="button">
-                <i class="fa-regular fa-circle-question text-lg"></i>
-                <span class="hidden sm:inline">How this works</span>
+                <i class="fa-regular fa-circle-question text-accentGreen text-base"></i>
+                <span>? How this works</span>
             </button>
         </div>
     </header>
@@ -211,8 +211,9 @@
                     <span>Generate Doctor Request Note</span>
                     <i class="fa-solid fa-arrow-right text-sm ml-1"></i>
                 </button>
-                <p class="text-xs text-slate-400 mt-2 font-medium">Create a simple conversation starter &mdash; never a
-                    prescription.</p>
+                <p class="text-xs text-slate-500 mt-2 font-medium" id="selectedNoteSummary">
+                    Create a personalized conversation starter &mdash; never a prescription.
+                </p>
             </div>
 
         </div>
@@ -269,42 +270,30 @@
             <!-- Modal Body (Scrollable) -->
             <div class="p-5 md:p-6 overflow-y-auto space-y-4 text-sm text-slate-700 leading-relaxed">
 
-                <!-- Section 1: Generic Search Engine Logic -->
+                <!-- Section 1: CDSCO Regulatory Database -->
                 <div class="flex items-start gap-3">
                     <div
                         class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        <i class="fa-solid fa-shield-halved text-xs"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slateBlue text-sm mb-1">1. Active Ingredient (API) Mapping</h4>
+                        <h4 class="font-bold text-slateBlue text-sm mb-1">1. CDSCO Official Regulatory Database</h4>
                         <p class="text-xs text-slate-600">
-                            Brand names (like <em>Lipitor</em>, <em>Augmentin</em>, or <em>Pan-D</em>) are commercial
-                            trademarks owned by pharma manufacturers. Our search engine maps trade names to their
-                            standardized <strong>Active Pharmaceutical Ingredient (API)</strong> (such as
-                            <em>Atorvastatin Calcium</em> or <em>Amoxicillin + Clavulanic Acid</em>), revealing
-                            certified generic alternatives with identical chemical strength and therapeutic intent.
+                            Our primary dataset incorporates regulatory approvals from India's <strong>Central Drugs Standard Control Organisation (CDSCO)</strong>. We map commercial brand names to their registered <strong>Active Pharmaceutical Ingredients (APIs)</strong> and official therapeutic indications, referencing clinical bioequivalence standards (80%–125% 90% Confidence Interval).
                         </p>
                     </div>
                 </div>
 
-                <!-- Section 2: CDSCO Bioequivalence Standard -->
+                <!-- Section 2: Local In-Memory Search Engine -->
                 <div class="flex items-start gap-3">
                     <div
                         class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
-                        <i class="fa-solid fa-certificate text-xs"></i>
+                        <i class="fa-solid fa-bolt text-xs"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slateBlue text-sm mb-1">2. CDSCO Bioequivalence Standard</h4>
+                        <h4 class="font-bold text-slateBlue text-sm mb-1">2. Local In-Memory Search (Serverless & Private)</h4>
                         <p class="text-xs text-slate-600">
-                            Under India's <strong>Central Drugs Standard Control Organisation (CDSCO)</strong> and
-                            Indian Pharmacopoeia norms, generic formulations must demonstrate bioequivalence within an
-                            accepted <strong>80%–125% (90% Confidence Interval)</strong> geometric mean ratio for rate
-                            (C<sub>max</sub>) and extent (AUC) of systemic absorption relative to the innovator
-                            benchmark.
-                        </p>
-                        <p class="text-[11px] text-slate-500 mt-1 italic">
-                            *Scientifically, claiming "100% match" is medically flawed due to normal biological
-                            variance, but CDSCO bioequivalence certifies equivalent clinical efficacy and safety.
+                            MediBuddy loads both the CDSCO registry and the 150 prescribed Indian drugs dataset into browser memory concurrently via <code>Promise.all</code> and PapaParse. Your medical queries are computed <strong>100% client-side</strong> without sending search strings to any tracking server, guaranteeing zero latency and complete patient privacy.
                         </p>
                     </div>
                 </div>
@@ -316,13 +305,9 @@
                         <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slateBlue text-sm mb-1">3. Realistic Indian Market Savings</h4>
+                        <h4 class="font-bold text-slateBlue text-sm mb-1">3. Real-World Market Alternatives & Pricing</h4>
                         <p class="text-xs text-slate-600">
-                            Innovator brand prices reflect patent development amortization and advertising. Certified
-                            generic equivalents from Indian manufacturers and <strong>PMBJP (Pradhan Mantri Bhartiya
-                                Janaushadhi Pariyojana)</strong> Kendras provide equivalent therapeutic outcomes at
-                            <strong>70% to 85% lower cost</strong> (e.g., generic Atorvastatin at ₹40 vs. brand Lipitor
-                            at ₹250).
+                            Prescribed brand prices often include innovator patent amortization and marketing costs. Certified generic equivalents from Indian pharma manufacturers and <strong>PMBJP Jan Aushadhi Kendras</strong> deliver identical chemical bioequivalence and clinical outcomes at <strong>40% to 80% lower cost</strong>.
                         </p>
                     </div>
                 </div>

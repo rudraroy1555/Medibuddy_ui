@@ -243,6 +243,73 @@ function performSearch(customQuery = null) {
     renderResults(query, searchResults);
 }
 
+// Active Alternative Drug Selection State
+let selectedAlternativeIndex = 0;
+let currentAlternativesList = [];
+
+/**
+ * Updates the summary caption below the Generate Doctor Note button
+ */
+function updateDoctorNoteSummary() {
+    const summaryEl = document.getElementById('selectedNoteSummary');
+    if (!summaryEl) return;
+
+    if (currentAlternativesList && currentAlternativesList.length > 0 && selectedAlternativeIndex >= 0 && currentAlternativesList[selectedAlternativeIndex]) {
+        const item = currentAlternativesList[selectedAlternativeIndex];
+        const savings = Math.max(0, item.standard_price - item.cheaper_price);
+        summaryEl.innerHTML = `Selected for doctor note: <strong class="text-accentGreen font-bold">${escapeHtml(item.cheaper_brand)}</strong> (₹${item.cheaper_price.toFixed(2)}) &bull; Saves ₹${savings.toFixed(2)} vs ${escapeHtml(item.brand_name)}.`;
+    } else {
+        summaryEl.innerHTML = `Create a personalized conversation starter &mdash; never a prescription.`;
+    }
+}
+
+/**
+ * Interactively select an alternative drug card and update visual highlighting
+ * @param {number} index - Index of selected item in currentAlternativesList
+ */
+function selectAlternative(index) {
+    if (!currentAlternativesList || !currentAlternativesList[index]) return;
+    selectedAlternativeIndex = index;
+
+    const cards = document.querySelectorAll('.alternative-drug-card');
+    cards.forEach((card, idx) => {
+        const isSelected = (idx === selectedAlternativeIndex);
+        const radio = card.querySelector('input[type="radio"]');
+        const pillContainer = card.querySelector('.selection-pill-container');
+        const borderIndicator = card.querySelector('.left-indicator-bar');
+
+        if (radio) radio.checked = isSelected;
+
+        if (isSelected) {
+            card.className = 'alternative-drug-card rounded-xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden group mb-4 cursor-pointer border-2 border-accentGreen bg-emerald-50/70 shadow-md ring-2 ring-accentGreen/20';
+            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-accentGreen transition-colors';
+            if (pillContainer) {
+                pillContainer.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                        <i class="fa-solid fa-circle-check"></i> Selected for Discussion
+                    </span>
+                `;
+            }
+        } else {
+            card.className = 'alternative-drug-card rounded-xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden group mb-4 cursor-pointer border border-slate-200 bg-white hover:border-emerald-300 hover:bg-slate-50/50 shadow-sm';
+            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-slate-300 group-hover:bg-accentGreen transition-colors';
+            if (pillContainer) {
+                pillContainer.innerHTML = `
+                    <button type="button" onclick="selectAlternative(${idx})" 
+                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-accentGreen hover:bg-emerald-50 transition-all cursor-pointer">
+                        <i class="fa-regular fa-circle text-slate-400"></i> Select Alternative
+                    </button>
+                `;
+            }
+        }
+    });
+
+    updateDoctorNoteSummary();
+}
+
+// Expose globally so inline onclick handlers have access
+window.selectAlternative = selectAlternative;
+
 /**
  * Dynamically render comparison cards from both pricing alternatives and CDSCO official records
  */
@@ -252,6 +319,10 @@ function renderResults(query, searchResults) {
     const priceAlternatives = (searchResults && searchResults.priceAlternatives) || [];
     const officialAPIs = (searchResults && searchResults.officialAPIs) || [];
     const totalCount = priceAlternatives.length + officialAPIs.length;
+
+    // Cache current list for dynamic selection and note generation
+    currentAlternativesList = priceAlternatives;
+    selectedAlternativeIndex = priceAlternatives.length > 0 ? 0 : -1;
 
     if (totalCount === 0) {
         resultsCountBadge.textContent = '0 matches found';
@@ -275,6 +346,7 @@ function renderResults(query, searchResults) {
                 </div>
             </div>
         `;
+        updateDoctorNoteSummary();
         return;
     }
 
@@ -295,7 +367,7 @@ function renderResults(query, searchResults) {
     // SECTION 1: REAL-WORLD MARKET PRICING & CHEAPER ALTERNATIVES
     // =========================================================================
     if (priceAlternatives.length > 0) {
-        priceAlternatives.slice(0, 8).forEach(item => {
+        priceAlternatives.slice(0, 8).forEach((item, index) => {
             const brand = item.brand_name;
             const cheaperBrand = item.cheaper_brand;
             const generic = item.generic_name;
@@ -304,15 +376,26 @@ function renderResults(query, searchResults) {
             const altPrice = item.cheaper_price;
             const savings = Math.max(0, stdPrice - altPrice);
             const savingsPercent = stdPrice > 0 ? Math.round((savings / stdPrice) * 100) : 0;
+            const isSelected = (index === selectedAlternativeIndex);
 
             cardsHtml += `
-                <div class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group mb-4">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-accentGreen"></div>
+                <div class="alternative-drug-card rounded-xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden group mb-4 cursor-pointer ${
+                    isSelected
+                        ? 'border-2 border-accentGreen bg-emerald-50/70 shadow-md ring-2 ring-accentGreen/20'
+                        : 'border border-slate-200 bg-white hover:border-emerald-300 hover:bg-slate-50/50 shadow-sm'
+                }" data-index="${index}" onclick="selectAlternative(${index})">
+                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${isSelected ? 'bg-accentGreen' : 'bg-slate-300 group-hover:bg-accentGreen'} transition-colors"></div>
 
                     <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div class="flex-grow">
+                            <!-- Header with Brand Name, Badges, and Radio Toggle -->
                             <div class="flex items-center gap-3 mb-2 flex-wrap">
-                                <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(cheaperBrand)}</h3>
+                                <label class="inline-flex items-center gap-2.5 cursor-pointer" onclick="event.stopPropagation();">
+                                    <input type="radio" name="selectedAlternativeRadio" value="${index}" ${isSelected ? 'checked' : ''} 
+                                        onchange="selectAlternative(${index})" 
+                                        class="w-4 h-4 text-accentGreen focus:ring-accentGreen cursor-pointer accent-accentGreen">
+                                    <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(cheaperBrand)}</h3>
+                                </label>
                                 <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                                     <i class="fa-solid fa-check"></i> Cheaper Alternative
                                 </span>
@@ -320,6 +403,7 @@ function renderResults(query, searchResults) {
                                     ${escapeHtml(condition)}
                                 </span>
                             </div>
+
                             <p class="text-sm text-slate-700 mb-1 font-medium">
                                 Active Salt / Generic: <span class="font-semibold text-accentGreen">${escapeHtml(generic)}</span>
                             </p>
@@ -331,22 +415,31 @@ function renderResults(query, searchResults) {
                             </p>
                         </div>
 
-                        <div class="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
+                        <!-- Price Savings & Selection Action -->
+                        <div class="flex items-center gap-4 md:gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
                             <div class="text-center md:text-right flex flex-col justify-center">
                                 <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Direct Savings</span>
                                 <span class="font-bold text-accentGreen text-xl">Save ₹${savings.toFixed(2)}</span>
                                 <span class="text-[10px] text-accentGreen font-semibold">(${savingsPercent}% cheaper)</span>
                             </div>
-                            <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Therapeutic Match</span>
-                                <span class="inline-flex items-center gap-1.5 text-accentGreen font-bold text-xs bg-accentGreen/10 px-2.5 py-1.5 rounded-lg border border-accentGreen/30">
-                                    <i class="fa-solid fa-circle-check"></i> 100% Bioequivalent
-                                </span>
+
+                            <!-- Interactive Button / Pill -->
+                            <div class="selection-pill-container flex items-center justify-end" onclick="event.stopPropagation();">
+                                ${isSelected ? `
+                                    <span class="inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                                        <i class="fa-solid fa-circle-check"></i> Selected for Discussion
+                                    </span>
+                                ` : `
+                                    <button type="button" onclick="selectAlternative(${index})" 
+                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-accentGreen hover:bg-emerald-50 transition-all cursor-pointer">
+                                        <i class="fa-regular fa-circle text-slate-400"></i> Select Alternative
+                                    </button>
+                                `}
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-accentGreen/20 flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
+                    <div class="mt-4 pt-3 border-t ${isSelected ? 'border-accentGreen/30' : 'border-slate-100'} flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
                         <div>
                             <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Alternative Retail Price</p>
                             <p class="text-[11px] text-slate-400">Standard pack retail estimation</p>
@@ -407,6 +500,7 @@ function renderResults(query, searchResults) {
     }
 
     cardsList.innerHTML = cardsHtml;
+    updateDoctorNoteSummary();
 }
 
 /**
@@ -481,24 +575,43 @@ function generateDoctorRequestNotePDF() {
         return;
     }
 
-    const brandElement = document.getElementById('searchQueryDisplay');
-    let brandName = brandElement ? brandElement.textContent.trim() : '';
+    // Read details from the currently selected alternative card
+    const selectedItem = (currentAlternativesList && selectedAlternativeIndex >= 0 && currentAlternativesList[selectedAlternativeIndex])
+        ? currentAlternativesList[selectedAlternativeIndex]
+        : (currentAlternativesList && currentAlternativesList.length > 0 ? currentAlternativesList[0] : null);
 
-    const brandCardHeader = document.querySelector('.bg-white.border-slate-200 h3');
-    if (brandCardHeader && (!brandName || brandName.toLowerCase().includes('generic'))) {
-        brandName = brandCardHeader.textContent.trim();
-    }
-    if (!brandName) brandName = 'Prescribed Medication';
+    let brandName = '';
+    let cheaperBrand = '';
+    let genericApiName = '';
+    let cheaperPriceStr = '';
+    let stdPriceStr = '';
+    let savingsStr = '';
+    let condition = '';
 
-    const saltElement = document.querySelector('#activeSaltDisplay span');
-    let genericApiName = saltElement ? saltElement.textContent.trim() : '';
+    if (selectedItem) {
+        brandName = selectedItem.brand_name || 'Prescribed Medication';
+        cheaperBrand = selectedItem.cheaper_brand || 'Generic Equivalent Alternative';
+        genericApiName = selectedItem.generic_name || 'CDSCO Standard API';
+        const std = selectedItem.standard_price || 0;
+        const alt = selectedItem.cheaper_price || 0;
+        const sav = Math.max(0, std - alt);
+        const savPct = std > 0 ? Math.round((sav / std) * 100) : 0;
 
-    const genericCardApi = document.querySelector('.bg-softGreen .text-accentGreen');
-    if (genericCardApi && (!genericApiName || genericApiName === 'None')) {
-        genericApiName = genericCardApi.textContent.trim();
-    }
-    if (!genericApiName || genericApiName === 'None') {
-        genericApiName = 'Generic Equivalent (CDSCO Standard)';
+        stdPriceStr = `₹${std.toFixed(2)}`;
+        cheaperPriceStr = `₹${alt.toFixed(2)}`;
+        savingsStr = `₹${sav.toFixed(2)} (${savPct}% savings)`;
+        condition = selectedItem.health_condition || 'Therapeutic Indication';
+    } else {
+        // Fallback to active query display and CDSCO salt if no pricing item is loaded
+        const brandElement = document.getElementById('searchQueryDisplay');
+        brandName = brandElement ? brandElement.textContent.trim() : (lastQuery || 'Prescribed Medication');
+        cheaperBrand = `${brandName} (Generic Bioequivalent)`;
+        const saltElement = document.querySelector('#activeSaltDisplay span');
+        genericApiName = saltElement ? saltElement.textContent.trim() : 'CDSCO Bioequivalent API';
+        stdPriceStr = 'Market Benchmark';
+        cheaperPriceStr = 'Jan Aushadhi / Certified Generic Rate';
+        savingsStr = 'Substantial Generic Savings';
+        condition = 'Prescribed Medical Condition';
     }
 
     const originalBtnHtml = generateDoctorNoteBtn ? generateDoctorNoteBtn.innerHTML : '';
@@ -522,7 +635,7 @@ function generateDoctorRequestNotePDF() {
         const contentWidth = pageWidth - (margin * 2);
 
         // Top Header Banner
-        doc.setFillColor(35, 57, 77);
+        doc.setFillColor(35, 57, 77); // slateBlue #23394d
         doc.rect(0, 0, pageWidth, 28, 'F');
 
         doc.setFont('helvetica', 'bold');
@@ -535,7 +648,7 @@ function generateDoctorRequestNotePDF() {
         doc.setTextColor(203, 213, 225);
         doc.text('Patient Request for Therapeutic Generic Alternative Evaluation', margin, 20);
 
-        let currentY = 40;
+        let currentY = 38;
         const currentDate = new Date().toLocaleDateString('en-IN', {
             year: 'numeric',
             month: 'long',
@@ -543,81 +656,108 @@ function generateDoctorRequestNotePDF() {
         });
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setTextColor(100, 116, 139);
         doc.text(`Date: ${currentDate}`, margin, currentY);
-        doc.text(`Regulatory Alignment: CDSCO (India) Drug Standard`, pageWidth - margin, currentY, { align: 'right' });
+        doc.text(`Regulatory Standard: CDSCO (India) Bioequivalence Norms`, pageWidth - margin, currentY, { align: 'right' });
 
-        currentY += 12;
+        currentY += 10;
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.setTextColor(15, 23, 42);
-        doc.text('Subject: Request to Evaluate Generic Medication Alternative', margin, currentY);
+        doc.text(`Subject: Request to Evaluate Generic Alternative (${cheaperBrand})`, margin, currentY);
 
-        currentY += 6;
-
+        currentY += 5;
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.5);
         doc.line(margin, currentY, margin + contentWidth, currentY);
 
-        currentY += 10;
+        currentY += 8;
 
+        // Structured Medical Comparison Box
         doc.setFillColor(248, 250, 252);
         doc.setDrawColor(203, 213, 225);
-        doc.roundedRect(margin, currentY, contentWidth, 24, 2, 2, 'FD');
+        doc.roundedRect(margin, currentY, contentWidth, 42, 2, 2, 'FD');
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9);
         doc.setTextColor(71, 85, 105);
-        doc.text('CURRENT REFERENCE BRAND:', margin + 6, currentY + 7);
-        doc.text('CDSCO-APPROVED GENERIC API:', margin + 6, currentY + 16);
+        doc.text('CURRENT REFERENCE BRAND:', margin + 6, currentY + 8);
+        doc.text('CHOSEN CHEAPER ALTERNATIVE:', margin + 6, currentY + 16);
+        doc.text('ACTIVE PHARMACEUTICAL INGREDIENT:', margin + 6, currentY + 24);
+        doc.text('HEALTH CONDITION / THERAPY:', margin + 6, currentY + 32);
+        doc.text('ESTIMATED PRICE & SAVINGS:', margin + 6, currentY + 39);
 
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setTextColor(35, 57, 77);
-        doc.text(brandName, margin + 68, currentY + 7);
+        doc.text(`${brandName} (${stdPriceStr})`, margin + 74, currentY + 8);
+
+        doc.setTextColor(22, 101, 52); // accentGreen
+        doc.text(`${cheaperBrand} (${cheaperPriceStr})`, margin + 74, currentY + 16);
+        doc.text(genericApiName, margin + 74, currentY + 24);
+
+        doc.setTextColor(51, 65, 85);
+        doc.text(condition, margin + 74, currentY + 32);
 
         doc.setTextColor(22, 101, 52);
-        doc.text(genericApiName, margin + 68, currentY + 16);
+        doc.text(savingsStr, margin + 74, currentY + 39);
 
-        currentY += 34;
+        currentY += 50;
 
+        // Structured Clinical Letter to Physician
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(11);
+        doc.setFontSize(10.5);
         doc.setTextColor(30, 41, 59);
 
         doc.text('Dear Doctor,', margin, currentY);
-        currentY += 8;
+        currentY += 7;
 
-        const p1 = `I am currently reviewing my medication costs. I found a CDSCO-approved generic equivalent for ${brandName}. The generic active pharmaceutical ingredient (API) is ${genericApiName}.`;
+        const p1 = `I am currently reviewing my ongoing healthcare expenses. I noticed that a CDSCO-cleared bioequivalent alternative exists for my medication ${brandName}:`;
         const linesP1 = doc.splitTextToSize(p1, contentWidth);
         doc.text(linesP1, margin, currentY);
-        currentY += (linesP1.length * 6) + 4;
+        currentY += (linesP1.length * 5.5) + 3;
 
-        const p2 = 'Could we please discuss if switching to this generic alternative is medically appropriate and safe for my current treatment plan?';
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.setTextColor(35, 57, 77);
+        doc.text(`* Alternative Brand: ${cheaperBrand}`, margin + 6, currentY);
+        currentY += 5;
+        doc.text(`* Active Pharmaceutical Ingredient: ${genericApiName}`, margin + 6, currentY);
+        currentY += 5;
+        doc.text(`* Cost Comparison: ${stdPriceStr} vs ${cheaperPriceStr} (Estimated Savings: ${savingsStr})`, margin + 6, currentY);
+        currentY += 7;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.setTextColor(30, 41, 59);
+
+        const p2 = `Could you please advise if substituting ${brandName} with ${cheaperBrand} is clinically safe and therapeutic for my condition?`;
         const linesP2 = doc.splitTextToSize(p2, contentWidth);
         doc.text(linesP2, margin, currentY);
-        currentY += (linesP2.length * 6) + 8;
+        currentY += (linesP2.length * 5.5) + 3;
 
         const p3 = 'I would appreciate your clinical evaluation regarding therapeutic efficacy, dosage equivalence, and whether any monitoring is recommended during substitution.';
         const linesP3 = doc.splitTextToSize(p3, contentWidth);
         doc.text(linesP3, margin, currentY);
-        currentY += (linesP3.length * 6) + 16;
+        currentY += (linesP3.length * 5.5) + 12;
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
         doc.setTextColor(15, 23, 42);
-        doc.text('Thank you for your guidance,', margin, currentY);
-        currentY += 16;
+        doc.text('Thank you for your guidance and clinical time,', margin, currentY);
+        currentY += 14;
 
         doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
         doc.text('Patient Signature: _________________________________________', margin, currentY);
-        currentY += 10;
+        currentY += 8;
         doc.text('Printed Patient Name: _____________________________________', margin, currentY);
-        currentY += 10;
+        currentY += 8;
         doc.text('Contact Phone: ____________________________________________', margin, currentY);
 
+        // Disclaimer Footer
         const footerY = 270;
         doc.setDrawColor(226, 232, 240);
         doc.line(margin, footerY - 5, margin + contentWidth, footerY - 5);
@@ -625,11 +765,11 @@ function generateDoctorRequestNotePDF() {
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(8);
         doc.setTextColor(148, 163, 184);
-        const disclaimer = 'Note: This document is an informational conversation starter prepared by the patient. It does not constitute a valid prescription or mandate substitution. All therapeutic decisions and dosage alterations remain solely under your physician\'s professional discretion.';
+        const disclaimer = 'Note: This document is an informational conversation starter prepared by the patient. It does not constitute a valid prescription or medical advice. All therapeutic substitution decisions remain solely under your treating physician\'s professional judgment.';
         const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth);
         doc.text(disclaimerLines, margin, footerY);
 
-        const sanitizedFilename = `Doctor_Request_Note_${brandName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+        const sanitizedFilename = `Doctor_Request_Note_${cheaperBrand.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
         doc.save(sanitizedFilename);
 
         if (generateDoctorNoteBtn) {
@@ -640,7 +780,7 @@ function generateDoctorRequestNotePDF() {
             setTimeout(() => {
                 generateDoctorNoteBtn.innerHTML = originalBtnHtml;
                 generateDoctorNoteBtn.disabled = false;
-            }, 2000);
+            }, 2500);
         }
     } catch (err) {
         console.error('Error generating PDF:', err);
@@ -755,7 +895,8 @@ const howItWorksDialog = document.getElementById('howItWorksDialog');
 const closeHowItWorksBtn = document.getElementById('closeHowItWorksBtn');
 const dismissHowItWorksBtn = document.getElementById('dismissHowItWorksBtn');
 
-function openHowItWorksModal() {
+function openHowItWorksModal(e) {
+    if (e && e.preventDefault) e.preventDefault();
     if (!howItWorksModal || !howItWorksDialog) return;
     howItWorksModal.classList.remove('opacity-0', 'pointer-events-none', 'invisible');
     howItWorksModal.classList.add('opacity-100', 'pointer-events-auto', 'visible');
@@ -764,7 +905,8 @@ function openHowItWorksModal() {
     document.body.style.overflow = 'hidden';
 }
 
-function closeHowItWorksModal() {
+function closeHowItWorksModal(e) {
+    if (e && e.preventDefault) e.preventDefault();
     if (!howItWorksModal || !howItWorksDialog) return;
     howItWorksModal.classList.remove('opacity-100', 'pointer-events-auto', 'visible');
     howItWorksModal.classList.add('opacity-0', 'pointer-events-none', 'invisible');
@@ -776,6 +918,12 @@ function closeHowItWorksModal() {
 if (howItWorksBtn) howItWorksBtn.addEventListener('click', openHowItWorksModal);
 if (closeHowItWorksBtn) closeHowItWorksBtn.addEventListener('click', closeHowItWorksModal);
 if (dismissHowItWorksBtn) dismissHowItWorksBtn.addEventListener('click', closeHowItWorksModal);
+
+if (howItWorksDialog) {
+    howItWorksDialog.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+}
 
 if (howItWorksModal) {
     howItWorksModal.addEventListener('click', function (e) {
