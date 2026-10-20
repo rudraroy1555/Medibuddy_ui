@@ -32,10 +32,6 @@ const cartAlternativeTotal = document.getElementById('cartAlternativeTotal');
 const cartSavingsTotal = document.getElementById('cartSavingsTotal');
 const clearCartBtn = document.getElementById('clearCartBtn');
 const cartGeneratePdfBtn = document.getElementById('cartGeneratePdfBtn');
-const floatingCartBar = document.getElementById('floatingCartBar');
-const floatingCartBtn = document.getElementById('floatingCartBtn');
-const floatingCartCount = document.getElementById('floatingCartCount');
-const floatingCartSavings = document.getElementById('floatingCartSavings');
 
 // In-Memory Database Storage & Filter State
 let cdscoData = [];
@@ -381,7 +377,6 @@ function updateCartUI() {
     // 1. Badges
     if (navCartBadge) navCartBadge.textContent = count;
     if (drawerCartBadge) drawerCartBadge.textContent = count;
-    if (floatingCartCount) floatingCartCount.textContent = count;
 
     // 2. Financial Totals
     let totalStd = 0;
@@ -396,18 +391,6 @@ function updateCartUI() {
     if (cartBenchmarkTotal) cartBenchmarkTotal.textContent = `₹${totalStd.toFixed(2)}`;
     if (cartAlternativeTotal) cartAlternativeTotal.textContent = `₹${totalAlt.toFixed(2)}`;
     if (cartSavingsTotal) cartSavingsTotal.textContent = `Save ₹${totalSavings.toFixed(2)} (${totalSavingsPct}%)`;
-    if (floatingCartSavings) floatingCartSavings.textContent = `Save ₹${totalSavings.toFixed(2)}`;
-
-    // 3. Floating Sticky Bar Visibility
-    if (floatingCartBar) {
-        if (count > 0) {
-            floatingCartBar.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
-            floatingCartBar.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
-        } else {
-            floatingCartBar.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
-            floatingCartBar.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
-        }
-    }
 
     // 4. Drawer Item List Rendering
     if (cartItemsList) {
@@ -466,15 +449,6 @@ function updateCartUI() {
         }
     }
 
-    // 5. Update Doctor Note Summary text
-    const summaryEl = document.getElementById('selectedNoteSummary');
-    if (summaryEl) {
-        if (count > 0) {
-            summaryEl.innerHTML = `Discussion Cart: <strong class="text-accentGreen font-bold">${count} medicine${count > 1 ? 's' : ''}</strong> shortlisted &bull; Total Est. Savings: <strong class="text-accentGreen font-bold">₹${totalSavings.toFixed(2)}</strong> (${totalSavingsPct}%). Ready to generate consolidated note.`;
-        } else {
-            summaryEl.innerHTML = `Create a personalized conversation starter &mdash; never a prescription. Click 'Add to Discussion Cart' on any alternative to build your consultation list.`;
-        }
-    }
 
     // 6. Update Active Rendered Cards state in DOM
     const cards = document.querySelectorAll('.alternative-drug-card');
@@ -781,8 +755,6 @@ if (popularChips) {
 // ==============================================================================
 // GENERATE DOCTOR REQUEST NOTE PDF (VIA JSPDF)
 // ==============================================================================
-const generateDoctorNoteBtn = document.getElementById('generateDoctorNoteBtn');
-
 function generateDoctorRequestNotePDF() {
     const { jsPDF } = window.jspdf || {};
     if (!jsPDF) {
@@ -805,47 +777,34 @@ function generateDoctorRequestNotePDF() {
         }
     }
 
-    // Buttons feedback
-    const originalBtnHtml = generateDoctorNoteBtn ? generateDoctorNoteBtn.innerHTML : '';
-    const originalDrawerBtnHtml = cartGeneratePdfBtn ? cartGeneratePdfBtn.innerHTML : '';
+    // Note Generator button state feedback inside drawer
+    const defaultDrawerBtnHtml = `
+        <i class="fa-regular fa-file-lines text-base"></i>
+        <span>Note Generator</span>
+        <i class="fa-solid fa-arrow-right text-xs"></i>
+    `;
+    const originalDrawerBtnHtml = cartGeneratePdfBtn ? (cartGeneratePdfBtn.innerHTML || defaultDrawerBtnHtml) : defaultDrawerBtnHtml;
 
     const setButtonsLoading = () => {
-        if (generateDoctorNoteBtn) {
-            generateDoctorNoteBtn.innerHTML = `
-                <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
-                <span>Generating PDF (${itemsToPrint.length} item${itemsToPrint.length > 1 ? 's' : ''})...</span>
-            `;
-            generateDoctorNoteBtn.disabled = true;
-        }
         if (cartGeneratePdfBtn) {
             cartGeneratePdfBtn.innerHTML = `
                 <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
-                <span>Generating Note...</span>
+                <span>Generating Note (${itemsToPrint.length} item${itemsToPrint.length > 1 ? 's' : ''})...</span>
             `;
             cartGeneratePdfBtn.disabled = true;
         }
     };
 
     const resetButtonsSuccess = () => {
-        if (generateDoctorNoteBtn) {
-            generateDoctorNoteBtn.innerHTML = `
-                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
-                <span class="text-emerald-700">PDF Downloaded!</span>
-            `;
-        }
         if (cartGeneratePdfBtn) {
             cartGeneratePdfBtn.innerHTML = `
                 <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-                <span>PDF Downloaded!</span>
+                <span>Note Downloaded!</span>
             `;
         }
         setTimeout(() => {
-            if (generateDoctorNoteBtn) {
-                generateDoctorNoteBtn.innerHTML = originalBtnHtml;
-                generateDoctorNoteBtn.disabled = false;
-            }
             if (cartGeneratePdfBtn) {
-                cartGeneratePdfBtn.innerHTML = originalDrawerBtnHtml;
+                cartGeneratePdfBtn.innerHTML = defaultDrawerBtnHtml;
                 cartGeneratePdfBtn.disabled = false;
             }
         }, 2500);
@@ -1083,20 +1042,13 @@ function generateDoctorRequestNotePDF() {
     } catch (err) {
         console.error('Error generating multi-item PDF:', err);
         alert('An error occurred while generating the PDF. Please try again.');
-        if (generateDoctorNoteBtn) {
-            generateDoctorNoteBtn.innerHTML = originalBtnHtml;
-            generateDoctorNoteBtn.disabled = false;
-        }
         if (cartGeneratePdfBtn) {
-            cartGeneratePdfBtn.innerHTML = originalDrawerBtnHtml;
+            cartGeneratePdfBtn.innerHTML = defaultDrawerBtnHtml;
             cartGeneratePdfBtn.disabled = false;
         }
     }
 }
 
-if (generateDoctorNoteBtn) {
-    generateDoctorNoteBtn.addEventListener('click', generateDoctorRequestNotePDF);
-}
 if (cartGeneratePdfBtn) {
     cartGeneratePdfBtn.addEventListener('click', generateDoctorRequestNotePDF);
 }
@@ -1257,7 +1209,6 @@ if (sortFilterSelect) {
 }
 
 if (navCartBtn) navCartBtn.addEventListener('click', openCartDrawer);
-if (floatingCartBtn) floatingCartBtn.addEventListener('click', openCartDrawer);
 if (closeCartDrawerBtn) closeCartDrawerBtn.addEventListener('click', closeCartDrawer);
 if (cartDrawerBackdrop) cartDrawerBackdrop.addEventListener('click', closeCartDrawer);
 if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
