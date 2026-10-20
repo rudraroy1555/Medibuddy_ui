@@ -454,33 +454,36 @@ function renderResults(query, searchResults) {
             const approvalDate = item.approval_date || item.source_year || 'Approved';
 
             cardsHtml += `
-                <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group mb-4">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-grow">
-                            <div class="flex items-center gap-3 mb-2 flex-wrap">
-                                <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(drugName)}</h3>
-                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-slate-200 flex items-center gap-1">
-                                    <i class="fa-solid fa-shield-halved text-slate-500"></i> CDSCO Official Registry
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 md:p-6 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all relative overflow-hidden group mb-4">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-slate-300 transition-colors"></div>
+
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="flex-grow min-w-0 space-y-1.5">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <h3 class="text-xl font-bold text-slateBlue tracking-tight">${escapeHtml(drugName)}</h3>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-slate-200 flex items-center gap-1 shadow-xs">
+                                    <i class="fa-solid fa-shield-halved text-slate-500"></i> CDSCO Registry
                                 </span>
                             </div>
-                            <p class="text-sm text-slate-700 mb-1 font-medium">
+
+                            <p class="text-sm text-slate-700 font-medium">
                                 Active Regulatory API: <span class="font-semibold text-slate-900">${escapeHtml(genericApi)}</span>
                             </p>
-                            <p class="text-xs text-slate-500 mb-2">
-                                <strong class="text-slate-600">Approved Indication:</strong> ${escapeHtml(indication)}
+                            <p class="text-xs text-slate-500">
+                                <strong class="text-slate-600 font-medium">Approved Indication:</strong> ${escapeHtml(indication)}
                             </p>
                             <p class="text-[11px] text-slate-400">
                                 Regulatory Approval: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
                             </p>
                         </div>
 
-                        <div class="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
-                            <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Standard Status</span>
-                                <span class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
-                                    <i class="fa-solid fa-certificate text-slate-500"></i> Reference Listed Drug
-                                </span>
-                            </div>
+                        <!-- Fixed right-side badge column: non-shrinking, strictly aligned -->
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center w-full md:w-auto md:min-w-[190px] flex-shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 gap-1.5">
+                            <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Regulatory Standard</span>
+                            <span class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs whitespace-nowrap">
+                                <i class="fa-solid fa-certificate text-emerald-600 text-xs"></i>
+                                <span>Reference Listed Drug</span>
+                            </span>
                         </div>
                     </div>
                 </div>
