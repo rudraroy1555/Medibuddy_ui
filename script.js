@@ -52,10 +52,12 @@ function updateBadgeStatus() {
     if (!serverStatusBadge) return;
 
     if (typeof Papa !== 'undefined') {
-        serverStatusBadge.style.cssText = "border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;";
+        serverStatusBadge.className = "status-online hidden lg:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-[rgba(16,185,129,0.3)] dark:bg-[rgba(16,185,129,0.12)] dark:text-[#34D399]";
+        serverStatusBadge.style.cssText = "";
         serverStatusBadge.innerHTML = `<span>🟢 System Online (Dual-Dataset Search)</span>`;
     } else {
-        serverStatusBadge.style.cssText = "border: 1px solid #fca5a5; color: #b91c1c; background-color: #fef2f2;";
+        serverStatusBadge.className = "hidden lg:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs border border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-950/40 dark:text-red-400";
+        serverStatusBadge.style.cssText = "";
         serverStatusBadge.innerHTML = `<span>🔴 PapaParse Library Missing</span>`;
     }
 }
@@ -163,7 +165,8 @@ async function initializeDatasets() {
     } catch (err) {
         console.error("Failed to load datasets via Promise.all:", err);
         if (serverStatusBadge) {
-            serverStatusBadge.style.cssText = "border: 1px solid #fcd34d; color: #b45309; background-color: #fffbeb;";
+            serverStatusBadge.className = "hidden lg:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-300";
+            serverStatusBadge.style.cssText = "";
             serverStatusBadge.innerHTML = `<span>⚠️ Dataset Fetch Failed</span>`;
         }
         throw err;
@@ -214,6 +217,46 @@ function searchMaster(query) {
 }
 
 /**
+ * Renders sleek skeleton loader placeholders with animated pulse effects
+ * @param {number} count - Number of skeleton cards to display
+ */
+function renderSkeletonCards(count = 3) {
+    if (!cardsList) return;
+    let skeletonHtml = '';
+    for (let i = 0; i < count; i++) {
+        skeletonHtml += `
+            <div class="rounded-2xl p-5 md:p-6 mb-4 border border-slate-200/80 dark:border-[#334155] bg-white dark:bg-[#161F30] shadow-xs relative overflow-hidden animate-pulse">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 dark:bg-slate-700"></div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-grow space-y-2.5 w-full md:w-3/5">
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <div class="h-6 w-32 bg-slate-200 dark:bg-slate-700 rounded-md"></div>
+                            <div class="h-5 w-28 bg-emerald-100 dark:bg-emerald-950/60 rounded-full"></div>
+                            <div class="h-5 w-20 bg-slate-100 dark:bg-slate-800 rounded-full"></div>
+                        </div>
+                        <div class="h-4 w-48 bg-slate-200/90 dark:bg-slate-700/80 rounded"></div>
+                        <div class="h-3 w-56 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                        <div class="h-3 w-40 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                    </div>
+                    <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-[#334155]/60">
+                        <div class="space-y-1 text-left md:text-right">
+                            <div class="h-3 w-20 bg-slate-100 dark:bg-slate-800 rounded md:ml-auto"></div>
+                            <div class="h-6 w-28 bg-emerald-100 dark:bg-emerald-950/60 rounded md:ml-auto"></div>
+                        </div>
+                        <div class="h-9 w-36 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-[#334155]/60 flex justify-between items-center">
+                    <div class="h-3 w-32 bg-slate-100 dark:bg-slate-800 rounded"></div>
+                    <div class="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                </div>
+            </div>
+        `;
+    }
+    cardsList.innerHTML = skeletonHtml;
+}
+
+/**
  * Perform search entirely client-side using searchMaster across both datasets
  */
 function performSearch(customQuery = null) {
@@ -239,20 +282,19 @@ function performSearch(customQuery = null) {
 
     if (!isLocalDbReady) {
         if (resultsCountBadge) resultsCountBadge.textContent = 'Parsing datasets...';
-        if (cardsList) {
-            cardsList.innerHTML = `
-                <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 shadow-sm animate-pulse">
-                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-slateBlue mb-3"></i>
-                    <p class="font-medium text-sm">Loading CDSCO and Pricing databases into browser memory...</p>
-                </div>
-            `;
-        }
+        renderSkeletonCards(3);
         return;
     }
 
-    const searchResults = searchMaster(query);
-    currentSearchResults = searchResults;
-    renderResults(query, searchResults);
+    if (resultsCountBadge) resultsCountBadge.textContent = 'Searching options...';
+    renderSkeletonCards(3);
+
+    // Micro-delay provides a smooth, perceptible skeleton transition
+    setTimeout(() => {
+        const searchResults = searchMaster(query);
+        currentSearchResults = searchResults;
+        renderResults(query, searchResults);
+    }, 120);
 }
 
 // ==============================================================================
@@ -396,13 +438,13 @@ function updateCartUI() {
     if (cartItemsList) {
         if (count === 0) {
             cartItemsList.innerHTML = `
-                <div class="text-center py-12 px-4 text-slate-500">
-                    <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3 text-2xl">
+                <div class="text-center py-12 px-4 text-slate-500 dark:text-[#94A3B8]">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 dark:bg-[#1E293B] flex items-center justify-center text-slate-400 dark:text-[#94A3B8] mb-3 text-2xl">
                         <i class="fa-solid fa-clipboard-check"></i>
                     </div>
-                    <h4 class="font-bold text-slateBlue text-base mb-1">Your Discussion Cart is empty</h4>
-                    <p class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed mb-4">
-                        Search medications and click <strong class="text-slate-700 font-semibold">'Add to Discussion Cart'</strong> on cheaper generic alternatives to prepare a consultation note for your doctor.
+                    <h4 class="font-bold text-slateBlue dark:text-[#F8FAFC] text-base mb-1">Your Doctor Checklist is empty</h4>
+                    <p class="text-xs text-slate-500 dark:text-[#94A3B8] max-w-xs mx-auto leading-relaxed mb-4">
+                        Search medications and click <strong class="text-slate-700 dark:text-slate-200 font-semibold">'+ Save for Doctor Visit'</strong> on cheaper generic alternatives to prepare a consultation note for your doctor.
                     </p>
                 </div>
             `;
@@ -414,32 +456,32 @@ function updateCartUI() {
                 const itemSavingsPct = it.standard_price > 0 ? Math.round((itemSavings / it.standard_price) * 100) : 0;
 
                 itemsHtml += `
-                    <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-xs relative overflow-hidden group">
+                    <div class="bg-white dark:bg-[#1E293B] rounded-xl p-3.5 border border-slate-200 dark:border-[#334155] shadow-xs relative overflow-hidden group">
                         <div class="flex justify-between items-start gap-2">
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <h4 class="font-bold text-slateBlue text-sm tracking-tight">${escapeHtml(it.cheaper_brand)}</h4>
-                                    <span class="bg-emerald-50 text-accentGreen text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 uppercase">
+                                    <h4 class="font-bold text-slateBlue dark:text-[#F8FAFC] text-sm tracking-tight">${escapeHtml(it.cheaper_brand)}</h4>
+                                    <span class="bg-emerald-50 dark:bg-emerald-950/60 text-accentGreen dark:text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60 uppercase">
                                         Alternative
                                     </span>
                                 </div>
-                                <p class="text-xs text-slate-600 mt-0.5 truncate">
-                                    Active API: <span class="text-accentGreen font-semibold">${escapeHtml(it.generic_name)}</span>
+                                <p class="text-xs text-slate-600 dark:text-[#94A3B8] mt-0.5 truncate">
+                                    Active API: <span class="text-accentGreen dark:text-emerald-400 font-semibold">${escapeHtml(it.generic_name)}</span>
                                 </p>
-                                <p class="text-[11px] text-slate-400 mt-0.5">
-                                    Benchmark: <strong class="text-slate-600">${escapeHtml(it.brand_name)}</strong> (₹${it.standard_price.toFixed(2)})
+                                <p class="text-[11px] text-slate-400 dark:text-[#94A3B8] mt-0.5">
+                                    Benchmark: <strong class="text-slate-600 dark:text-slate-200">${escapeHtml(it.brand_name)}</strong> (₹${it.standard_price.toFixed(2)})
                                 </p>
                             </div>
-                            <button type="button" onclick="removeFromCart('${itemKey}')" title="Remove from discussion cart"
-                                class="text-slate-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
+                            <button type="button" onclick="removeFromCart('${itemKey}')" aria-label="Remove from checklist"
+                                class="text-slate-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer">
                                 <i class="fa-regular fa-trash-can text-sm"></i>
                             </button>
                         </div>
-                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
-                            <span class="text-accentGreen font-bold">Save ₹${itemSavings.toFixed(2)} (${itemSavingsPct}%)</span>
+                        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-[#334155]/60 flex justify-between items-center text-xs">
+                            <span class="text-accentGreen dark:text-emerald-400 font-bold">Save ₹${itemSavings.toFixed(2)} (${itemSavingsPct}%)</span>
                             <div class="flex items-baseline gap-1.5">
-                                <span class="text-slate-400 line-through text-[11px]">₹${it.standard_price.toFixed(2)}</span>
-                                <span class="font-bold text-slateBlue text-sm">₹${it.cheaper_price.toFixed(2)}</span>
+                                <span class="text-slate-400 dark:text-slate-500 line-through text-[11px]">₹${it.standard_price.toFixed(2)}</span>
+                                <span class="font-bold text-slateBlue dark:text-[#F8FAFC] text-sm">₹${it.cheaper_price.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -460,26 +502,28 @@ function updateCartUI() {
         const borderIndicator = card.querySelector('.left-indicator-bar');
 
         if (inCart) {
-            card.className = 'alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white shadow-sm ring-2 ring-accentGreen/20';
-            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-accentGreen transition-colors';
+            card.className = 'alternative-drug-card is-selected rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white dark:from-emerald-950/40 dark:via-[#161F30] dark:to-[#161F30] dark:border-emerald-500 shadow-sm ring-2 ring-accentGreen/20 dark:ring-emerald-500/30';
+            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-accentGreen dark:bg-emerald-500 transition-colors';
             if (actionContainer) {
                 actionContainer.innerHTML = `
                     <button type="button" onclick="event.stopPropagation(); toggleCartItem(${idx})" 
-                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 transition-all cursor-pointer">
-                        <i class="fa-solid fa-check text-sm"></i>
-                        <span>In Discussion Cart</span>
+                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen dark:bg-emerald-600 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 transition-all cursor-pointer"
+                        data-tooltip="Remove from checklist">
+                        <i class="fa-solid fa-check text-sm" aria-hidden="true"></i>
+                        <span>Saved to Checklist</span>
                     </button>
                 `;
             }
         } else {
-            card.className = 'alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs';
-            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-slate-400 transition-colors';
+            card.className = 'alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border border-slate-200 dark:border-[#334155] bg-white dark:bg-[#161F30] hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-xs';
+            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-slate-200 dark:bg-slate-700 group-hover:bg-slate-400 dark:group-hover:bg-slate-500 transition-colors';
             if (actionContainer) {
                 actionContainer.innerHTML = `
                     <button type="button" onclick="event.stopPropagation(); toggleCartItem(${idx})" 
-                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen hover:bg-emerald-50 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer">
-                        <i class="fa-solid fa-cart-plus text-slate-400"></i>
-                        <span>Add to Discussion Cart</span>
+                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-200 hover:text-accentGreen dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 dark:border-[#334155] hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer"
+                        data-tooltip="Save for doctor visit">
+                        <i class="fa-solid fa-plus text-accentGreen dark:text-emerald-400" aria-hidden="true"></i>
+                        <span>Save for Doctor Visit</span>
                     </button>
                 `;
             }
@@ -501,12 +545,32 @@ function renderResults(query, searchResults) {
     // Apply sorting filters to priceAlternatives
     let priceAlternatives = [...rawPriceAlternatives];
     if (currentSortMode === 'price-asc') {
-        priceAlternatives.sort((a, b) => (Number(a.cheaper_price) || 0) - (Number(b.cheaper_price) || 0));
-    } else if (currentSortMode === 'savings-desc') {
+        // Price: Low to High - strictly sorts by absolute retail price of the alternative drug
         priceAlternatives.sort((a, b) => {
-            const savA = Math.max(0, (Number(a.standard_price) || 0) - (Number(a.cheaper_price) || 0));
-            const savB = Math.max(0, (Number(b.standard_price) || 0) - (Number(b.cheaper_price) || 0));
+            const priceA = Math.max(0, Number(a.cheaper_price) || 0);
+            const priceB = Math.max(0, Number(b.cheaper_price) || 0);
+            if (priceA !== priceB) {
+                return priceA - priceB;
+            }
+            // Tie-breaker: higher savings first
+            const savA = Math.max(0, (Number(a.standard_price) || 0) - priceA);
+            const savB = Math.max(0, (Number(b.standard_price) || 0) - priceB);
             return savB - savA;
+        });
+    } else if (currentSortMode === 'savings-desc') {
+        // Highest Savings - strictly sorts by maximum money saved (Standard Price - Alternative Price)
+        priceAlternatives.sort((a, b) => {
+            const priceA = Math.max(0, Number(a.cheaper_price) || 0);
+            const priceB = Math.max(0, Number(b.cheaper_price) || 0);
+            const stdA = Math.max(0, Number(a.standard_price) || 0);
+            const stdB = Math.max(0, Number(b.standard_price) || 0);
+            const savA = Math.max(0, stdA - priceA);
+            const savB = Math.max(0, stdB - priceB);
+            if (savB !== savA) {
+                return savB - savA;
+            }
+            // Tie-breaker: lower retail price first
+            return priceA - priceB;
         });
     }
 
@@ -514,23 +578,23 @@ function renderResults(query, searchResults) {
 
     if (totalCount === 0) {
         resultsCountBadge.textContent = '0 matches found';
-        activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-400">No matching salt</span>`;
+        activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-400 dark:text-slate-500">No matching salt</span>`;
 
         cardsList.innerHTML = `
-            <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-600 shadow-sm">
-                <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
-                <h3 class="text-lg font-bold text-slateBlue mb-1">No matching medicines found</h3>
-                <p class="text-sm text-slate-500 max-w-md mx-auto mb-4">
-                    We couldn't find any record matching "<strong>${escapeHtml(query)}</strong>" across either dataset.
+            <div class="empty-state-card bg-white dark:bg-[#161F30] border border-slate-200 dark:border-[#334155] rounded-xl p-8 text-center text-slate-600 dark:text-[#94A3B8] shadow-sm">
+                <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+                <h3 class="text-lg font-bold text-slateBlue dark:text-[#F8FAFC] mb-1">No matching medicines found</h3>
+                <p class="text-sm text-slate-500 dark:text-[#94A3B8] max-w-md mx-auto mb-4">
+                    We couldn't find any record matching "<strong class="text-slate-700 dark:text-[#F8FAFC]">${escapeHtml(query)}</strong>" across either dataset.
                 </p>
                 <div class="flex flex-wrap justify-center gap-2 text-xs">
-                    <span class="text-slate-400">Try searching:</span>
-                    <button type="button" onclick="performSearch('Calpol')" class="text-slateBlue font-semibold underline">Calpol</button>
-                    <button type="button" onclick="performSearch('Paracetamol')" class="text-slateBlue font-semibold underline">Paracetamol</button>
-                    <button type="button" onclick="performSearch('Combiflam')" class="text-slateBlue font-semibold underline">Combiflam</button>
-                    <button type="button" onclick="performSearch('Augmentin')" class="text-slateBlue font-semibold underline">Augmentin</button>
-                    <button type="button" onclick="performSearch('Metformin')" class="text-slateBlue font-semibold underline">Metformin</button>
-                    <button type="button" onclick="performSearch('Montair LC')" class="text-slateBlue font-semibold underline">Montair LC</button>
+                    <span class="text-slate-400 dark:text-slate-500">Try searching:</span>
+                    <button type="button" onclick="performSearch('Calpol')" class="text-slateBlue dark:text-emerald-400 font-semibold underline hover:text-accentGreen dark:hover:text-emerald-300 transition-colors cursor-pointer">Calpol</button>
+                    <button type="button" onclick="performSearch('Paracetamol')" class="text-slateBlue dark:text-emerald-400 font-semibold underline hover:text-accentGreen dark:hover:text-emerald-300 transition-colors cursor-pointer">Paracetamol</button>
+                    <button type="button" onclick="performSearch('Combiflam')" class="text-slateBlue dark:text-emerald-400 font-semibold underline hover:text-accentGreen dark:hover:text-emerald-300 transition-colors cursor-pointer">Combiflam</button>
+                    <button type="button" onclick="performSearch('Augmentin')" class="text-slateBlue dark:text-emerald-400 font-semibold underline hover:text-accentGreen dark:hover:text-emerald-300 transition-colors cursor-pointer">Augmentin</button>
+                    <button type="button" onclick="performSearch('Metformin')" class="text-slateBlue dark:text-emerald-400 font-semibold underline hover:text-accentGreen dark:hover:text-emerald-300 transition-colors cursor-pointer">Metformin</button>
+                    <button type="button" onclick="performSearch('Montair LC')" class="text-slateBlue dark:text-emerald-400 font-semibold underline hover:text-accentGreen dark:hover:text-emerald-300 transition-colors cursor-pointer">Montair LC</button>
                 </div>
             </div>
         `;
@@ -546,7 +610,7 @@ function renderResults(query, searchResults) {
         primarySalt = officialAPIs[0].clean_generic_api;
     }
 
-    activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-700">${escapeHtml(primarySalt)}</span>`;
+    activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-700 dark:text-slate-200">${escapeHtml(primarySalt)}</span>`;
     resultsCountBadge.textContent = `${totalCount} option${totalCount > 1 ? 's' : ''} found (${priceAlternatives.length} market, ${officialAPIs.length} CDSCO)`;
 
     let cardsHtml = '';
@@ -569,56 +633,58 @@ function renderResults(query, searchResults) {
             cardsHtml += `
                 <div class="alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer ${
                     inCart
-                        ? 'border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white shadow-sm ring-2 ring-accentGreen/20'
-                        : 'border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                        ? 'border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white dark:from-emerald-950/40 dark:via-[#161F30] dark:to-[#161F30] dark:border-emerald-500 shadow-sm ring-2 ring-accentGreen/20 dark:ring-emerald-500/30 is-selected'
+                        : 'border border-slate-200 dark:border-[#334155] bg-white dark:bg-[#161F30] hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-xs'
                 }" data-index="${index}" onclick="toggleCartItem(${index})">
-                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${inCart ? 'bg-accentGreen' : 'bg-slate-200 group-hover:bg-slate-400'} transition-colors"></div>
+                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${inCart ? 'bg-accentGreen dark:bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700 group-hover:bg-slate-400 dark:group-hover:bg-slate-500'} transition-colors"></div>
 
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div class="flex-grow space-y-1.5">
                             <!-- Clean Header: Cheaper Brand Name and Status Badges -->
                             <div class="flex items-center gap-2.5 flex-wrap">
-                                <h3 class="text-xl font-bold text-slateBlue tracking-tight">${escapeHtml(cheaperBrand)}</h3>
-                                <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                                <h3 class="text-xl font-bold text-slateBlue dark:text-[#F8FAFC] tracking-tight">${escapeHtml(cheaperBrand)}</h3>
+                                <span class="bg-accentGreen dark:bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-check"></i> Cheaper Alternative
                                 </span>
-                                <span class="text-xs bg-slate-100 text-slate-700 font-medium px-2.5 py-0.5 rounded-full border border-slate-200">
+                                <span class="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-[#334155]">
                                     ${escapeHtml(condition)}
                                 </span>
                             </div>
 
-                            <p class="text-sm text-slate-700 font-medium">
-                                Active Generic API: <span class="font-semibold text-accentGreen">${escapeHtml(generic)}</span>
+                            <p class="text-sm text-slate-600 dark:text-[#94A3B8] font-medium">
+                                Active Generic API: <span class="font-semibold text-accentGreen dark:text-emerald-400">${escapeHtml(generic)}</span>
                             </p>
-                            <p class="text-xs text-slate-500">
-                                Prescribed Brand Benchmark: <strong class="text-slate-700 font-semibold">${escapeHtml(brand)}</strong> (Standard: ₹${stdPrice.toFixed(2)})
+                            <p class="text-xs text-slate-500 dark:text-[#94A3B8]">
+                                Prescribed Brand Benchmark: <strong class="text-slate-700 dark:text-slate-200 font-semibold">${escapeHtml(brand)}</strong> (Standard: ₹${stdPrice.toFixed(2)})
                             </p>
-                            <p class="text-[11px] text-slate-400">
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500">
                                 Bioequivalent Generic Substitute &bull; Verified Indian Prescribed Dataset
                             </p>
                         </div>
 
                         <!-- Single Clean Action Column -->
-                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-[#334155]/60">
                             <div class="text-left md:text-right">
-                                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Estimated Savings</span>
-                                <span class="font-bold text-accentGreen text-lg md:text-xl">Save ₹${savings.toFixed(2)}</span>
-                                <span class="text-[11px] text-emerald-700 font-semibold block">(${savingsPercent}% lower cost)</span>
+                                <span class="text-[10px] font-bold uppercase text-slate-400 dark:text-[#94A3B8] tracking-wider block">Estimated Savings</span>
+                                <span class="font-bold text-accentGreen dark:text-emerald-400 text-lg md:text-xl">Save ₹${savings.toFixed(2)}</span>
+                                <span class="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold block">(${savingsPercent}% lower cost)</span>
                             </div>
 
                             <!-- Cart Add/Remove Toggle Button -->
                             <div class="selection-action-container">
                                 ${inCart ? `
                                     <button type="button" onclick="event.stopPropagation(); toggleCartItem(${index})" 
-                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 transition-all cursor-pointer">
-                                        <i class="fa-solid fa-check text-sm"></i>
-                                        <span>In Discussion Cart</span>
+                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen dark:bg-emerald-600 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 transition-all cursor-pointer"
+                                        data-tooltip="Remove from checklist">
+                                        <i class="fa-solid fa-check text-sm" aria-hidden="true"></i>
+                                        <span>Saved to Checklist</span>
                                     </button>
                                 ` : `
                                     <button type="button" onclick="event.stopPropagation(); toggleCartItem(${index})" 
-                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen hover:bg-emerald-50 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer">
-                                        <i class="fa-solid fa-cart-plus text-slate-400"></i>
-                                        <span>Add to Discussion Cart</span>
+                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-200 hover:text-accentGreen dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 dark:border-[#334155] hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer"
+                                        data-tooltip="Save for doctor visit">
+                                        <i class="fa-solid fa-plus text-accentGreen dark:text-emerald-400" aria-hidden="true"></i>
+                                        <span>Save for Doctor Visit</span>
                                     </button>
                                 `}
                             </div>
@@ -626,13 +692,13 @@ function renderResults(query, searchResults) {
                     </div>
 
                     <!-- Clean Price Comparison Bar -->
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                        <div class="text-slate-500">
+                    <div class="mt-4 pt-3 border-t border-slate-100 dark:border-[#334155]/60 flex justify-between items-center text-xs">
+                        <div class="text-slate-500 dark:text-[#94A3B8]">
                             Estimated retail price per pack
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-slate-400 line-through text-xs">₹${stdPrice.toFixed(2)}</span>
-                            <span class="font-bold text-slateBlue text-xl">₹${altPrice.toFixed(2)}</span>
+                            <span class="text-slate-400 dark:text-slate-500 line-through text-xs">₹${stdPrice.toFixed(2)}</span>
+                            <span class="font-bold text-slateBlue dark:text-[#F8FAFC] text-xl">₹${altPrice.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -651,34 +717,34 @@ function renderResults(query, searchResults) {
             const approvalDate = item.approval_date || item.source_year || 'Approved';
 
             cardsHtml += `
-                <div class="bg-white border border-slate-200 rounded-2xl p-5 md:p-6 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all relative overflow-hidden group mb-4">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-slate-300 transition-colors"></div>
+                <div class="cdsco-record-card bg-white dark:bg-[#161F30] border border-slate-200 dark:border-[#334155] rounded-2xl p-5 md:p-6 shadow-xs hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-sm transition-all relative overflow-hidden group mb-4">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 dark:bg-slate-700 group-hover:bg-slate-300 dark:group-hover:bg-slate-600 transition-colors"></div>
 
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div class="flex-grow min-w-0 space-y-1.5">
                             <div class="flex items-center gap-2.5 flex-wrap">
-                                <h3 class="text-xl font-bold text-slateBlue tracking-tight">${escapeHtml(drugName)}</h3>
-                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-slate-200 flex items-center gap-1 shadow-xs">
-                                    <i class="fa-solid fa-shield-halved text-slate-500"></i> CDSCO Registry
+                                <h3 class="text-xl font-bold text-slateBlue dark:text-[#F8FAFC] tracking-tight">${escapeHtml(drugName)}</h3>
+                                <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-slate-200 dark:border-[#334155] flex items-center gap-1 shadow-xs">
+                                    <i class="fa-solid fa-shield-halved text-slate-500 dark:text-slate-400"></i> CDSCO Registry
                                 </span>
                             </div>
 
-                            <p class="text-sm text-slate-700 font-medium">
-                                Active Regulatory API: <span class="font-semibold text-slate-900">${escapeHtml(genericApi)}</span>
+                            <p class="text-sm text-slate-600 dark:text-[#94A3B8] font-medium">
+                                Active Regulatory API: <span class="font-semibold text-slate-900 dark:text-[#F8FAFC]">${escapeHtml(genericApi)}</span>
                             </p>
-                            <p class="text-xs text-slate-500">
-                                <strong class="text-slate-600 font-medium">Approved Indication:</strong> ${escapeHtml(indication)}
+                            <p class="text-xs text-slate-500 dark:text-[#94A3B8]">
+                                <strong class="text-slate-600 dark:text-slate-300 font-medium">Approved Indication:</strong> ${escapeHtml(indication)}
                             </p>
-                            <p class="text-[11px] text-slate-400">
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500">
                                 Regulatory Approval: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
                             </p>
                         </div>
 
                         <!-- Fixed right-side badge column: non-shrinking, strictly aligned -->
-                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center w-full md:w-auto md:min-w-[190px] flex-shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 gap-1.5">
-                            <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Regulatory Standard</span>
-                            <span class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs whitespace-nowrap">
-                                <i class="fa-solid fa-certificate text-emerald-600 text-xs"></i>
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center w-full md:w-auto md:min-w-[190px] flex-shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-[#334155]/60 gap-1.5">
+                            <span class="text-[10px] font-bold uppercase text-slate-400 dark:text-[#94A3B8] tracking-wider">Regulatory Standard</span>
+                            <span class="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-semibold text-xs bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#334155] shadow-xs whitespace-nowrap" data-tooltip="Reference Listed Drug Bioequivalent">
+                                <i class="fa-solid fa-certificate text-emerald-600 dark:text-emerald-400 text-xs"></i>
                                 <span>Reference Listed Drug</span>
                             </span>
                         </div>
@@ -771,7 +837,7 @@ function generateDoctorRequestNotePDF() {
             addToCart(currentAlternativesList[0]);
             itemsToPrint = [...discussionCart];
         } else {
-            alert("Your Discussion Cart is empty. Please search and add at least one generic alternative to your cart before generating a note.");
+            alert("Your Doctor Checklist is empty. Please search and add at least one generic alternative to your checklist before generating a note.");
             openCartDrawer();
             return;
         }
@@ -1088,7 +1154,7 @@ function appendMessage(sender, text) {
     if (sender === 'user') {
         bubble.className = 'bg-slateBlue text-white rounded-xl rounded-tr-sm p-3 shadow-sm max-w-[85%] self-end text-sm';
     } else {
-        bubble.className = 'bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700 text-sm';
+        bubble.className = 'chat-bot-bubble bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-[#334155] rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700 dark:text-[#F8FAFC] text-sm leading-relaxed';
     }
     bubble.textContent = text;
     chatMessages.appendChild(bubble);
@@ -1097,7 +1163,7 @@ function appendMessage(sender, text) {
 
 const clinicalResponses = {
     effective: "Yes. Generic Atorvastatin contains the identical active pharmaceutical ingredient (Atorvastatin Calcium) in equivalent dosage and strength as brand Lipitor, providing identical therapeutic cholesterol reduction.",
-    price: "Brand Lipitor includes originator R&D patent premiums and global branding costs (₹250/strip). Generics by PMBJP Jan Aushadhi or Indian pharma manufacturers compete on efficient domestic volume production (₹40/strip), yielding direct 84% savings.",
+    price: "Original manufacturers spend hundreds of crores on initial drug discovery, R&D, clinical trials, and brand marketing (priced at ₹250/strip). In contrast, generic manufacturers only pay for manufacturing the already-approved formula under strict CDSCO standards once patents expire, passing the 60%–80% savings (₹40/strip) directly to patients.",
     cdsco: "In India, CDSCO requires generic formulations to prove bioequivalence within an 80%–125% 90% confidence interval for Cmax and AUC. Claiming '100%' is pharmacologically misleading, but regulatory bioequivalence proves identical clinical outcomes.",
     default: "Certified generic Atorvastatin is a CDSCO-cleared therapeutic substitute for Lipitor. Always review with your doctor before switching cardiac maintenance medications."
 };
@@ -1106,12 +1172,12 @@ function handleChatResponse(query) {
     appendMessage('user', query);
     setTimeout(() => {
         const q = query.toLowerCase();
-        if (q.includes('effective') || q.includes('safe') || q.includes('lipitor')) {
-            appendMessage('bot', clinicalResponses.effective);
-        } else if (q.includes('40') || q.includes('250') || q.includes('price') || q.includes('why')) {
+        if (q.includes('40') || q.includes('250') || q.includes('price') || q.includes('cost') || q.includes('cheap') || q.includes('expensive') || q.includes('saving') || (q.includes('why') && (q.includes('vs') || q.includes('₹') || q.includes('rupee')))) {
             appendMessage('bot', clinicalResponses.price);
-        } else if (q.includes('cdsco') || q.includes('standard') || q.includes('bioequivalen')) {
+        } else if (q.includes('cdsco') || q.includes('standard') || q.includes('bioequivalen') || q.includes('registry') || q.includes('approval') || q.includes('rld')) {
             appendMessage('bot', clinicalResponses.cdsco);
+        } else if (q.includes('effective') || q.includes('safe') || q.includes('work the same') || q.includes('identical') || q.includes('lipitor') || q.includes('atorvastatin')) {
+            appendMessage('bot', clinicalResponses.effective);
         } else {
             appendMessage('bot', clinicalResponses.default);
         }
@@ -1197,17 +1263,142 @@ window.addEventListener('keydown', function (e) {
 });
 
 // ==============================================================================
-// DISCUSSION CART & SORTING FILTER EVENT LISTENERS
 // ==============================================================================
-if (sortFilterSelect) {
-    sortFilterSelect.addEventListener('change', function (e) {
-        currentSortMode = e.target.value;
-        if (currentSearchResults && lastQuery) {
-            renderResults(lastQuery, currentSearchResults);
+// MODERN CUSTOM SORTING DROPDOWN CONTROLS
+// ==============================================================================
+function initSortDropdown() {
+    const container = document.getElementById('sortDropdownContainer');
+    const trigger = document.getElementById('sortDropdownTrigger');
+    const menu = document.getElementById('sortDropdownMenu');
+    const caret = document.getElementById('sortCaretIcon');
+    const label = document.getElementById('sortSelectedLabel');
+
+    if (!trigger || !menu || !container) return;
+
+    const labels = {
+        'relevance': 'Relevance',
+        'price-asc': 'Price: Low to High',
+        'savings-desc': 'Highest Savings'
+    };
+
+    function toggleMenu(show) {
+        const willShow = (typeof show === 'boolean') ? show : menu.classList.contains('invisible');
+        if (willShow) {
+            menu.classList.remove('opacity-0', 'translate-y-1', 'invisible', 'pointer-events-none');
+            menu.classList.add('opacity-100', 'translate-y-0', 'visible', 'pointer-events-auto');
+            if (caret) caret.classList.add('rotate-180');
+            trigger.setAttribute('aria-expanded', 'true');
+        } else {
+            menu.classList.remove('opacity-100', 'translate-y-0', 'visible', 'pointer-events-auto');
+            menu.classList.add('opacity-0', 'translate-y-1', 'invisible', 'pointer-events-none');
+            if (caret) caret.classList.remove('rotate-180');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleMenu();
+    });
+
+    const optionBtns = menu.querySelectorAll('.sort-option-btn');
+    optionBtns.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const val = this.getAttribute('data-value');
+            if (!val) return;
+
+            // Update current sort mode
+            currentSortMode = val;
+            if (sortFilterSelect && sortFilterSelect.value !== val) {
+                sortFilterSelect.value = val;
+            }
+
+            // Update UI label
+            if (label) label.textContent = labels[val] || 'Relevance';
+
+            // Update active states & checkmark icons
+            optionBtns.forEach(b => {
+                const isSelected = (b.getAttribute('data-value') === val);
+                b.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                const checkIcon = b.querySelector('.sort-check-icon');
+                const titleText = b.querySelector('.text-xs');
+
+                if (isSelected) {
+                    b.classList.add('bg-slate-100/90', 'text-slateBlue', 'font-semibold');
+                    b.classList.remove('hover:bg-slate-50', 'text-slate-600', 'font-medium');
+                    if (titleText) {
+                        titleText.classList.add('font-semibold', 'text-slate-800');
+                        titleText.classList.remove('font-medium', 'text-slate-700');
+                    }
+                    if (checkIcon) checkIcon.classList.remove('hidden');
+                } else {
+                    b.classList.remove('bg-slate-100/90', 'text-slateBlue', 'font-semibold');
+                    b.classList.add('hover:bg-slate-50', 'text-slate-600', 'font-medium');
+                    if (titleText) {
+                        titleText.classList.remove('font-semibold', 'text-slate-800');
+                        titleText.classList.add('font-medium', 'text-slate-700');
+                    }
+                    if (checkIcon) checkIcon.classList.add('hidden');
+                }
+            });
+
+            toggleMenu(false);
+
+            // Re-render results immediately with new sort ordering
+            if (currentSearchResults && lastQuery) {
+                renderResults(lastQuery, currentSearchResults);
+            }
+        });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function (e) {
+        if (!container.contains(e.target)) {
+            toggleMenu(false);
         }
     });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.classList.contains('invisible')) {
+            toggleMenu(false);
+            trigger.focus();
+        }
+    });
+
+    // Keep synced if sortFilterSelect is changed programmatically
+    if (sortFilterSelect) {
+        sortFilterSelect.addEventListener('change', function (e) {
+            const val = e.target.value;
+            currentSortMode = val;
+            if (label) label.textContent = labels[val] || 'Relevance';
+            const matchedBtn = menu.querySelector(`[data-value="${val}"]`);
+            if (matchedBtn) {
+                optionBtns.forEach(b => {
+                    const isSelected = (b === matchedBtn);
+                    b.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                    const checkIcon = b.querySelector('.sort-check-icon');
+                    if (isSelected) {
+                        b.classList.add('bg-slate-100/90', 'text-slateBlue', 'font-semibold');
+                        b.classList.remove('hover:bg-slate-50', 'text-slate-600', 'font-medium');
+                        if (checkIcon) checkIcon.classList.remove('hidden');
+                    } else {
+                        b.classList.remove('bg-slate-100/90', 'text-slateBlue', 'font-semibold');
+                        b.classList.add('hover:bg-slate-50', 'text-slate-600', 'font-medium');
+                        if (checkIcon) checkIcon.classList.add('hidden');
+                    }
+                });
+            }
+            if (currentSearchResults && lastQuery) {
+                renderResults(lastQuery, currentSearchResults);
+            }
+        });
+    }
 }
 
+// DISCUSSION CART & DRAWER EVENT LISTENERS
+// ==============================================================================
 if (navCartBtn) navCartBtn.addEventListener('click', openCartDrawer);
 if (closeCartDrawerBtn) closeCartDrawerBtn.addEventListener('click', closeCartDrawer);
 if (cartDrawerBackdrop) cartDrawerBackdrop.addEventListener('click', closeCartDrawer);
@@ -1222,11 +1413,122 @@ window.addEventListener('keydown', function (e) {
 });
 
 // ==============================================================================
+// THEME TOGGLE (DARK MODE) CONTROLS
+// ==============================================================================
+function applyTheme(theme) {
+    const isDark = (theme === 'dark');
+    const themeToggleSun = document.getElementById('themeToggleSun');
+    const themeToggleMoon = document.getElementById('themeToggleMoon');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+    if (isDark) {
+        document.documentElement.classList.add('dark');
+        if (themeToggleSun) themeToggleSun.classList.remove('hidden');
+        if (themeToggleMoon) themeToggleMoon.classList.add('hidden');
+    } else {
+        document.documentElement.classList.remove('dark');
+        if (themeToggleSun) themeToggleSun.classList.add('hidden');
+        if (themeToggleMoon) themeToggleMoon.classList.remove('hidden');
+    }
+
+    if (themeToggleBtn) {
+        const label = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        themeToggleBtn.setAttribute('aria-label', label);
+        themeToggleBtn.setAttribute('data-tooltip', label);
+    }
+}
+
+function initThemeToggle() {
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    if (!themeToggleBtn) return;
+
+    let activeTheme = 'light';
+    try {
+        const saved = localStorage.getItem('medibuddy_theme');
+        if (saved === 'dark' || saved === 'light') {
+            activeTheme = saved;
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            activeTheme = 'dark';
+        }
+    } catch (e) {
+        console.warn('localStorage read error:', e);
+    }
+
+    applyTheme(activeTheme);
+
+    themeToggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const currentlyDark = document.documentElement.classList.contains('dark');
+        const nextTheme = currentlyDark ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        try {
+            localStorage.setItem('medibuddy_theme', nextTheme);
+        } catch (e) {
+            console.warn('localStorage write error:', e);
+        }
+    });
+
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            try {
+                if (!localStorage.getItem('medibuddy_theme')) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                }
+            } catch (err) {}
+        });
+    }
+}
+
+// ==============================================================================
+// SCROLL PROGRESS BAR & BACK TO TOP BUTTON CONTROLS
+// ==============================================================================
+function initScrollControllers() {
+    const scrollProgressBar = document.getElementById('scrollProgressBar');
+    const backToTopBtn = document.getElementById('backToTopBtn');
+
+    function handleScroll() {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+        if (scrollProgressBar) {
+            scrollProgressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+        }
+
+        if (backToTopBtn) {
+            if (scrollTop > 300) {
+                backToTopBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+                backToTopBtn.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+            } else {
+                backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+                backToTopBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+            }
+        }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    if (backToTopBtn) {
+        backToTopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+}
+
+// ==============================================================================
 // APP INITIALIZATION
 // ==============================================================================
 window.addEventListener('DOMContentLoaded', () => {
+    initThemeToggle();
+    initScrollControllers();
     updateBadgeStatus();
     loadCartFromStorage();
     updateCartUI();
+    initSortDropdown();
     initializeLocalDatabase();
 });

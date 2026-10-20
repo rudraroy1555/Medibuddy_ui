@@ -4,18 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medibuddy - Medicine Alternatives & Search</title>
+    <!-- Instant Theme Initialization Script (Prevents FOUC) -->
+    <script>
+        (function () {
+            try {
+                const savedTheme = localStorage.getItem('medibuddy_theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) { }
+        })();
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- jsPDF Library for Doctor Request Note Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -28,15 +43,54 @@
                         accentGreen: '#166534',
                         mutedAmber: '#fffbeb',
                         warningAmber: '#b45309',
+                        slate750: '#233247',
+                        slate850: '#131d31',
+                        slate950: '#0b1120',
                     }
                 }
             }
         }
     </script>
     <style>
+        :root {
+            --bg-page: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-subtle: #f1f5f9;
+            --card-border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-subtle: #e2e8f0;
+            --card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+            --card-shadow-hover: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+            --header-bg: rgba(255, 255, 255, 0.92);
+            --footer-bg: #fffbeb;
+            --footer-border: rgba(180, 83, 9, 0.2);
+            --footer-text: #78350f;
+        }
+
+        .dark {
+            --bg-page: #0b1120;
+            --bg-surface: #161f30;
+            --bg-surface-subtle: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-subtle: #334155;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+            --card-shadow-hover: 0 16px 32px -4px rgba(0, 0, 0, 0.7), 0 6px 14px -3px rgba(0, 0, 0, 0.5);
+            --header-bg: rgba(11, 17, 32, 0.92);
+            --footer-bg: #0f172a;
+            --footer-border: rgba(245, 158, 11, 0.25);
+            --footer-text: #fde68a;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         .fade-in {
@@ -64,13 +118,272 @@
             background: #f1f5f9;
         }
 
+        .dark ::-webkit-scrollbar-track {
+            background: #0b1120;
+        }
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
 
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Micro-Interactions: Elevated Card Hover States */
+        .alternative-drug-card,
+        .cdsco-record-card {
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .alternative-drug-card:hover,
+        .cdsco-record-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .dark .alternative-drug-card:not(.is-selected),
+        .dark .cdsco-record-card {
+            background-color: #161f30;
+            border-color: #334155;
+        }
+
+        /* Navbar Status Pill in Dark Mode */
+        .dark #serverStatusBadge.status-online {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+            color: #34d399 !important;
+        }
+
+        /* Professional Tooltip System */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 7px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            z-index: 70;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark [data-tooltip]::before {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-tooltip]:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Navbar Tooltips: Flip below buttons with z-index 9999 to prevent top clipping */
+        header,
+        header nav {
+            overflow: visible !important;
+        }
+
+        header [data-tooltip]::before {
+            bottom: auto;
+            top: calc(100% + 8px);
+            transform: translateX(-50%) translateY(-4px);
+            z-index: 9999;
+        }
+
+        header [data-tooltip]:hover::before {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Prevent rightmost navbar tooltip from clipping viewport edge on small screens */
+        header #howItWorksBtn[data-tooltip]::before {
+            left: auto;
+            right: 0;
+            transform: translateY(-4px);
+        }
+
+        header #howItWorksBtn[data-tooltip]:hover::before {
+            transform: translateY(0);
+        }
+
+        /* Chatbot Dark Mode Surfaces */
+        .dark #chatbotWindow {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+        }
+
+        .dark #chatMessages {
+            background-color: #0b1120 !important;
+        }
+
+        .dark #chatForm {
+            background-color: #0f172a !important;
+            border-top: 1px solid #1e293b !important;
+        }
+
+        .dark #chatInput {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        .dark #chatInput::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        .dark .chat-bot-bubble {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        .dark #chatChips button {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        .dark #chatChips button:hover {
+            background-color: #273549 !important;
+            border-color: #10b981 !important;
+            color: #34d399 !important;
+        }
+
+        /* How It Works Modal Step Icons */
+        .modal-step-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 9999px;
+            background-color: #059669;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .dark .modal-step-icon {
+            background-color: #059669;
+            color: #ffffff;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Empty State / No Matches Card Dark Mode */
+        .empty-state-card {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .dark .empty-state-card {
+            background-color: #161f30 !important;
+            border-color: #334155 !important;
+            color: #94a3b8 !important;
+        }
+
+        .dark .empty-state-card h3 {
+            color: #f8fafc !important;
+        }
+
+        .dark .empty-state-card p {
+            color: #94a3b8 !important;
+        }
+
+        .dark .empty-state-card strong {
+            color: #f8fafc !important;
+        }
+
+        /* Completely suppress any tooltips on checklist trash/delete button */
+        #cartItemsList button::before,
+        #cartItemsList button::after {
+            display: none !important;
+            content: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* How It Works Modal Dark Mode Surfaces */
+        .dark #howItWorksDialog {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+        }
+
+        .dark #howItWorksDialog .modal-body-content,
+        .dark #howItWorksDialog .overflow-y-auto {
+            background-color: #0f172a !important;
+            color: #94a3b8 !important;
+        }
+
+        .dark #howItWorksDialog h4 {
+            color: #f8fafc !important;
+        }
+
+        .dark #howItWorksDialog p {
+            color: #94a3b8 !important;
+        }
+
+        .dark #howItWorksDialog strong {
+            color: #f8fafc !important;
+        }
+
+        .dark #howItWorksDialog code {
+            background-color: #1e293b !important;
+            color: #34d399 !important;
+            border: 1px solid #334155 !important;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .dark #howItWorksDialog .modal-advisory-box {
+            background-color: rgba(69, 26, 3, 0.45) !important;
+            border-color: rgba(180, 83, 9, 0.5) !important;
+            color: #fde68a !important;
+        }
+
+        .dark #howItWorksDialog .modal-advisory-box p {
+            color: #fde68a !important;
+        }
+
+        .dark #howItWorksDialog .modal-advisory-box strong {
+            color: #fef3c7 !important;
+        }
+
+        .dark #howItWorksDialog .modal-advisory-box i {
+            color: #fbbf24 !important;
+        }
+
+        .dark #howItWorksDialog .modal-footer-container {
+            background-color: #0b1120 !important;
+            border-top: 1px solid #1e293b !important;
         }
 
         /* Chat window animations */
@@ -91,69 +404,80 @@
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col relative pb-16 sm:pb-20 text-slate-800">
+<body class="min-h-screen flex flex-col relative pb-16 sm:pb-20 bg-[var(--bg-page)] text-[var(--text-primary)]">
+    <!-- Scroll Progress Bar -->
+    <div id="scrollProgressBar" class="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 z-50 transition-all duration-75 ease-out pointer-events-none" style="width: 0%;"></div>
     <!-- Header / Navigation -->
-    <header class="w-full bg-white/95 backdrop-blur-md px-4 sm:px-8 py-3.5 flex justify-between items-center border-b border-slate-200/80 shadow-xs z-20 sticky top-0">
-        <div class="flex items-center gap-2.5 text-slateBlue">
-            <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-accentGreen shadow-xs">
+    <header class="w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 sm:px-8 py-3.5 flex justify-between items-center border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs z-40 sticky top-0 transition-colors duration-200 overflow-visible">
+        <div class="flex items-center gap-2.5 text-slateBlue dark:text-white">
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/50 flex items-center justify-center text-accentGreen dark:text-emerald-400 shadow-xs">
                 <i class="fa-solid fa-pills text-lg"></i>
             </div>
-            <span class="font-bold text-xl tracking-tight text-slateBlue">medibuddy</span>
+            <span class="font-bold text-xl tracking-tight text-slateBlue dark:text-white">medibuddy</span>
         </div>
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1.5 sm:gap-2.5">
             <!-- Client-side system status badge (Single, uncluttered) -->
             <div id="serverStatusBadge"
-                class="hidden md:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs"
-                style="border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;">
+                class="status-online hidden lg:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-[rgba(16,185,129,0.3)] dark:bg-[rgba(16,185,129,0.12)] dark:text-[#34D399]">
                 <span>🟢 System Online (Dual-Dataset Search)</span>
             </div>
-            <!-- Discussion Cart Trigger Button -->
-            <button id="navCartBtn"
-                class="text-slate-700 hover:text-slateBlue hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs relative"
-                aria-label="View Prescription Discussion Cart" type="button">
-                <i class="fa-solid fa-clipboard-list text-accentGreen text-base"></i>
-                <span class="hidden sm:inline">Discussion Cart</span>
-                <span id="navCartBadge" class="bg-accentGreen text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-0.5">0</span>
+
+            <!-- Dark Mode Toggle Button -->
+            <button id="themeToggleBtn"
+                class="text-slate-700 dark:text-slate-300 hover:text-slateBlue dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs relative cursor-pointer"
+                aria-label="Toggle Dark Mode" data-tooltip="Toggle theme (Light / Dark)" type="button">
+                <i id="themeToggleSun" class="fa-solid fa-sun text-amber-400 text-sm hidden"></i>
+                <i id="themeToggleMoon" class="fa-solid fa-moon text-slate-600 dark:text-slate-300 text-sm"></i>
             </button>
+
+            <!-- Doctor Checklist Trigger Button -->
+            <button id="navCartBtn"
+                class="text-slate-700 dark:text-slate-300 hover:text-slateBlue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs relative"
+                aria-label="View Doctor Consultation Checklist" data-tooltip="Doctor Checklist" type="button">
+                <i class="fa-solid fa-clipboard-list text-accentGreen dark:text-emerald-400 text-base"></i>
+                <span class="hidden sm:inline">Doctor Checklist</span>
+                <span id="navCartBadge" class="bg-accentGreen dark:bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-0.5">0</span>
+            </button>
+
             <!-- Single 'How this works' link button -->
             <button id="howItWorksBtn"
-                class="text-slate-700 hover:text-slateBlue hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs"
-                aria-label="How this works" aria-haspopup="dialog" type="button">
-                <i class="fa-regular fa-circle-question text-accentGreen text-base"></i>
+                class="text-slate-700 dark:text-slate-300 hover:text-slateBlue dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs"
+                aria-label="How this works" aria-haspopup="dialog" data-tooltip="How MediBuddy Works" type="button">
+                <i class="fa-regular fa-circle-question text-accentGreen dark:text-emerald-400 text-base"></i>
                 <span class="hidden sm:inline">How this works</span>
             </button>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center px-4 pt-8 md:pt-14 w-full max-w-4xl mx-auto">
+    <main class="flex-grow flex flex-col items-center px-3.5 sm:px-6 pt-6 sm:pt-10 md:pt-14 w-full max-w-4xl mx-auto">
         <!-- Hero Search Section -->
         <div class="text-center mb-8 w-full transition-all duration-500 ease-in-out" id="hero-section">
             <div
-                class="inline-flex items-center gap-2 bg-softGreen text-accentGreen text-xs font-bold px-3 py-1 rounded-full mb-5 tracking-wide uppercase border border-accentGreen/20">
+                class="inline-flex items-center gap-2 bg-softGreen dark:bg-emerald-950/50 text-accentGreen dark:text-emerald-300 text-xs font-bold px-3 py-1 rounded-full mb-5 tracking-wide uppercase border border-accentGreen/20 dark:border-emerald-800/40">
                 <i class="fa-solid fa-shield-halved"></i>
                 Production Drug Database &bull; CDSCO Standard
             </div>
-            <h1 class="text-3xl md:text-5xl font-bold text-slateBlue mb-3 tracking-tight">
+            <h1 class="text-3xl md:text-5xl font-bold text-slateBlue dark:text-white mb-3 tracking-tight">
                 Find a medicine that fits.
             </h1>
-            <p class="text-slate-500 text-sm md:text-base mb-6 max-w-lg mx-auto leading-relaxed">
+            <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base mb-6 max-w-lg mx-auto leading-relaxed">
                 Search verified generic equivalents, active pharmaceutical ingredients (APIs), and realistic pricing in
                 Indian Rupees (₹).
             </p>
 
             <!-- Search Box -->
             <div class="relative w-full max-w-2xl mx-auto group">
-                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <div class="absolute inset-y-0 left-0 pl-4 sm:pl-5 flex items-center pointer-events-none">
                     <i id="searchIcon"
-                        class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue transition-colors text-lg"></i>
+                        class="fa-solid fa-magnifying-glass text-slate-400 group-focus-within:text-slateBlue dark:group-focus-within:text-emerald-400 transition-colors text-base sm:text-lg"></i>
                 </div>
                 <input type="text" id="searchInput"
-                    class="w-full pl-14 pr-32 py-4 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent transition-all text-base md:text-lg text-slate-700 bg-white"
-                    placeholder="Search brand or generic (e.g. Lipitor, Atorvastatin, Augmentin)..." value="Lipitor"
+                    class="w-full pl-11 sm:pl-14 pr-24 sm:pr-32 py-3.5 sm:py-4 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-[0_2px_12px_rgba(15,23,42,0.05)] focus:outline-none focus:ring-2 focus:ring-slateBlue/20 dark:focus:ring-emerald-500/20 focus:border-slateBlue dark:focus:border-emerald-500 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-sm sm:text-base md:text-lg text-slate-700 dark:text-slate-100 bg-white dark:bg-slate-900 placeholder-slate-400 dark:placeholder-slate-500"
+                    placeholder="Search brand or generic (e.g. Lipitor, Atorvastatin)..." value="Lipitor"
                     autocomplete="off">
                 <button id="searchBtn"
-                    class="absolute inset-y-2 right-2 bg-slateBlue text-white px-5 md:px-6 rounded-lg font-medium hover:bg-deepSlate transition-colors shadow-sm flex items-center gap-1.5"
+                    class="absolute inset-y-1.5 sm:inset-y-2 right-1.5 sm:right-2 bg-slateBlue hover:bg-deepSlate dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white px-4 sm:px-6 rounded-xl font-semibold transition-all shadow-xs hover:shadow-sm active:scale-[0.98] flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm"
                     type="button">
                     <span>Search</span>
                     <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -161,28 +485,27 @@
             </div>
 
             <!-- Quick Search Suggestion Chips -->
-            <div class="flex items-center justify-center gap-2 mt-4 flex-wrap text-xs text-slate-500" id="popularChips">
+            <div class="flex items-center justify-center gap-2 mt-4 flex-wrap text-xs text-slate-500 dark:text-slate-400" id="popularChips">
                 <span class="font-medium">Try searching:</span>
                 <button type="button"
-                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
-                    data-term="Lipitor">Lipitor</button>
+                    class="chip-btn px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full border border-slate-200 dark:border-slate-700 transition-colors font-medium shadow-2xs cursor-pointer"
+                    data-tooltip="Search Lipitor" data-term="Lipitor">Lipitor</button>
                 <button type="button"
-                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
-                    data-term="Atorvastatin">Atorvastatin</button>
+                    class="chip-btn px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full border border-slate-200 dark:border-slate-700 transition-colors font-medium shadow-2xs cursor-pointer"
+                    data-tooltip="Search Atorvastatin" data-term="Atorvastatin">Atorvastatin</button>
                 <button type="button"
-                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
-                    data-term="Augmentin">Augmentin</button>
+                    class="chip-btn px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full border border-slate-200 dark:border-slate-700 transition-colors font-medium shadow-2xs cursor-pointer"
+                    data-tooltip="Search Augmentin" data-term="Augmentin">Augmentin</button>
                 <button type="button"
-                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
-                    data-term="Metformin">Metformin</button>
+                    class="chip-btn px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full border border-slate-200 dark:border-slate-700 transition-colors font-medium shadow-2xs cursor-pointer"
+                    data-tooltip="Search Metformin" data-term="Metformin">Metformin</button>
                 <button type="button"
-                    class="chip-btn px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 transition-colors font-medium"
-                    data-term="Pan-D">Pan-D</button>
+                    class="chip-btn px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full border border-slate-200 dark:border-slate-700 transition-colors font-medium shadow-2xs cursor-pointer"
+                    data-tooltip="Search Pan-D" data-term="Pan-D">Pan-D</button>
             </div>
 
-            <p class="text-xs text-slate-400 mt-3 flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-lock text-slate-300"></i>
-                Live in-memory search across clean_generic_api and drug_name columns.
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-3 flex items-center justify-center gap-1.5 text-center">
+                <span>🔒 Instant search across CDSCO-verified generic equivalents and branded medicines.</span>
             </p>
         </div>
 
@@ -190,26 +513,89 @@
         <div id="resultsContainer" class="w-full max-w-3xl flex flex-col gap-5 fade-in pb-8">
 
             <!-- Dynamic Results Header with Sorting Filters -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-2 border-b border-slate-200 pb-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-2 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <div>
-                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Search Results for</h2>
-                    <p class="text-2xl font-bold text-slateBlue" id="searchQueryDisplay">Lipitor</p>
-                    <p class="text-xs text-slate-500 mt-0.5" id="activeSaltDisplay">
-                        Active Salt: <span class="font-semibold text-slate-700">Atorvastatin Calcium</span>
+                    <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Search Results for</h2>
+                    <p class="text-2xl font-bold text-slateBlue dark:text-white" id="searchQueryDisplay">Lipitor</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="activeSaltDisplay">
+                        Active Salt: <span class="font-semibold text-slate-700 dark:text-slate-200">Atorvastatin Calcium</span>
                     </p>
                 </div>
-                <div class="flex flex-col sm:items-end gap-2 text-xs text-slate-500 w-full sm:w-auto">
+                <div class="flex flex-col sm:items-end gap-2 text-xs text-slate-500 dark:text-slate-400 w-full sm:w-auto">
                     <div class="flex items-center justify-between sm:justify-end gap-3 w-full">
-                        <p class="font-semibold text-slate-700" id="resultsCountBadge">Loading options...</p>
-                        <!-- Sorting Dropdown -->
-                        <div class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-xs text-xs font-medium text-slate-700">
-                            <i class="fa-solid fa-arrow-down-wide-short text-slate-400"></i>
-                            <label for="sortFilterSelect" class="text-slate-500 font-normal">Sort:</label>
-                            <select id="sortFilterSelect" class="bg-transparent text-slate-700 font-semibold focus:outline-none cursor-pointer">
-                                <option value="relevance">Relevance</option>
+                        <p class="font-semibold text-slate-700 dark:text-slate-300" id="resultsCountBadge">Loading options...</p>
+                        <!-- Modern Sleek Sorting Dropdown -->
+                        <div class="relative inline-block text-left" id="sortDropdownContainer">
+                            <!-- Custom Dropdown Trigger Button -->
+                            <button type="button" id="sortDropdownTrigger"
+                                class="inline-flex items-center justify-between gap-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50/90 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-700 shadow-2xs hover:shadow-xs hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slateBlue/20 dark:focus:ring-emerald-500/20"
+                                aria-haspopup="listbox" aria-expanded="false" aria-controls="sortDropdownMenu" data-tooltip="Change sorting order">
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-arrow-down-wide-short text-slate-400 dark:text-slate-400 text-xs"></i>
+                                    <span class="text-slate-400 dark:text-slate-400 font-normal">Sort:</span>
+                                    <span id="sortSelectedLabel" class="font-semibold text-slate-800 dark:text-white">Relevance</span>
+                                </div>
+                                <i id="sortCaretIcon" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ml-1"></i>
+                            </button>
+
+                            <!-- Synchronized Native Select (Preserved for form compatibility & automated tests) -->
+                            <select id="sortFilterSelect" class="sr-only" aria-hidden="true" tabindex="-1">
+                                <option value="relevance" selected>Relevance</option>
                                 <option value="price-asc">Price: Low to High</option>
                                 <option value="savings-desc">Highest Savings</option>
                             </select>
+
+                            <!-- Floating Options Menu -->
+                            <div id="sortDropdownMenu"
+                                class="opacity-0 translate-y-1 invisible pointer-events-none transition-all duration-200 ease-out absolute right-0 mt-2 w-60 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-1.5 z-30 flex flex-col gap-0.5"
+                                role="listbox" aria-label="Sort options">
+                                
+                                <!-- Relevance Option -->
+                                <button type="button" role="option" aria-selected="true" data-value="relevance"
+                                    class="sort-option-btn group w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer bg-slate-100/90 dark:bg-slate-700/70 text-slateBlue dark:text-white font-semibold">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shadow-2xs">
+                                            <i class="fa-solid fa-bullseye text-[11px]"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-semibold text-slate-800 dark:text-white">Relevance</div>
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-400 font-normal">Best match for search query</div>
+                                        </div>
+                                    </div>
+                                    <i class="sort-check-icon fa-solid fa-check text-accentGreen dark:text-emerald-400 text-xs"></i>
+                                </button>
+
+                                <!-- Price: Low to High Option -->
+                                <button type="button" role="option" aria-selected="false" data-value="price-asc"
+                                    class="sort-option-btn group w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 font-medium">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:border-emerald-200 shadow-2xs transition-colors">
+                                            <i class="fa-solid fa-arrow-down-1-9 text-[11px]"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-medium text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">Price: Low to High</div>
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-400 font-normal">Lowest retail price (₹)</div>
+                                        </div>
+                                    </div>
+                                    <i class="sort-check-icon fa-solid fa-check text-accentGreen dark:text-emerald-400 text-xs hidden"></i>
+                                </button>
+
+                                <!-- Highest Savings Option -->
+                                <button type="button" role="option" aria-selected="false" data-value="savings-desc"
+                                    class="sort-option-btn group w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 font-medium">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:border-emerald-200 shadow-2xs transition-colors">
+                                            <i class="fa-solid fa-piggy-bank text-[11px]"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-medium text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">Highest Savings</div>
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-400 font-normal">Max money saved (₹)</div>
+                                        </div>
+                                    </div>
+                                    <i class="sort-check-icon fa-solid fa-check text-accentGreen dark:text-emerald-400 text-xs hidden"></i>
+                                </button>
+
+                            </div>
                         </div>
                     </div>
                     <p class="hidden sm:block">Prices in Indian Rupees (₹)</p>
@@ -225,12 +611,12 @@
 
     <!-- Safety Compliance Footer -->
     <footer
-        class="fixed bottom-0 w-full bg-mutedAmber border-t border-warningAmber/20 py-3 px-6 z-20 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+        class="fixed bottom-0 w-full bg-mutedAmber dark:bg-slate-900 border-t border-warningAmber/20 dark:border-amber-900/40 py-3 px-4 sm:px-6 z-20 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_20px_-3px_rgba(0,0,0,0.3)] transition-colors">
         <div class="max-w-4xl mx-auto flex items-start sm:items-center gap-3 justify-center sm:justify-start">
-            <div class="bg-warningAmber/10 p-1.5 rounded-full mt-0.5 sm:mt-0 flex-shrink-0">
+            <div class="bg-warningAmber/10 dark:bg-amber-950/40 p-1.5 rounded-full mt-0.5 sm:mt-0 flex-shrink-0">
                 <i class="fa-solid fa-triangle-exclamation text-warningAmber text-sm"></i>
             </div>
-            <p class="text-xs sm:text-sm text-amber-900 font-medium">
+            <p class="text-xs sm:text-sm text-amber-900 dark:text-amber-200 font-medium">
                 <strong
                     class="font-bold uppercase tracking-wider text-[10px] sm:text-xs text-warningAmber mr-1">Regulatory
                     & Clinical Notice:</strong>
@@ -240,19 +626,26 @@
         </div>
     </footer>
 
+    <!-- Back to Top Floating Button -->
+    <button id="backToTopBtn"
+        class="fixed bottom-20 right-24 z-40 w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg text-slate-600 dark:text-slate-300 hover:text-accentGreen dark:hover:text-emerald-400 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 group"
+        aria-label="Scroll back to top" data-tooltip="Scroll back to top" type="button">
+        <i class="fa-solid fa-arrow-up text-sm transition-transform duration-200 group-hover:-translate-y-0.5"></i>
+    </button>
+
     <!-- ==========================================================================
          HOW IT WORKS MODAL DIALOG
          ========================================================================== -->
     <div id="howItWorksModal"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none invisible transition-all duration-300 ease-out"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/75 backdrop-blur-sm opacity-0 pointer-events-none invisible transition-all duration-300 ease-out"
         role="dialog" aria-modal="true" aria-labelledby="howItWorksTitle">
 
         <!-- Modal Card Container -->
         <div id="howItWorksDialog"
-            class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[90vh]">
+            class="relative w-full max-w-xl bg-white dark:bg-[#0F172A] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#1E293B] overflow-hidden transform scale-95 transition-all duration-300 ease-out flex flex-col max-h-[90vh]">
 
             <!-- Modal Header -->
-            <div class="bg-slateBlue text-white p-5 flex items-center justify-between border-b border-white/10">
+            <div class="bg-slateBlue dark:bg-slate-900 text-white p-5 flex items-center justify-between border-b border-white/10 dark:border-[#1E293B]">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                         <i class="fa-solid fa-circle-info text-emerald-400 text-base"></i>
@@ -272,56 +665,59 @@
             </div>
 
             <!-- Modal Body (Scrollable) -->
-            <div class="p-5 md:p-6 overflow-y-auto space-y-4 text-sm text-slate-700 leading-relaxed">
+            <div class="modal-body-content p-5 md:p-6 overflow-y-auto space-y-4 text-sm text-slate-700 dark:text-[#94A3B8] dark:bg-[#0F172A] leading-relaxed">
 
                 <!-- Section 1: CDSCO Regulatory Database -->
-                <div class="flex items-start gap-3">
-                    <div
-                        class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
-                        <i class="fa-solid fa-shield-halved text-xs"></i>
+                <div class="flex items-start gap-3.5">
+                    <div class="modal-step-icon" style="width: 36px; height: 36px; min-width: 36px; background-color: #059669; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2L4 5.5V11.5C4 16.5 7.4 21.2 12 22.5C16.6 21.2 20 16.5 20 11.5V5.5L12 2ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z"/>
+                        </svg>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slateBlue text-sm mb-1">1. CDSCO Official Regulatory Database</h4>
-                        <p class="text-xs text-slate-600">
-                            Our primary dataset incorporates regulatory approvals from India's <strong>Central Drugs Standard Control Organisation (CDSCO)</strong>. We map commercial brand names to their registered <strong>Active Pharmaceutical Ingredients (APIs)</strong> and official therapeutic indications, referencing clinical bioequivalence standards (80%–125% 90% Confidence Interval).
+                        <h4 class="font-bold text-slateBlue dark:text-[#F8FAFC] text-sm mb-1">1. CDSCO Official Regulatory Database</h4>
+                        <p class="text-xs text-slate-600 dark:text-[#94A3B8]">
+                            Our primary dataset incorporates regulatory approvals from India's <strong class="text-slate-800 dark:text-[#F8FAFC]">Central Drugs Standard Control Organisation (CDSCO)</strong>. We map commercial brand names to their registered <strong class="text-slate-800 dark:text-[#F8FAFC]">Active Pharmaceutical Ingredients (APIs)</strong> and official therapeutic indications, referencing clinical bioequivalence standards (80%–125% 90% Confidence Interval).
                         </p>
                     </div>
                 </div>
 
                 <!-- Section 2: Local In-Memory Search Engine -->
-                <div class="flex items-start gap-3">
-                    <div
-                        class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
-                        <i class="fa-solid fa-bolt text-xs"></i>
+                <div class="flex items-start gap-3.5">
+                    <div class="modal-step-icon" style="width: 36px; height: 36px; min-width: 36px; background-color: #059669; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M13 2L4 13.5H11V22L20 10.5H13L16 2H13Z"/>
+                        </svg>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slateBlue text-sm mb-1">2. Local In-Memory Search (Serverless & Private)</h4>
-                        <p class="text-xs text-slate-600">
-                            MediBuddy loads both the CDSCO registry and the 150 prescribed Indian drugs dataset into browser memory concurrently via <code>Promise.all</code> and PapaParse. Your medical queries are computed <strong>100% client-side</strong> without sending search strings to any tracking server, guaranteeing zero latency and complete patient privacy.
+                        <h4 class="font-bold text-slateBlue dark:text-[#F8FAFC] text-sm mb-1">2. Local In-Memory Search (Serverless & Private)</h4>
+                        <p class="text-xs text-slate-600 dark:text-[#94A3B8]">
+                            MediBuddy loads both the CDSCO registry and the 150 prescribed Indian drugs dataset into browser memory concurrently via <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1E293B] dark:border dark:border-[#334155] dark:text-emerald-400 font-mono text-[11px]">Promise.all</code> and PapaParse. Your medical queries are computed <strong class="text-slate-800 dark:text-[#F8FAFC]">100% client-side</strong> without sending search strings to any tracking server, guaranteeing zero latency and complete patient privacy.
                         </p>
                     </div>
                 </div>
 
                 <!-- Section 3: Indian Market Pricing & Savings -->
-                <div class="flex items-start gap-3">
-                    <div
-                        class="w-7 h-7 rounded-lg bg-emerald-50 text-accentGreen flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200">
-                        <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
+                <div class="flex items-start gap-3.5">
+                    <div class="modal-step-icon" style="width: 36px; height: 36px; min-width: 36px; background-color: #059669; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M18 3H6V5H10.5C12.3 5.4 13.6 6.8 13.9 8.5H6V10.5H13.8C13.3 12.8 11.2 14.5 8.7 14.5H6V16.2L13.8 23H16.8L8.6 15.9C11.6 15.6 14.2 13.5 15.3 10.5H18V8.5H15.6C15.3 7.2 14.6 6 13.5 5H18V3Z"/>
+                        </svg>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slateBlue text-sm mb-1">3. Real-World Market Alternatives & Pricing</h4>
-                        <p class="text-xs text-slate-600">
-                            Prescribed brand prices often include innovator patent amortization and marketing costs. Certified generic equivalents from Indian pharma manufacturers and <strong>PMBJP Jan Aushadhi Kendras</strong> deliver identical chemical bioequivalence and clinical outcomes at <strong>40% to 80% lower cost</strong>.
+                        <h4 class="font-bold text-slateBlue dark:text-[#F8FAFC] text-sm mb-1">3. Real-World Market Alternatives & Pricing</h4>
+                        <p class="text-xs text-slate-600 dark:text-[#94A3B8]">
+                            Prescribed brand prices often include innovator patent amortization and marketing costs. Certified generic equivalents from Indian pharma manufacturers and <strong class="text-slate-800 dark:text-[#F8FAFC]">PMBJP Jan Aushadhi Kendras</strong> deliver identical chemical bioequivalence and clinical outcomes at <strong class="text-slate-800 dark:text-[#F8FAFC]">40% to 80% lower cost</strong>.
                         </p>
                     </div>
                 </div>
 
                 <!-- Clinical Safety Disclaimer -->
                 <div
-                    class="bg-amber-50 border border-warningAmber/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-900 mt-1">
-                    <i class="fa-solid fa-triangle-exclamation text-warningAmber text-base mt-0.5 flex-shrink-0"></i>
-                    <p class="text-xs">
-                        <strong>Clinical Advisory:</strong> This platform is designed solely as an educational
+                    class="modal-advisory-box bg-amber-50 dark:bg-amber-950/40 border border-warningAmber/30 dark:border-amber-800/60 rounded-xl p-3.5 flex items-start gap-3 text-amber-900 dark:text-amber-200 mt-1">
+                    <i class="fa-solid fa-triangle-exclamation text-warningAmber dark:text-amber-400 text-base mt-0.5 flex-shrink-0"></i>
+                    <p class="text-xs text-amber-900 dark:text-amber-200/90 leading-relaxed">
+                        <strong class="text-amber-950 dark:text-amber-100">Clinical Advisory:</strong> This platform is designed solely as an educational
                         discussion aid. Never alter, discontinue, or substitute prescription medications without the
                         direct consultation and approval of your treating physician.
                     </p>
@@ -330,9 +726,9 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-end">
+            <div class="modal-footer-container bg-slate-50 dark:bg-[#0B1120] px-5 py-3 border-t border-slate-200 dark:border-[#1E293B] flex justify-end">
                 <button id="dismissHowItWorksBtn"
-                    class="bg-slateBlue hover:bg-deepSlate text-white text-xs font-semibold py-2 px-5 rounded-lg transition-colors cursor-pointer shadow-sm"
+                    class="bg-slateBlue hover:bg-deepSlate dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-5 rounded-lg transition-colors cursor-pointer shadow-sm"
                     type="button">
                     Got it, thanks!
                 </button>
@@ -349,21 +745,21 @@
         role="dialog" aria-modal="true" aria-labelledby="cartDrawerTitle">
         
         <!-- Backdrop -->
-        <div id="cartDrawerBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300"></div>
+        <div id="cartDrawerBackdrop" class="fixed inset-0 bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs transition-opacity duration-300"></div>
 
         <!-- Slide-over Drawer Panel -->
         <div id="cartDrawerPanel"
-            class="relative w-full max-w-md bg-white shadow-2xl flex flex-col h-full transform translate-x-full transition-transform duration-300 ease-out z-10 border-l border-slate-200">
+            class="relative w-full max-w-md bg-white dark:bg-[#161F30] shadow-2xl flex flex-col h-full transform translate-x-full transition-transform duration-300 ease-out z-10 border-l border-slate-200 dark:border-[#334155]">
             
             <!-- Drawer Header -->
-            <div class="bg-slateBlue text-white p-5 flex items-center justify-between border-b border-white/10 shadow-sm flex-shrink-0">
+            <div class="bg-slateBlue dark:bg-slate-900 text-white p-5 flex items-center justify-between border-b border-white/10 shadow-sm flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-accentGreen">
                         <i class="fa-solid fa-clipboard-list text-lg text-emerald-400"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 id="cartDrawerTitle" class="font-bold text-base leading-tight">Prescription Discussion Cart</h3>
+                            <h3 id="cartDrawerTitle" class="font-bold text-base leading-tight">Doctor Consultation Checklist</h3>
                             <span id="drawerCartBadge" class="bg-accentGreen text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
                         </div>
                         <p class="text-[11px] text-slate-300">Shortlisted for Doctor Request Note</p>
@@ -371,40 +767,42 @@
                 </div>
                 <button id="closeCartDrawerBtn"
                     class="text-slate-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                    aria-label="Close Discussion Cart" type="button">
+                    aria-label="Close Doctor Consultation Checklist" type="button">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
             <!-- Drawer Body: Scrollable Item List -->
-            <div id="cartItemsList" class="flex-grow p-4 md:p-5 overflow-y-auto space-y-3 bg-slate-50">
+            <div id="cartItemsList" class="flex-grow p-4 md:p-5 overflow-y-auto space-y-3 bg-slate-50 dark:bg-[#0B1120]">
                 <!-- Populated dynamically via updateCartUI() -->
             </div>
 
             <!-- Drawer Footer: Financial Totals & Primary Actions -->
-            <div class="p-4 md:p-5 bg-white border-t border-slate-200 shadow-lg flex-shrink-0 space-y-3">
-                <div class="space-y-1.5 text-xs text-slate-600">
+            <div class="p-4 md:p-5 bg-white dark:bg-[#161F30] border-t border-slate-200 dark:border-[#334155] shadow-lg flex-shrink-0 space-y-3">
+                <div class="space-y-1.5 text-xs text-slate-600 dark:text-[#94A3B8]">
                     <div class="flex justify-between">
                         <span>Benchmark Prescribed Cost:</span>
-                        <span id="cartBenchmarkTotal" class="font-semibold text-slate-700">₹0.00</span>
+                        <span id="cartBenchmarkTotal" class="font-semibold text-slate-700 dark:text-[#F8FAFC]">₹0.00</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Generic Alternative Cost:</span>
-                        <span id="cartAlternativeTotal" class="font-semibold text-slate-700">₹0.00</span>
+                        <span id="cartAlternativeTotal" class="font-semibold text-slate-700 dark:text-[#F8FAFC]">₹0.00</span>
                     </div>
-                    <div class="flex justify-between text-sm font-bold pt-2 border-t border-slate-100 text-slateBlue">
+                    <div class="flex justify-between text-sm font-bold pt-2 border-t border-slate-100 dark:border-[#334155] text-slateBlue dark:text-[#F8FAFC]">
                         <span>Total Estimated Savings:</span>
-                        <span id="cartSavingsTotal" class="text-accentGreen text-base">Save ₹0.00</span>
+                        <span id="cartSavingsTotal" class="text-accentGreen dark:text-emerald-400 text-base">Save ₹0.00</span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 pt-1">
                     <button id="clearCartBtn" type="button"
-                        class="text-slate-500 hover:text-red-600 hover:bg-red-50 text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 transition-colors cursor-pointer">
+                        class="text-slate-500 dark:text-[#94A3B8] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 dark:border-[#334155] transition-colors cursor-pointer"
+                        data-tooltip="Remove all medications">
                         <i class="fa-regular fa-trash-can mr-1"></i> Clear
                     </button>
                     <button id="cartGeneratePdfBtn" type="button"
-                        class="flex-grow bg-slateBlue hover:bg-deepSlate text-white font-semibold text-xs md:text-sm py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                        class="flex-grow bg-slateBlue hover:bg-deepSlate dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-semibold text-xs md:text-sm py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                        data-tooltip="Export printable PDF note">
                         <i class="fa-regular fa-file-lines text-base"></i>
                         <span>Note Generator</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -421,21 +819,21 @@
 
     <!-- Floating Action Button (FAB) -->
     <button id="chatbotFab"
-        class="fixed bottom-20 right-6 z-40 w-14 h-14 bg-slateBlue hover:bg-deepSlate text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-slateBlue/30 group"
-        aria-label="Open Medical Assistant Chat" aria-expanded="false" aria-controls="chatbotWindow">
+        class="fixed bottom-20 right-6 z-40 w-14 h-14 bg-slateBlue hover:bg-deepSlate dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-slateBlue/30 dark:focus:ring-emerald-500/30 group"
+        aria-label="Open Medical Assistant Chat" aria-expanded="false" aria-controls="chatbotWindow" data-tooltip="Ask MediBuddy Assistant">
         <i id="fabChatIcon"
             class="fa-solid fa-comments text-2xl transition-transform duration-200 group-hover:scale-110"></i>
         <i id="fabCloseIcon" class="fa-solid fa-xmark text-2xl hidden"></i>
-        <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+        <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
     </button>
 
     <!-- Hidden Chat UI Window -->
     <div id="chatbotWindow"
-        class="chat-modal-enter fixed bottom-36 right-6 z-50 w-[360px] max-w-[calc(100vw-32px)] h-[500px] max-h-[calc(100vh-170px)] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
+        class="chat-modal-enter fixed bottom-36 right-6 z-50 w-[360px] max-w-[calc(100vw-32px)] h-[500px] max-h-[calc(100vh-170px)] bg-white dark:bg-[#0F172A] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#1E293B] flex flex-col overflow-hidden"
         role="dialog" aria-labelledby="chatTitle" aria-modal="false">
 
         <!-- Chat Header -->
-        <div class="bg-slateBlue text-white p-4 flex items-center justify-between shadow-sm">
+        <div class="bg-slateBlue dark:bg-slate-900 text-white p-4 flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
                     <i class="fa-solid fa-user-doctor text-emerald-400"></i>
@@ -455,12 +853,12 @@
         </div>
 
         <!-- Message Area -->
-        <div id="chatMessages" class="flex-grow p-4 overflow-y-auto bg-slate-50 flex flex-col gap-3 text-sm">
+        <div id="chatMessages" class="flex-grow p-4 overflow-y-auto bg-slate-50 dark:bg-[#0B1120] flex flex-col gap-3 text-sm">
             <div
-                class="bg-white border border-slate-200 rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700">
+                class="chat-bot-bubble bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-[#334155] rounded-xl rounded-tl-sm p-3.5 shadow-sm max-w-[88%] text-slate-700 dark:text-[#F8FAFC]">
                 <p>Hello! I can help you find generic equivalents, explain CDSCO bioequivalence, and verify pricing in
                     Indian Rupees (₹).</p>
-                <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-amber-700 font-medium">
+                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 text-[11px] text-amber-700 dark:text-amber-400 font-medium">
                     ⚠️ Educational only &mdash; please consult your physician before switching medicines.
                 </div>
             </div>
@@ -468,17 +866,17 @@
             <!-- Quick Questions -->
             <div class="flex flex-col gap-1.5 my-1" id="chatChips">
                 <button type="button"
-                    class="text-left text-xs bg-white hover:bg-emerald-50 text-slateBlue hover:text-accentGreen border border-slate-200 hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium"
+                    class="text-left text-xs bg-white dark:bg-[#1E293B] hover:bg-emerald-50 dark:hover:bg-slate-700 text-slateBlue dark:text-[#F8FAFC] hover:text-accentGreen dark:hover:text-emerald-300 border border-slate-200 dark:border-[#334155] hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium cursor-pointer"
                     data-query="Is generic Atorvastatin as effective as Lipitor?">
                     💬 Is generic Atorvastatin as effective as Lipitor?
                 </button>
                 <button type="button"
-                    class="text-left text-xs bg-white hover:bg-emerald-50 text-slateBlue hover:text-accentGreen border border-slate-200 hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium"
+                    class="text-left text-xs bg-white dark:bg-[#1E293B] hover:bg-emerald-50 dark:hover:bg-slate-700 text-slateBlue dark:text-[#F8FAFC] hover:text-accentGreen dark:hover:text-emerald-300 border border-slate-200 dark:border-[#334155] hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium cursor-pointer"
                     data-query="Why is generic Atorvastatin ₹40 vs Lipitor ₹250?">
                     💬 Why is generic Atorvastatin ₹40 vs Lipitor ₹250?
                 </button>
                 <button type="button"
-                    class="text-left text-xs bg-white hover:bg-emerald-50 text-slateBlue hover:text-accentGreen border border-slate-200 hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium"
+                    class="text-left text-xs bg-white dark:bg-[#1E293B] hover:bg-emerald-50 dark:hover:bg-slate-700 text-slateBlue dark:text-[#F8FAFC] hover:text-accentGreen dark:hover:text-emerald-300 border border-slate-200 dark:border-[#334155] hover:border-accentGreen/30 px-3 py-2 rounded-lg transition-colors font-medium cursor-pointer"
                     data-query="What does CDSCO Standard mean?">
                     💬 What does CDSCO Standard mean?
                 </button>
@@ -486,13 +884,13 @@
         </div>
 
         <!-- Chat Input Form -->
-        <form id="chatForm" class="p-3 bg-white border-t border-slate-200 flex items-center gap-2"
+        <form id="chatForm" class="p-3 bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-[#1E293B] flex items-center gap-2"
             onsubmit="event.preventDefault(); sendChatMessage();">
             <input type="text" id="chatInput"
-                class="flex-grow px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slateBlue focus:border-transparent text-sm bg-slate-50 placeholder-slate-400"
+                class="flex-grow px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#334155] focus:outline-none focus:ring-2 focus:ring-slateBlue dark:focus:ring-emerald-500/20 text-sm bg-slate-50 dark:bg-[#1E293B] text-slate-800 dark:text-[#F8FAFC] placeholder-slate-400 dark:placeholder-slate-400"
                 placeholder="Ask about salts, CDSCO standards, or ₹ savings..." autocomplete="off">
             <button type="submit"
-                class="w-10 h-10 bg-slateBlue hover:bg-deepSlate text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0 shadow-sm"
+                class="w-10 h-10 bg-slateBlue hover:bg-deepSlate dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0 shadow-sm cursor-pointer"
                 aria-label="Send">
                 <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
