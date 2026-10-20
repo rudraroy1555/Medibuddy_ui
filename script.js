@@ -33,16 +33,10 @@ function updateBadgeStatus() {
 
     if (typeof Papa !== 'undefined') {
         serverStatusBadge.style.cssText = "border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;";
-        serverStatusBadge.innerHTML = `
-            <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: #22c55e;"></span>
-            <span>🟢 System Online (Dual-Dataset Search)</span>
-        `;
+        serverStatusBadge.innerHTML = `<span>🟢 System Online (Dual-Dataset Search)</span>`;
     } else {
         serverStatusBadge.style.cssText = "border: 1px solid #fca5a5; color: #b91c1c; background-color: #fef2f2;";
-        serverStatusBadge.innerHTML = `
-            <span class="w-2 h-2 rounded-full" style="background-color: #ef4444;"></span>
-            <span>🔴 PapaParse Library Missing</span>
-        `;
+        serverStatusBadge.innerHTML = `<span>🔴 PapaParse Library Missing</span>`;
     }
 }
 
@@ -150,10 +144,7 @@ async function initializeDatasets() {
         console.error("Failed to load datasets via Promise.all:", err);
         if (serverStatusBadge) {
             serverStatusBadge.style.cssText = "border: 1px solid #fcd34d; color: #b45309; background-color: #fffbeb;";
-            serverStatusBadge.innerHTML = `
-                <span class="w-2 h-2 rounded-full" style="background-color: #f59e0b;"></span>
-                <span>⚠️ Dataset Fetch Failed</span>
-            `;
+            serverStatusBadge.innerHTML = `<span>⚠️ Dataset Fetch Failed</span>`;
         }
         throw err;
     }
@@ -274,30 +265,30 @@ function selectAlternative(index) {
     const cards = document.querySelectorAll('.alternative-drug-card');
     cards.forEach((card, idx) => {
         const isSelected = (idx === selectedAlternativeIndex);
-        const radio = card.querySelector('input[type="radio"]');
-        const pillContainer = card.querySelector('.selection-pill-container');
+        const actionContainer = card.querySelector('.selection-action-container');
         const borderIndicator = card.querySelector('.left-indicator-bar');
 
-        if (radio) radio.checked = isSelected;
-
         if (isSelected) {
-            card.className = 'alternative-drug-card rounded-xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden group mb-4 cursor-pointer border-2 border-accentGreen bg-emerald-50/70 shadow-md ring-2 ring-accentGreen/20';
+            card.className = 'alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white shadow-sm ring-2 ring-accentGreen/20';
             if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-accentGreen transition-colors';
-            if (pillContainer) {
-                pillContainer.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                        <i class="fa-solid fa-circle-check"></i> Selected for Discussion
-                    </span>
+            if (actionContainer) {
+                actionContainer.innerHTML = `
+                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${idx})" 
+                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer">
+                        <i class="fa-solid fa-circle-check text-sm"></i>
+                        <span>Selected for Discussion</span>
+                    </button>
                 `;
             }
         } else {
-            card.className = 'alternative-drug-card rounded-xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden group mb-4 cursor-pointer border border-slate-200 bg-white hover:border-emerald-300 hover:bg-slate-50/50 shadow-sm';
-            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-slate-300 group-hover:bg-accentGreen transition-colors';
-            if (pillContainer) {
-                pillContainer.innerHTML = `
-                    <button type="button" onclick="selectAlternative(${idx})" 
-                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-accentGreen hover:bg-emerald-50 transition-all cursor-pointer">
-                        <i class="fa-regular fa-circle text-slate-400"></i> Select Alternative
+            card.className = 'alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs';
+            if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-slate-400 transition-colors';
+            if (actionContainer) {
+                actionContainer.innerHTML = `
+                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${idx})" 
+                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen hover:bg-emerald-50 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer">
+                        <i class="fa-regular fa-circle text-slate-400"></i>
+                        <span>Select for Discussion</span>
                     </button>
                 `;
             }
@@ -379,74 +370,72 @@ function renderResults(query, searchResults) {
             const isSelected = (index === selectedAlternativeIndex);
 
             cardsHtml += `
-                <div class="alternative-drug-card rounded-xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden group mb-4 cursor-pointer ${
+                <div class="alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer ${
                     isSelected
-                        ? 'border-2 border-accentGreen bg-emerald-50/70 shadow-md ring-2 ring-accentGreen/20'
-                        : 'border border-slate-200 bg-white hover:border-emerald-300 hover:bg-slate-50/50 shadow-sm'
+                        ? 'border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white shadow-sm ring-2 ring-accentGreen/20'
+                        : 'border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
                 }" data-index="${index}" onclick="selectAlternative(${index})">
-                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${isSelected ? 'bg-accentGreen' : 'bg-slate-300 group-hover:bg-accentGreen'} transition-colors"></div>
+                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${isSelected ? 'bg-accentGreen' : 'bg-slate-200 group-hover:bg-slate-400'} transition-colors"></div>
 
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-grow">
-                            <!-- Header with Brand Name, Badges, and Radio Toggle -->
-                            <div class="flex items-center gap-3 mb-2 flex-wrap">
-                                <label class="inline-flex items-center gap-2.5 cursor-pointer" onclick="event.stopPropagation();">
-                                    <input type="radio" name="selectedAlternativeRadio" value="${index}" ${isSelected ? 'checked' : ''} 
-                                        onchange="selectAlternative(${index})" 
-                                        class="w-4 h-4 text-accentGreen focus:ring-accentGreen cursor-pointer accent-accentGreen">
-                                    <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(cheaperBrand)}</h3>
-                                </label>
-                                <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="flex-grow space-y-1.5">
+                            <!-- Clean Header: Cheaper Brand Name and Status Badges (Uncluttered, Single Title) -->
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <h3 class="text-xl font-bold text-slateBlue tracking-tight">${escapeHtml(cheaperBrand)}</h3>
+                                <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-check"></i> Cheaper Alternative
                                 </span>
-                                <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-0.5 rounded-full">
+                                <span class="text-xs bg-slate-100 text-slate-700 font-medium px-2.5 py-0.5 rounded-full border border-slate-200">
                                     ${escapeHtml(condition)}
                                 </span>
                             </div>
 
-                            <p class="text-sm text-slate-700 mb-1 font-medium">
-                                Active Salt / Generic: <span class="font-semibold text-accentGreen">${escapeHtml(generic)}</span>
+                            <p class="text-sm text-slate-700 font-medium">
+                                Active Generic API: <span class="font-semibold text-accentGreen">${escapeHtml(generic)}</span>
                             </p>
-                            <p class="text-xs text-slate-500 mb-2">
-                                Prescribed Brand Benchmark: <strong class="text-slate-700">${escapeHtml(brand)}</strong> (Standard: ₹${stdPrice.toFixed(2)})
+                            <p class="text-xs text-slate-500">
+                                Prescribed Brand Benchmark: <strong class="text-slate-700 font-semibold">${escapeHtml(brand)}</strong> (Standard: ₹${stdPrice.toFixed(2)})
                             </p>
                             <p class="text-[11px] text-slate-400">
                                 Bioequivalent Generic Substitute &bull; Verified Indian Prescribed Dataset
                             </p>
                         </div>
 
-                        <!-- Price Savings & Selection Action -->
-                        <div class="flex items-center gap-4 md:gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
-                            <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Direct Savings</span>
-                                <span class="font-bold text-accentGreen text-xl">Save ₹${savings.toFixed(2)}</span>
-                                <span class="text-[10px] text-accentGreen font-semibold">(${savingsPercent}% cheaper)</span>
+                        <!-- Single Clean Action Column -->
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                            <div class="text-left md:text-right">
+                                <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Estimated Savings</span>
+                                <span class="font-bold text-accentGreen text-lg md:text-xl">Save ₹${savings.toFixed(2)}</span>
+                                <span class="text-[11px] text-emerald-700 font-semibold block">(${savingsPercent}% lower cost)</span>
                             </div>
 
-                            <!-- Interactive Button / Pill -->
-                            <div class="selection-pill-container flex items-center justify-end" onclick="event.stopPropagation();">
+                            <!-- Single, uncluttered Action Button -->
+                            <div class="selection-action-container">
                                 ${isSelected ? `
-                                    <span class="inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                                        <i class="fa-solid fa-circle-check"></i> Selected for Discussion
-                                    </span>
+                                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${index})" 
+                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer">
+                                        <i class="fa-solid fa-circle-check text-sm"></i>
+                                        <span>Selected for Discussion</span>
+                                    </button>
                                 ` : `
-                                    <button type="button" onclick="selectAlternative(${index})" 
-                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-accentGreen hover:bg-emerald-50 transition-all cursor-pointer">
-                                        <i class="fa-regular fa-circle text-slate-400"></i> Select Alternative
+                                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${index})" 
+                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen hover:bg-emerald-50 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer">
+                                        <i class="fa-regular fa-circle text-slate-400"></i>
+                                        <span>Select for Discussion</span>
                                     </button>
                                 `}
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t ${isSelected ? 'border-accentGreen/30' : 'border-slate-100'} flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Alternative Retail Price</p>
-                            <p class="text-[11px] text-slate-400">Standard pack retail estimation</p>
+                    <!-- Clean Price Comparison Bar -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <div class="text-slate-500">
+                            Estimated retail price per pack
                         </div>
-                        <div class="text-right">
-                            <span class="text-xs text-slate-400 line-through mr-2">₹${stdPrice.toFixed(2)}</span>
-                            <span class="font-bold text-slateBlue text-2xl">₹${altPrice.toFixed(2)}</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-slate-400 line-through text-xs">₹${stdPrice.toFixed(2)}</span>
+                            <span class="font-bold text-slateBlue text-xl">₹${altPrice.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

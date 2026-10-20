@@ -93,24 +93,23 @@
 
 <body class="min-h-screen flex flex-col relative pb-28 text-slate-800">
     <!-- Header / Navigation -->
-    <header class="w-full bg-white px-6 py-4 flex justify-between items-center shadow-sm z-10 sticky top-0">
-        <div class="flex items-center gap-2 text-slateBlue">
-            <i class="fa-solid fa-pills text-xl text-accentGreen"></i>
-            <span class="font-bold text-xl tracking-tight">medibuddy</span>
-            <span
-                class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1">Live
-                Database (₹)</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <!-- Client-side system status badge -->
-            <div id="serverStatusBadge"
-                class="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium shadow-sm"
-                style="border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;">
-                <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: #22c55e;"></span>
-                <span>🟢 System Online (Local Search)</span>
+    <header class="w-full bg-white/95 backdrop-blur-md px-4 sm:px-8 py-3.5 flex justify-between items-center border-b border-slate-200/80 shadow-xs z-20 sticky top-0">
+        <div class="flex items-center gap-2.5 text-slateBlue">
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-accentGreen shadow-xs">
+                <i class="fa-solid fa-pills text-lg"></i>
             </div>
+            <span class="font-bold text-xl tracking-tight text-slateBlue">medibuddy</span>
+        </div>
+        <div class="flex items-center gap-3 sm:gap-4">
+            <!-- Client-side system status badge (Single, uncluttered) -->
+            <div id="serverStatusBadge"
+                class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs"
+                style="border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;">
+                <span>🟢 System Online (Dual-Dataset Search)</span>
+            </div>
+            <!-- Single '? How this works' link button -->
             <button id="howItWorksBtn"
-                class="text-slate-700 hover:text-slateBlue bg-slate-50 hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs"
+                class="text-slate-700 hover:text-slateBlue hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs"
                 aria-label="How this works" aria-haspopup="dialog" type="button">
                 <i class="fa-regular fa-circle-question text-accentGreen text-base"></i>
                 <span>? How this works</span>
