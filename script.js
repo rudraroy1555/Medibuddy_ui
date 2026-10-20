@@ -16,14 +16,38 @@ const activeSaltDisplay = document.getElementById('activeSaltDisplay');
 const resultsCountBadge = document.getElementById('resultsCountBadge');
 const cardsList = document.getElementById('cardsList');
 const popularChips = document.getElementById('popularChips');
+const sortFilterSelect = document.getElementById('sortFilterSelect');
 
-// In-Memory Database Storage
+// Discussion Cart DOM References
+const navCartBtn = document.getElementById('navCartBtn');
+const navCartBadge = document.getElementById('navCartBadge');
+const drawerCartBadge = document.getElementById('drawerCartBadge');
+const cartDrawerModal = document.getElementById('cartDrawerModal');
+const cartDrawerBackdrop = document.getElementById('cartDrawerBackdrop');
+const cartDrawerPanel = document.getElementById('cartDrawerPanel');
+const closeCartDrawerBtn = document.getElementById('closeCartDrawerBtn');
+const cartItemsList = document.getElementById('cartItemsList');
+const cartBenchmarkTotal = document.getElementById('cartBenchmarkTotal');
+const cartAlternativeTotal = document.getElementById('cartAlternativeTotal');
+const cartSavingsTotal = document.getElementById('cartSavingsTotal');
+const clearCartBtn = document.getElementById('clearCartBtn');
+const cartGeneratePdfBtn = document.getElementById('cartGeneratePdfBtn');
+const floatingCartBar = document.getElementById('floatingCartBar');
+const floatingCartBtn = document.getElementById('floatingCartBtn');
+const floatingCartCount = document.getElementById('floatingCartCount');
+const floatingCartSavings = document.getElementById('floatingCartSavings');
+
+// In-Memory Database Storage & Filter State
 let cdscoData = [];
 let pricingData = [];
 let localDrugDatabase = []; // Kept for backwards compatibility
 let isLocalDbReady = false;
 let debounceTimer = null;
 let lastQuery = '';
+let currentSortMode = 'relevance';
+let currentSearchResults = null;
+let discussionCart = [];
+let currentAlternativesList = [];
 
 /**
  * PapaParse Dependency Check & Navbar Badge Status Updater
@@ -231,52 +255,245 @@ function performSearch(customQuery = null) {
     }
 
     const searchResults = searchMaster(query);
+    currentSearchResults = searchResults;
     renderResults(query, searchResults);
 }
 
-// Active Alternative Drug Selection State
-let selectedAlternativeIndex = 0;
-let currentAlternativesList = [];
+// ==============================================================================
+// PRESCRIPTION DISCUSSION CART STATE & HELPERS
+// ==============================================================================
 
-/**
- * Updates the summary caption below the Generate Doctor Note button
- */
-function updateDoctorNoteSummary() {
-    const summaryEl = document.getElementById('selectedNoteSummary');
-    if (!summaryEl) return;
+function getCartItemKey(item) {
+    if (!item) return '';
+    const b = (item.brand_name || '').trim().toLowerCase();
+    const c = (item.cheaper_brand || '').trim().toLowerCase();
+    const g = (item.generic_name || '').trim().toLowerCase();
+    return `${b}__${c}__${g}`;
+}
 
-    if (currentAlternativesList && currentAlternativesList.length > 0 && selectedAlternativeIndex >= 0 && currentAlternativesList[selectedAlternativeIndex]) {
-        const item = currentAlternativesList[selectedAlternativeIndex];
-        const savings = Math.max(0, item.standard_price - item.cheaper_price);
-        summaryEl.innerHTML = `Selected for doctor note: <strong class="text-accentGreen font-bold">${escapeHtml(item.cheaper_brand)}</strong> (₹${item.cheaper_price.toFixed(2)}) &bull; Saves ₹${savings.toFixed(2)} vs ${escapeHtml(item.brand_name)}.`;
-    } else {
-        summaryEl.innerHTML = `Create a personalized conversation starter &mdash; never a prescription.`;
+function isItemInCart(item) {
+    if (!item) return false;
+    const key = getCartItemKey(item);
+    return discussionCart.some(cartItem => getCartItemKey(cartItem) === key);
+}
+
+function saveCartToStorage() {
+    try {
+        localStorage.setItem('medibuddy_discussion_cart', JSON.stringify(discussionCart));
+    } catch (e) {
+        console.warn('Unable to persist discussion cart to localStorage:', e);
     }
 }
 
-/**
- * Interactively select an alternative drug card and update visual highlighting
- * @param {number} index - Index of selected item in currentAlternativesList
- */
-function selectAlternative(index) {
-    if (!currentAlternativesList || !currentAlternativesList[index]) return;
-    selectedAlternativeIndex = index;
+function loadCartFromStorage() {
+    try {
+        const stored = localStorage.getItem('medibuddy_discussion_cart');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+                discussionCart = parsed;
+            }
+        }
+    } catch (e) {
+        console.warn('Unable to load discussion cart from localStorage:', e);
+        discussionCart = [];
+    }
+}
 
+function addToCart(item) {
+    if (!item) return;
+    const key = getCartItemKey(item);
+    if (!discussionCart.some(it => getCartItemKey(it) === key)) {
+        discussionCart.push({
+            brand_name: item.brand_name || 'Prescribed Benchmark',
+            cheaper_brand: item.cheaper_brand || 'Generic Equivalent',
+            generic_name: item.generic_name || 'CDSCO Active API',
+            standard_price: Number(item.standard_price) || 0,
+            cheaper_price: Number(item.cheaper_price) || 0,
+            health_condition: item.health_condition || 'Therapeutic Use',
+            s_no: item.s_no || ''
+        });
+        saveCartToStorage();
+        updateCartUI();
+    }
+}
+
+function removeFromCart(key) {
+    discussionCart = discussionCart.filter(it => getCartItemKey(it) !== key);
+    saveCartToStorage();
+    updateCartUI();
+}
+
+function clearCart() {
+    discussionCart = [];
+    saveCartToStorage();
+    updateCartUI();
+}
+
+function toggleCartItem(index) {
+    if (!currentAlternativesList || !currentAlternativesList[index]) return;
+    const item = currentAlternativesList[index];
+    const key = getCartItemKey(item);
+    if (isItemInCart(item)) {
+        removeFromCart(key);
+    } else {
+        addToCart(item);
+    }
+}
+
+// Backward compatibility alias for selectAlternative
+const selectAlternative = toggleCartItem;
+window.selectAlternative = selectAlternative;
+window.toggleCartItem = toggleCartItem;
+window.removeFromCart = removeFromCart;
+window.clearCart = clearCart;
+
+// Drawer Controls
+function openCartDrawer(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!cartDrawerModal || !cartDrawerPanel) return;
+    cartDrawerModal.classList.remove('opacity-0', 'pointer-events-none', 'invisible');
+    cartDrawerModal.classList.add('opacity-100', 'pointer-events-auto', 'visible');
+    cartDrawerPanel.classList.remove('translate-x-full');
+    cartDrawerPanel.classList.add('translate-x-0');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCartDrawer(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!cartDrawerModal || !cartDrawerPanel) return;
+    cartDrawerModal.classList.remove('opacity-100', 'pointer-events-auto', 'visible');
+    cartDrawerModal.classList.add('opacity-0', 'pointer-events-none', 'invisible');
+    cartDrawerPanel.classList.remove('translate-x-0');
+    cartDrawerPanel.classList.add('translate-x-full');
+    document.body.style.overflow = '';
+}
+
+window.openCartDrawer = openCartDrawer;
+window.closeCartDrawer = closeCartDrawer;
+
+/**
+ * Updates cart badges, floating sticky bar, drawer contents, and rendered card states
+ */
+function updateCartUI() {
+    const count = discussionCart.length;
+
+    // 1. Badges
+    if (navCartBadge) navCartBadge.textContent = count;
+    if (drawerCartBadge) drawerCartBadge.textContent = count;
+    if (floatingCartCount) floatingCartCount.textContent = count;
+
+    // 2. Financial Totals
+    let totalStd = 0;
+    let totalAlt = 0;
+    discussionCart.forEach(it => {
+        totalStd += (Number(it.standard_price) || 0);
+        totalAlt += (Number(it.cheaper_price) || 0);
+    });
+    const totalSavings = Math.max(0, totalStd - totalAlt);
+    const totalSavingsPct = totalStd > 0 ? Math.round((totalSavings / totalStd) * 100) : 0;
+
+    if (cartBenchmarkTotal) cartBenchmarkTotal.textContent = `₹${totalStd.toFixed(2)}`;
+    if (cartAlternativeTotal) cartAlternativeTotal.textContent = `₹${totalAlt.toFixed(2)}`;
+    if (cartSavingsTotal) cartSavingsTotal.textContent = `Save ₹${totalSavings.toFixed(2)} (${totalSavingsPct}%)`;
+    if (floatingCartSavings) floatingCartSavings.textContent = `Save ₹${totalSavings.toFixed(2)}`;
+
+    // 3. Floating Sticky Bar Visibility
+    if (floatingCartBar) {
+        if (count > 0) {
+            floatingCartBar.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+            floatingCartBar.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+        } else {
+            floatingCartBar.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+            floatingCartBar.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        }
+    }
+
+    // 4. Drawer Item List Rendering
+    if (cartItemsList) {
+        if (count === 0) {
+            cartItemsList.innerHTML = `
+                <div class="text-center py-12 px-4 text-slate-500">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3 text-2xl">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <h4 class="font-bold text-slateBlue text-base mb-1">Your Discussion Cart is empty</h4>
+                    <p class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed mb-4">
+                        Search medications and click <strong class="text-slate-700 font-semibold">'Add to Discussion Cart'</strong> on cheaper generic alternatives to prepare a consultation note for your doctor.
+                    </p>
+                </div>
+            `;
+        } else {
+            let itemsHtml = '';
+            discussionCart.forEach(it => {
+                const itemKey = getCartItemKey(it);
+                const itemSavings = Math.max(0, it.standard_price - it.cheaper_price);
+                const itemSavingsPct = it.standard_price > 0 ? Math.round((itemSavings / it.standard_price) * 100) : 0;
+
+                itemsHtml += `
+                    <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-xs relative overflow-hidden group">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <h4 class="font-bold text-slateBlue text-sm tracking-tight">${escapeHtml(it.cheaper_brand)}</h4>
+                                    <span class="bg-emerald-50 text-accentGreen text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 uppercase">
+                                        Alternative
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-600 mt-0.5 truncate">
+                                    Active API: <span class="text-accentGreen font-semibold">${escapeHtml(it.generic_name)}</span>
+                                </p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">
+                                    Benchmark: <strong class="text-slate-600">${escapeHtml(it.brand_name)}</strong> (₹${it.standard_price.toFixed(2)})
+                                </p>
+                            </div>
+                            <button type="button" onclick="removeFromCart('${itemKey}')" title="Remove from discussion cart"
+                                class="text-slate-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
+                                <i class="fa-regular fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="text-accentGreen font-bold">Save ₹${itemSavings.toFixed(2)} (${itemSavingsPct}%)</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-slate-400 line-through text-[11px]">₹${it.standard_price.toFixed(2)}</span>
+                                <span class="font-bold text-slateBlue text-sm">₹${it.cheaper_price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            cartItemsList.innerHTML = itemsHtml;
+        }
+    }
+
+    // 5. Update Doctor Note Summary text
+    const summaryEl = document.getElementById('selectedNoteSummary');
+    if (summaryEl) {
+        if (count > 0) {
+            summaryEl.innerHTML = `Discussion Cart: <strong class="text-accentGreen font-bold">${count} medicine${count > 1 ? 's' : ''}</strong> shortlisted &bull; Total Est. Savings: <strong class="text-accentGreen font-bold">₹${totalSavings.toFixed(2)}</strong> (${totalSavingsPct}%). Ready to generate consolidated note.`;
+        } else {
+            summaryEl.innerHTML = `Create a personalized conversation starter &mdash; never a prescription. Click 'Add to Discussion Cart' on any alternative to build your consultation list.`;
+        }
+    }
+
+    // 6. Update Active Rendered Cards state in DOM
     const cards = document.querySelectorAll('.alternative-drug-card');
     cards.forEach((card, idx) => {
-        const isSelected = (idx === selectedAlternativeIndex);
+        if (!currentAlternativesList || !currentAlternativesList[idx]) return;
+        const item = currentAlternativesList[idx];
+        const inCart = isItemInCart(item);
         const actionContainer = card.querySelector('.selection-action-container');
         const borderIndicator = card.querySelector('.left-indicator-bar');
 
-        if (isSelected) {
+        if (inCart) {
             card.className = 'alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white shadow-sm ring-2 ring-accentGreen/20';
             if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-accentGreen transition-colors';
             if (actionContainer) {
                 actionContainer.innerHTML = `
-                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${idx})" 
-                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer">
-                        <i class="fa-solid fa-circle-check text-sm"></i>
-                        <span>Selected for Discussion</span>
+                    <button type="button" onclick="event.stopPropagation(); toggleCartItem(${idx})" 
+                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 transition-all cursor-pointer">
+                        <i class="fa-solid fa-check text-sm"></i>
+                        <span>In Discussion Cart</span>
                     </button>
                 `;
             }
@@ -285,35 +502,41 @@ function selectAlternative(index) {
             if (borderIndicator) borderIndicator.className = 'left-indicator-bar absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-slate-400 transition-colors';
             if (actionContainer) {
                 actionContainer.innerHTML = `
-                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${idx})" 
+                    <button type="button" onclick="event.stopPropagation(); toggleCartItem(${idx})" 
                         class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen hover:bg-emerald-50 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer">
-                        <i class="fa-regular fa-circle text-slate-400"></i>
-                        <span>Select for Discussion</span>
+                        <i class="fa-solid fa-cart-plus text-slate-400"></i>
+                        <span>Add to Discussion Cart</span>
                     </button>
                 `;
             }
         }
     });
-
-    updateDoctorNoteSummary();
 }
 
-// Expose globally so inline onclick handlers have access
-window.selectAlternative = selectAlternative;
-
 /**
- * Dynamically render comparison cards from both pricing alternatives and CDSCO official records
+ * Dynamically render comparison cards with sorting filters and cart actions
  */
 function renderResults(query, searchResults) {
     if (!cardsList || !resultsCountBadge || !activeSaltDisplay) return;
 
-    const priceAlternatives = (searchResults && searchResults.priceAlternatives) || [];
+    currentSearchResults = searchResults;
+    const rawPriceAlternatives = (searchResults && searchResults.priceAlternatives) || [];
     const officialAPIs = (searchResults && searchResults.officialAPIs) || [];
-    const totalCount = priceAlternatives.length + officialAPIs.length;
+    const totalCount = rawPriceAlternatives.length + officialAPIs.length;
 
-    // Cache current list for dynamic selection and note generation
+    // Apply sorting filters to priceAlternatives
+    let priceAlternatives = [...rawPriceAlternatives];
+    if (currentSortMode === 'price-asc') {
+        priceAlternatives.sort((a, b) => (Number(a.cheaper_price) || 0) - (Number(b.cheaper_price) || 0));
+    } else if (currentSortMode === 'savings-desc') {
+        priceAlternatives.sort((a, b) => {
+            const savA = Math.max(0, (Number(a.standard_price) || 0) - (Number(a.cheaper_price) || 0));
+            const savB = Math.max(0, (Number(b.standard_price) || 0) - (Number(b.cheaper_price) || 0));
+            return savB - savA;
+        });
+    }
+
     currentAlternativesList = priceAlternatives;
-    selectedAlternativeIndex = priceAlternatives.length > 0 ? 0 : -1;
 
     if (totalCount === 0) {
         resultsCountBadge.textContent = '0 matches found';
@@ -337,11 +560,11 @@ function renderResults(query, searchResults) {
                 </div>
             </div>
         `;
-        updateDoctorNoteSummary();
+        updateCartUI();
         return;
     }
 
-    // Determine the primary active salt for header display
+    // Determine primary active salt for header display
     let primarySalt = 'Generic Bioequivalent API';
     if (priceAlternatives.length > 0) {
         primarySalt = priceAlternatives[0].generic_name;
@@ -358,28 +581,28 @@ function renderResults(query, searchResults) {
     // SECTION 1: REAL-WORLD MARKET PRICING & CHEAPER ALTERNATIVES
     // =========================================================================
     if (priceAlternatives.length > 0) {
-        priceAlternatives.slice(0, 8).forEach((item, index) => {
+        priceAlternatives.slice(0, 10).forEach((item, index) => {
             const brand = item.brand_name;
             const cheaperBrand = item.cheaper_brand;
             const generic = item.generic_name;
             const condition = item.health_condition || 'Therapeutic Use';
-            const stdPrice = item.standard_price;
-            const altPrice = item.cheaper_price;
+            const stdPrice = Number(item.standard_price) || 0;
+            const altPrice = Number(item.cheaper_price) || 0;
             const savings = Math.max(0, stdPrice - altPrice);
             const savingsPercent = stdPrice > 0 ? Math.round((savings / stdPrice) * 100) : 0;
-            const isSelected = (index === selectedAlternativeIndex);
+            const inCart = isItemInCart(item);
 
             cardsHtml += `
                 <div class="alternative-drug-card rounded-2xl p-5 md:p-6 transition-all duration-200 relative overflow-hidden mb-4 cursor-pointer ${
-                    isSelected
+                    inCart
                         ? 'border-2 border-accentGreen bg-gradient-to-r from-emerald-50/70 via-white to-white shadow-sm ring-2 ring-accentGreen/20'
                         : 'border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
-                }" data-index="${index}" onclick="selectAlternative(${index})">
-                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${isSelected ? 'bg-accentGreen' : 'bg-slate-200 group-hover:bg-slate-400'} transition-colors"></div>
+                }" data-index="${index}" onclick="toggleCartItem(${index})">
+                    <div class="left-indicator-bar absolute top-0 left-0 w-1.5 h-full ${inCart ? 'bg-accentGreen' : 'bg-slate-200 group-hover:bg-slate-400'} transition-colors"></div>
 
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div class="flex-grow space-y-1.5">
-                            <!-- Clean Header: Cheaper Brand Name and Status Badges (Uncluttered, Single Title) -->
+                            <!-- Clean Header: Cheaper Brand Name and Status Badges -->
                             <div class="flex items-center gap-2.5 flex-wrap">
                                 <h3 class="text-xl font-bold text-slateBlue tracking-tight">${escapeHtml(cheaperBrand)}</h3>
                                 <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-xs">
@@ -409,19 +632,19 @@ function renderResults(query, searchResults) {
                                 <span class="text-[11px] text-emerald-700 font-semibold block">(${savingsPercent}% lower cost)</span>
                             </div>
 
-                            <!-- Single, uncluttered Action Button -->
+                            <!-- Cart Add/Remove Toggle Button -->
                             <div class="selection-action-container">
-                                ${isSelected ? `
-                                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${index})" 
-                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer">
-                                        <i class="fa-solid fa-circle-check text-sm"></i>
-                                        <span>Selected for Discussion</span>
+                                ${inCart ? `
+                                    <button type="button" onclick="event.stopPropagation(); toggleCartItem(${index})" 
+                                        class="select-alt-btn inline-flex items-center gap-1.5 bg-accentGreen text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-xs hover:bg-emerald-700 transition-all cursor-pointer">
+                                        <i class="fa-solid fa-check text-sm"></i>
+                                        <span>In Discussion Cart</span>
                                     </button>
                                 ` : `
-                                    <button type="button" onclick="event.stopPropagation(); selectAlternative(${index})" 
+                                    <button type="button" onclick="event.stopPropagation(); toggleCartItem(${index})" 
                                         class="select-alt-btn inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-accentGreen hover:bg-emerald-50 text-xs font-semibold px-4 py-2 rounded-xl border border-slate-200 hover:border-accentGreen/50 shadow-xs transition-all cursor-pointer">
-                                        <i class="fa-regular fa-circle text-slate-400"></i>
-                                        <span>Select for Discussion</span>
+                                        <i class="fa-solid fa-cart-plus text-slate-400"></i>
+                                        <span>Add to Discussion Cart</span>
                                     </button>
                                 `}
                             </div>
@@ -492,7 +715,7 @@ function renderResults(query, searchResults) {
     }
 
     cardsList.innerHTML = cardsHtml;
-    updateDoctorNoteSummary();
+    updateCartUI();
 }
 
 /**
@@ -567,53 +790,68 @@ function generateDoctorRequestNotePDF() {
         return;
     }
 
-    // Read details from the currently selected alternative card
-    const selectedItem = (currentAlternativesList && selectedAlternativeIndex >= 0 && currentAlternativesList[selectedAlternativeIndex])
-        ? currentAlternativesList[selectedAlternativeIndex]
-        : (currentAlternativesList && currentAlternativesList.length > 0 ? currentAlternativesList[0] : null);
+    // Determine items to include in note
+    let itemsToPrint = [...discussionCart];
 
-    let brandName = '';
-    let cheaperBrand = '';
-    let genericApiName = '';
-    let cheaperPriceStr = '';
-    let stdPriceStr = '';
-    let savingsStr = '';
-    let condition = '';
-
-    if (selectedItem) {
-        brandName = selectedItem.brand_name || 'Prescribed Medication';
-        cheaperBrand = selectedItem.cheaper_brand || 'Generic Equivalent Alternative';
-        genericApiName = selectedItem.generic_name || 'CDSCO Standard API';
-        const std = selectedItem.standard_price || 0;
-        const alt = selectedItem.cheaper_price || 0;
-        const sav = Math.max(0, std - alt);
-        const savPct = std > 0 ? Math.round((sav / std) * 100) : 0;
-
-        stdPriceStr = `₹${std.toFixed(2)}`;
-        cheaperPriceStr = `₹${alt.toFixed(2)}`;
-        savingsStr = `₹${sav.toFixed(2)} (${savPct}% savings)`;
-        condition = selectedItem.health_condition || 'Therapeutic Indication';
-    } else {
-        // Fallback to active query display and CDSCO salt if no pricing item is loaded
-        const brandElement = document.getElementById('searchQueryDisplay');
-        brandName = brandElement ? brandElement.textContent.trim() : (lastQuery || 'Prescribed Medication');
-        cheaperBrand = `${brandName} (Generic Bioequivalent)`;
-        const saltElement = document.querySelector('#activeSaltDisplay span');
-        genericApiName = saltElement ? saltElement.textContent.trim() : 'CDSCO Bioequivalent API';
-        stdPriceStr = 'Market Benchmark';
-        cheaperPriceStr = 'Jan Aushadhi / Certified Generic Rate';
-        savingsStr = 'Substantial Generic Savings';
-        condition = 'Prescribed Medical Condition';
+    // If cart is empty, fallback gracefully: auto-add top searched alternative if available
+    if (itemsToPrint.length === 0) {
+        if (currentAlternativesList && currentAlternativesList.length > 0) {
+            addToCart(currentAlternativesList[0]);
+            itemsToPrint = [...discussionCart];
+        } else {
+            alert("Your Discussion Cart is empty. Please search and add at least one generic alternative to your cart before generating a note.");
+            openCartDrawer();
+            return;
+        }
     }
 
+    // Buttons feedback
     const originalBtnHtml = generateDoctorNoteBtn ? generateDoctorNoteBtn.innerHTML : '';
-    if (generateDoctorNoteBtn) {
-        generateDoctorNoteBtn.innerHTML = `
-            <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
-            <span>Generating PDF...</span>
-        `;
-        generateDoctorNoteBtn.disabled = true;
-    }
+    const originalDrawerBtnHtml = cartGeneratePdfBtn ? cartGeneratePdfBtn.innerHTML : '';
+
+    const setButtonsLoading = () => {
+        if (generateDoctorNoteBtn) {
+            generateDoctorNoteBtn.innerHTML = `
+                <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                <span>Generating PDF (${itemsToPrint.length} item${itemsToPrint.length > 1 ? 's' : ''})...</span>
+            `;
+            generateDoctorNoteBtn.disabled = true;
+        }
+        if (cartGeneratePdfBtn) {
+            cartGeneratePdfBtn.innerHTML = `
+                <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+                <span>Generating Note...</span>
+            `;
+            cartGeneratePdfBtn.disabled = true;
+        }
+    };
+
+    const resetButtonsSuccess = () => {
+        if (generateDoctorNoteBtn) {
+            generateDoctorNoteBtn.innerHTML = `
+                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+                <span class="text-emerald-700">PDF Downloaded!</span>
+            `;
+        }
+        if (cartGeneratePdfBtn) {
+            cartGeneratePdfBtn.innerHTML = `
+                <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+                <span>PDF Downloaded!</span>
+            `;
+        }
+        setTimeout(() => {
+            if (generateDoctorNoteBtn) {
+                generateDoctorNoteBtn.innerHTML = originalBtnHtml;
+                generateDoctorNoteBtn.disabled = false;
+            }
+            if (cartGeneratePdfBtn) {
+                cartGeneratePdfBtn.innerHTML = originalDrawerBtnHtml;
+                cartGeneratePdfBtn.disabled = false;
+            }
+        }, 2500);
+    };
+
+    setButtonsLoading();
 
     try {
         const doc = new jsPDF({
@@ -623,24 +861,24 @@ function generateDoctorRequestNotePDF() {
         });
 
         const pageWidth = doc.internal.pageSize.getWidth();
-        const margin = 20;
+        const margin = 15;
         const contentWidth = pageWidth - (margin * 2);
 
-        // Top Header Banner
-        doc.setFillColor(35, 57, 77); // slateBlue #23394d
-        doc.rect(0, 0, pageWidth, 28, 'F');
+        // Header Banner
+        doc.setFillColor(35, 57, 77); // slateBlue
+        doc.rect(0, 0, pageWidth, 26, 'F');
 
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(15);
+        doc.setFontSize(14);
         doc.setTextColor(255, 255, 255);
-        doc.text('MEDIBUDDY | CLINICAL DISCUSSION AID', margin, 13);
+        doc.text('MEDIBUDDY | CLINICAL DISCUSSION AID', margin, 12);
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(203, 213, 225);
-        doc.text('Patient Request for Therapeutic Generic Alternative Evaluation', margin, 20);
+        doc.text('Patient Consultation Aid for Therapeutic Generic Bioequivalent Evaluation', margin, 19);
 
-        let currentY = 38;
+        let currentY = 35;
         const currentDate = new Date().toLocaleDateString('en-IN', {
             year: 'numeric',
             month: 'long',
@@ -648,144 +886,219 @@ function generateDoctorRequestNotePDF() {
         });
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(100, 116, 139);
         doc.text(`Date: ${currentDate}`, margin, currentY);
-        doc.text(`Regulatory Standard: CDSCO (India) Bioequivalence Norms`, pageWidth - margin, currentY, { align: 'right' });
+        doc.text(`Regulatory Reference: CDSCO (India) Bioequivalence Norms`, pageWidth - margin, currentY, { align: 'right' });
 
-        currentY += 10;
+        currentY += 8;
 
+        // Subject Line
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setTextColor(15, 23, 42);
-        doc.text(`Subject: Request to Evaluate Generic Alternative (${cheaperBrand})`, margin, currentY);
+        const subjectText = itemsToPrint.length === 1
+            ? `Subject: Clinical Evaluation Request for Generic Substitute (${itemsToPrint[0].cheaper_brand})`
+            : `Subject: Clinical Evaluation Request for ${itemsToPrint.length} Prescribed Generic Substitutes`;
+        doc.text(subjectText, margin, currentY);
 
-        currentY += 5;
+        currentY += 4;
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.5);
         doc.line(margin, currentY, margin + contentWidth, currentY);
 
-        currentY += 8;
+        currentY += 7;
 
-        // Structured Medical Comparison Box
-        doc.setFillColor(248, 250, 252);
-        doc.setDrawColor(203, 213, 225);
-        doc.roundedRect(margin, currentY, contentWidth, 42, 2, 2, 'FD');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(71, 85, 105);
-        doc.text('CURRENT REFERENCE BRAND:', margin + 6, currentY + 8);
-        doc.text('CHOSEN CHEAPER ALTERNATIVE:', margin + 6, currentY + 16);
-        doc.text('ACTIVE PHARMACEUTICAL INGREDIENT:', margin + 6, currentY + 24);
-        doc.text('HEALTH CONDITION / THERAPY:', margin + 6, currentY + 32);
-        doc.text('ESTIMATED PRICE & SAVINGS:', margin + 6, currentY + 39);
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(35, 57, 77);
-        doc.text(`${brandName} (${stdPriceStr})`, margin + 74, currentY + 8);
-
-        doc.setTextColor(22, 101, 52); // accentGreen
-        doc.text(`${cheaperBrand} (${cheaperPriceStr})`, margin + 74, currentY + 16);
-        doc.text(genericApiName, margin + 74, currentY + 24);
-
-        doc.setTextColor(51, 65, 85);
-        doc.text(condition, margin + 74, currentY + 32);
-
-        doc.setTextColor(22, 101, 52);
-        doc.text(savingsStr, margin + 74, currentY + 39);
-
-        currentY += 50;
-
-        // Structured Clinical Letter to Physician
+        // Letter Salutation & Context
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10.5);
+        doc.setFontSize(9.5);
         doc.setTextColor(30, 41, 59);
-
         doc.text('Dear Doctor,', margin, currentY);
+        currentY += 5;
+
+        const introText = 'I am actively reviewing my ongoing prescription expenses. In consultation with CDSCO-registered database standards, I have shortlisted the following certified generic equivalent(s) currently available in the Indian pharmaceutical market for your clinical evaluation:';
+        const splitIntro = doc.splitTextToSize(introText, contentWidth);
+        doc.text(splitIntro, margin, currentY);
+        currentY += (splitIntro.length * 4.5) + 4;
+
+        // TABLE HEADER
+        const colW = {
+            num: 8,
+            brand: 44,
+            alt: 66,
+            price: 26,
+            savings: 36
+        };
+
+        const tableX = margin;
+        doc.setFillColor(241, 245, 249);
+        doc.setDrawColor(203, 213, 225);
+        doc.rect(tableX, currentY, contentWidth, 7, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(51, 65, 85);
+        doc.text('#', tableX + 2, currentY + 4.8);
+        doc.text('PRESCRIBED BENCHMARK', tableX + colW.num + 2, currentY + 4.8);
+        doc.text('PROPOSED GENERIC & SALT', tableX + colW.num + colW.brand + 2, currentY + 4.8);
+        doc.text('ALT PRICE', tableX + colW.num + colW.brand + colW.alt + 2, currentY + 4.8);
+        doc.text('EST. SAVINGS', tableX + colW.num + colW.brand + colW.alt + colW.price + 2, currentY + 4.8);
+
         currentY += 7;
 
-        const p1 = `I am currently reviewing my ongoing healthcare expenses. I noticed that a CDSCO-cleared bioequivalent alternative exists for my medication ${brandName}:`;
-        const linesP1 = doc.splitTextToSize(p1, contentWidth);
-        doc.text(linesP1, margin, currentY);
-        currentY += (linesP1.length * 5.5) + 3;
+        let totalBenchmarkCost = 0;
+        let totalAlternativeCost = 0;
 
+        // TABLE ROWS
+        itemsToPrint.forEach((item, idx) => {
+            const std = Number(item.standard_price) || 0;
+            const alt = Number(item.cheaper_price) || 0;
+            const sav = Math.max(0, std - alt);
+            const savPct = std > 0 ? Math.round((sav / std) * 100) : 0;
+
+            totalBenchmarkCost += std;
+            totalAlternativeCost += alt;
+
+            const rowHeight = 11;
+            // Alternating fill
+            if (idx % 2 === 1) {
+                doc.setFillColor(248, 250, 252);
+                doc.rect(tableX, currentY, contentWidth, rowHeight, 'F');
+            }
+            doc.setDrawColor(226, 232, 240);
+            doc.line(tableX, currentY + rowHeight, tableX + contentWidth, currentY + rowHeight);
+
+            // Item number
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`${idx + 1}.`, tableX + 2, currentY + 4.5);
+
+            // Prescribed Benchmark
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 41, 59);
+            doc.text(doc.splitTextToSize(item.brand_name || 'Prescribed Drug', colW.brand - 4)[0], tableX + colW.num + 2, currentY + 4.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Std: ₹${std.toFixed(2)}`, tableX + colW.num + 2, currentY + 8.5);
+
+            // Generic Alternative & Salt
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            doc.setTextColor(22, 101, 52); // green
+            doc.text(doc.splitTextToSize(item.cheaper_brand || 'Generic Alternative', colW.alt - 4)[0], tableX + colW.num + colW.brand + 2, currentY + 4.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(71, 85, 105);
+            const saltLine = `Salt: ${item.generic_name || 'CDSCO API'}`;
+            doc.text(doc.splitTextToSize(saltLine, colW.alt - 4)[0], tableX + colW.num + colW.brand + 2, currentY + 8.5);
+
+            // Alt Price
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            doc.setTextColor(35, 57, 77);
+            doc.text(`₹${alt.toFixed(2)}`, tableX + colW.num + colW.brand + colW.alt + 2, currentY + 6.5);
+
+            // Savings
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(22, 101, 52);
+            doc.text(`Save ₹${sav.toFixed(2)}`, tableX + colW.num + colW.brand + colW.alt + colW.price + 2, currentY + 4.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.text(`(${savPct}% lower)`, tableX + colW.num + colW.brand + colW.alt + colW.price + 2, currentY + 8.5);
+
+            currentY += rowHeight;
+        });
+
+        // TOTAL SUMMARY BOX
+        const totalSavings = Math.max(0, totalBenchmarkCost - totalAlternativeCost);
+        const totalSavingsPct = totalBenchmarkCost > 0 ? Math.round((totalSavings / totalBenchmarkCost) * 100) : 0;
+
+        currentY += 4;
+        doc.setFillColor(240, 253, 244); // emerald-50
+        doc.setDrawColor(134, 239, 172); // emerald-300
+        doc.roundedRect(tableX, currentY, contentWidth, 14, 1.5, 1.5, 'FD');
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(22, 101, 52);
+        doc.text(`Total Benchmark Cost: ₹${totalBenchmarkCost.toFixed(2)}   |   Total Generic Alternative Cost: ₹${totalAlternativeCost.toFixed(2)}`, tableX + 5, currentY + 5.5);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text(`CONSOLIDATED ESTIMATED SAVINGS: Save ₹${totalSavings.toFixed(2)} (${totalSavingsPct}% Lower Overall Cost)`, tableX + 5, currentY + 10.5);
+
+        currentY += 20;
+
+        // CLINICAL QUESTIONS FOR PHYSICIAN
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9.5);
         doc.setTextColor(35, 57, 77);
-        doc.text(`* Alternative Brand: ${cheaperBrand}`, margin + 6, currentY);
+        doc.text('Key Clinical Questions for Physician Guidance:', margin, currentY);
         currentY += 5;
-        doc.text(`* Active Pharmaceutical Ingredient: ${genericApiName}`, margin + 6, currentY);
-        currentY += 5;
-        doc.text(`* Cost Comparison: ${stdPriceStr} vs ${cheaperPriceStr} (Estimated Savings: ${savingsStr})`, margin + 6, currentY);
-        currentY += 7;
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10.5);
-        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(8.5);
+        doc.setTextColor(51, 65, 85);
+        doc.text('1. Therapeutic Bioequivalence: Are the proposed generic formulations chemically and clinically equivalent for my ongoing treatment plan?', margin + 2, currentY);
+        currentY += 4.5;
+        doc.text('2. Excipients & Tolerability: Are there specific inactive ingredients, release mechanisms, or manufacturer standards I should evaluate?', margin + 2, currentY);
+        currentY += 4.5;
+        doc.text('3. Prescription Endorsement: If clinically cleared, could you please update my prescription with the approved active chemical salts?', margin + 2, currentY);
+        currentY += 9;
 
-        const p2 = `Could you please advise if substituting ${brandName} with ${cheaperBrand} is clinically safe and therapeutic for my condition?`;
-        const linesP2 = doc.splitTextToSize(p2, contentWidth);
-        doc.text(linesP2, margin, currentY);
-        currentY += (linesP2.length * 5.5) + 3;
-
-        const p3 = 'I would appreciate your clinical evaluation regarding therapeutic efficacy, dosage equivalence, and whether any monitoring is recommended during substitution.';
-        const linesP3 = doc.splitTextToSize(p3, contentWidth);
-        doc.text(linesP3, margin, currentY);
-        currentY += (linesP3.length * 5.5) + 12;
-
+        // SIGNATURE BLOCK
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
+        doc.setFontSize(8.5);
         doc.setTextColor(15, 23, 42);
-        doc.text('Thank you for your guidance and clinical time,', margin, currentY);
-        currentY += 14;
+        doc.text('Thank you for your clinical time, advice, and continued care.', margin, currentY);
+        currentY += 10;
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9.5);
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
         doc.text('Patient Signature: _________________________________________', margin, currentY);
-        currentY += 8;
+        doc.text('Date: ________________________', pageWidth - margin - 50, currentY);
+        currentY += 6.5;
         doc.text('Printed Patient Name: _____________________________________', margin, currentY);
-        currentY += 8;
-        doc.text('Contact Phone: ____________________________________________', margin, currentY);
+        doc.text('Phone: _______________________', pageWidth - margin - 50, currentY);
 
-        // Disclaimer Footer
-        const footerY = 270;
+        // FOOTER DISCLAIMER
+        const footerY = 276;
         doc.setDrawColor(226, 232, 240);
-        doc.line(margin, footerY - 5, margin + contentWidth, footerY - 5);
+        doc.line(margin, footerY - 4, margin + contentWidth, footerY - 4);
 
         doc.setFont('helvetica', 'italic');
-        doc.setFontSize(8);
+        doc.setFontSize(7.5);
         doc.setTextColor(148, 163, 184);
-        const disclaimer = 'Note: This document is an informational conversation starter prepared by the patient. It does not constitute a valid prescription or medical advice. All therapeutic substitution decisions remain solely under your treating physician\'s professional judgment.';
+        const disclaimer = 'Notice: This document is an educational patient discussion aid prepared via MediBuddy. It does NOT constitute a valid medical prescription. All substitution decisions remain solely under the clinical discretion of your licensed treating physician.';
         const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth);
         doc.text(disclaimerLines, margin, footerY);
 
-        const sanitizedFilename = `Doctor_Request_Note_${cheaperBrand.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+        const sanitizedFilename = `Doctor_Request_Note_${itemsToPrint.length}_Medications.pdf`;
         doc.save(sanitizedFilename);
 
-        if (generateDoctorNoteBtn) {
-            generateDoctorNoteBtn.innerHTML = `
-                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
-                <span class="text-emerald-700">PDF Downloaded!</span>
-            `;
-            setTimeout(() => {
-                generateDoctorNoteBtn.innerHTML = originalBtnHtml;
-                generateDoctorNoteBtn.disabled = false;
-            }, 2500);
-        }
+        resetButtonsSuccess();
     } catch (err) {
-        console.error('Error generating PDF:', err);
+        console.error('Error generating multi-item PDF:', err);
         alert('An error occurred while generating the PDF. Please try again.');
         if (generateDoctorNoteBtn) {
             generateDoctorNoteBtn.innerHTML = originalBtnHtml;
             generateDoctorNoteBtn.disabled = false;
+        }
+        if (cartGeneratePdfBtn) {
+            cartGeneratePdfBtn.innerHTML = originalDrawerBtnHtml;
+            cartGeneratePdfBtn.disabled = false;
         }
     }
 }
 
 if (generateDoctorNoteBtn) {
     generateDoctorNoteBtn.addEventListener('click', generateDoctorRequestNotePDF);
+}
+if (cartGeneratePdfBtn) {
+    cartGeneratePdfBtn.addEventListener('click', generateDoctorRequestNotePDF);
 }
 
 // ==============================================================================
@@ -932,9 +1245,37 @@ window.addEventListener('keydown', function (e) {
 });
 
 // ==============================================================================
+// DISCUSSION CART & SORTING FILTER EVENT LISTENERS
+// ==============================================================================
+if (sortFilterSelect) {
+    sortFilterSelect.addEventListener('change', function (e) {
+        currentSortMode = e.target.value;
+        if (currentSearchResults && lastQuery) {
+            renderResults(lastQuery, currentSearchResults);
+        }
+    });
+}
+
+if (navCartBtn) navCartBtn.addEventListener('click', openCartDrawer);
+if (floatingCartBtn) floatingCartBtn.addEventListener('click', openCartDrawer);
+if (closeCartDrawerBtn) closeCartDrawerBtn.addEventListener('click', closeCartDrawer);
+if (cartDrawerBackdrop) cartDrawerBackdrop.addEventListener('click', closeCartDrawer);
+if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+
+window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        if (cartDrawerModal && !cartDrawerModal.classList.contains('invisible')) {
+            closeCartDrawer();
+        }
+    }
+});
+
+// ==============================================================================
 // APP INITIALIZATION
 // ==============================================================================
 window.addEventListener('DOMContentLoaded', () => {
     updateBadgeStatus();
+    loadCartFromStorage();
+    updateCartUI();
     initializeLocalDatabase();
 });

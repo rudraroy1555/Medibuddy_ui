@@ -100,19 +100,27 @@
             </div>
             <span class="font-bold text-xl tracking-tight text-slateBlue">medibuddy</span>
         </div>
-        <div class="flex items-center gap-3 sm:gap-4">
+        <div class="flex items-center gap-2 sm:gap-3">
             <!-- Client-side system status badge (Single, uncluttered) -->
             <div id="serverStatusBadge"
-                class="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs"
+                class="hidden md:inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium shadow-xs"
                 style="border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;">
                 <span>🟢 System Online (Dual-Dataset Search)</span>
             </div>
+            <!-- Discussion Cart Trigger Button -->
+            <button id="navCartBtn"
+                class="text-slate-700 hover:text-slateBlue hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs relative"
+                aria-label="View Prescription Discussion Cart" type="button">
+                <i class="fa-solid fa-clipboard-list text-accentGreen text-base"></i>
+                <span class="hidden sm:inline">Discussion Cart</span>
+                <span id="navCartBadge" class="bg-accentGreen text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-0.5">0</span>
+            </button>
             <!-- Single 'How this works' link button -->
             <button id="howItWorksBtn"
-                class="text-slate-700 hover:text-slateBlue hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs"
+                class="text-slate-700 hover:text-slateBlue hover:bg-slate-100 transition-colors text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs"
                 aria-label="How this works" aria-haspopup="dialog" type="button">
                 <i class="fa-regular fa-circle-question text-accentGreen text-base"></i>
-                <span>How this works</span>
+                <span class="hidden sm:inline">How this works</span>
             </button>
         </div>
     </header>
@@ -181,8 +189,8 @@
         <!-- Results Container (Visible for comparison) -->
         <div id="resultsContainer" class="w-full max-w-3xl flex flex-col gap-5 fade-in pb-8">
 
-            <!-- Dynamic Results Header -->
-            <div class="flex justify-between items-end mb-2 border-b border-slate-200 pb-4">
+            <!-- Dynamic Results Header with Sorting Filters -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-2 border-b border-slate-200 pb-4">
                 <div>
                     <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Search Results for</h2>
                     <p class="text-2xl font-bold text-slateBlue" id="searchQueryDisplay">Lipitor</p>
@@ -190,9 +198,21 @@
                         Active Salt: <span class="font-semibold text-slate-700">Atorvastatin Calcium</span>
                     </p>
                 </div>
-                <div class="text-right text-xs text-slate-500">
-                    <p class="font-semibold text-slate-700" id="resultsCountBadge">Loading options...</p>
-                    <p>Prices in Indian Rupees (₹)</p>
+                <div class="flex flex-col sm:items-end gap-2 text-xs text-slate-500 w-full sm:w-auto">
+                    <div class="flex items-center justify-between sm:justify-end gap-3 w-full">
+                        <p class="font-semibold text-slate-700" id="resultsCountBadge">Loading options...</p>
+                        <!-- Sorting Dropdown -->
+                        <div class="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-xs text-xs font-medium text-slate-700">
+                            <i class="fa-solid fa-arrow-down-wide-short text-slate-400"></i>
+                            <label for="sortFilterSelect" class="text-slate-500 font-normal">Sort:</label>
+                            <select id="sortFilterSelect" class="bg-transparent text-slate-700 font-semibold focus:outline-none cursor-pointer">
+                                <option value="relevance">Relevance</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="savings-desc">Highest Savings</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="hidden sm:block">Prices in Indian Rupees (₹)</p>
                 </div>
             </div>
 
@@ -331,6 +351,103 @@
                     type="button">
                     Got it, thanks!
                 </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         PRESCRIPTION DISCUSSION CART FLOATING BAR
+         ========================================================================== -->
+    <div id="floatingCartBar"
+        class="fixed bottom-14 sm:bottom-16 left-1/2 transform -translate-x-1/2 z-30 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+        <button id="floatingCartBtn" type="button"
+            class="bg-slateBlue text-white hover:bg-deepSlate px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700/80 cursor-pointer backdrop-blur-md">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs font-bold tracking-wide uppercase text-slate-300">Discussion Cart:</span>
+                <span id="floatingCartCount" class="bg-accentGreen text-white font-bold text-xs px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <span class="h-4 w-px bg-slate-600"></span>
+            <div class="text-xs font-semibold text-emerald-300">
+                <span id="floatingCartSavings">Save ₹0.00</span>
+            </div>
+            <span class="text-xs bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full font-medium transition-colors flex items-center gap-1.5 ml-1">
+                <span>View Cart & Note</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </span>
+        </button>
+    </div>
+
+    <!-- ==========================================================================
+         PRESCRIPTION DISCUSSION CART SLIDE-OVER DRAWER
+         ========================================================================== -->
+    <div id="cartDrawerModal"
+        class="fixed inset-0 z-50 flex justify-end opacity-0 pointer-events-none invisible transition-all duration-300 ease-out"
+        role="dialog" aria-modal="true" aria-labelledby="cartDrawerTitle">
+        
+        <!-- Backdrop -->
+        <div id="cartDrawerBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300"></div>
+
+        <!-- Slide-over Drawer Panel -->
+        <div id="cartDrawerPanel"
+            class="relative w-full max-w-md bg-white shadow-2xl flex flex-col h-full transform translate-x-full transition-transform duration-300 ease-out z-10 border-l border-slate-200">
+            
+            <!-- Drawer Header -->
+            <div class="bg-slateBlue text-white p-5 flex items-center justify-between border-b border-white/10 shadow-sm flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-accentGreen">
+                        <i class="fa-solid fa-clipboard-list text-lg text-emerald-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="cartDrawerTitle" class="font-bold text-base leading-tight">Prescription Discussion Cart</h3>
+                            <span id="drawerCartBadge" class="bg-accentGreen text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300">Shortlisted for Doctor Request Note</p>
+                    </div>
+                </div>
+                <button id="closeCartDrawerBtn"
+                    class="text-slate-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                    aria-label="Close Discussion Cart" type="button">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Drawer Body: Scrollable Item List -->
+            <div id="cartItemsList" class="flex-grow p-4 md:p-5 overflow-y-auto space-y-3 bg-slate-50">
+                <!-- Populated dynamically via updateCartUI() -->
+            </div>
+
+            <!-- Drawer Footer: Financial Totals & Primary Actions -->
+            <div class="p-4 md:p-5 bg-white border-t border-slate-200 shadow-lg flex-shrink-0 space-y-3">
+                <div class="space-y-1.5 text-xs text-slate-600">
+                    <div class="flex justify-between">
+                        <span>Benchmark Prescribed Cost:</span>
+                        <span id="cartBenchmarkTotal" class="font-semibold text-slate-700">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Generic Alternative Cost:</span>
+                        <span id="cartAlternativeTotal" class="font-semibold text-slate-700">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold pt-2 border-t border-slate-100 text-slateBlue">
+                        <span>Total Estimated Savings:</span>
+                        <span id="cartSavingsTotal" class="text-accentGreen text-base">Save ₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <button id="clearCartBtn" type="button"
+                        class="text-slate-500 hover:text-red-600 hover:bg-red-50 text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 transition-colors cursor-pointer">
+                        <i class="fa-regular fa-trash-can mr-1"></i> Clear
+                    </button>
+                    <button id="cartGeneratePdfBtn" type="button"
+                        class="flex-grow bg-slateBlue hover:bg-deepSlate text-white font-semibold text-xs md:text-sm py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-regular fa-file-lines text-base"></i>
+                        <span>Generate Note (PDF)</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
             </div>
 
         </div>
