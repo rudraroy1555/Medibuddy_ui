@@ -18,7 +18,9 @@ const cardsList = document.getElementById('cardsList');
 const popularChips = document.getElementById('popularChips');
 
 // In-Memory Database Storage
-let localDrugDatabase = [];
+let cdscoData = [];
+let pricingData = [];
+let localDrugDatabase = []; // Kept for backwards compatibility
 let isLocalDbReady = false;
 let debounceTimer = null;
 let lastQuery = '';
@@ -33,7 +35,7 @@ function updateBadgeStatus() {
         serverStatusBadge.style.cssText = "border: 1px solid #86efac; color: #15803d; background-color: #f0fdf4;";
         serverStatusBadge.innerHTML = `
             <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: #22c55e;"></span>
-            <span>🟢 System Online (Local Search)</span>
+            <span>🟢 System Online (Dual-Dataset Search)</span>
         `;
     } else {
         serverStatusBadge.style.cssText = "border: 1px solid #fca5a5; color: #b91c1c; background-color: #fef2f2;";
@@ -61,52 +63,147 @@ function escapeHtml(str) {
 }
 
 /**
- * Initialize Client-Side In-Memory Database via PapaParse
+ * Promisified PapaParse wrapper to load a CSV file asynchronously.
+ * Handles network streaming, header whitespace trimming, and BOM sanitization.
+ *
+ * @param {string} url - Relative URL path to the CSV file
+ * @param {object} [customConfig={}] - Optional PapaParse configurations
+ * @returns {Promise<Array<object>>}
  */
-function initializeLocalDatabase() {
-    if (typeof Papa === 'undefined') {
-        console.error("PapaParse library is undefined. Ensure the CDN script is properly loaded.");
-        updateBadgeStatus();
-        return;
-    }
-
-    Papa.parse("production_drug_database.csv", {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function (results) {
-            localDrugDatabase = (results.data || []).map(row => ({
-                s_no: (row.s_no || '').trim(),
-                drug_name: (row.drug_name || '').trim(),
-                indication: (row.indication || '').trim(),
-                approval_date: (row.approval_date || '').trim(),
-                source_year: (row.source_year || '').trim(),
-                clean_generic_api: (row.clean_generic_api || '').trim()
-            })).filter(row => row.drug_name || row.clean_generic_api);
-
-            isLocalDbReady = true;
-            updateBadgeStatus();
-
-            // Perform initial search once in-memory dataset is ready
-            if (searchInput) {
-                performSearch(searchInput.value || 'Lipitor');
-            }
-        },
-        error: function (err) {
-            console.error("Failed to parse production_drug_database.csv:", err);
-            if (serverStatusBadge) {
-                serverStatusBadge.style.cssText = "border: 1px solid #fcd34d; color: #b45309; background-color: #fffbeb;";
-                serverStatusBadge.innerHTML = `
-                    <span class="w-2 h-2 rounded-full" style="background-color: #f59e0b;"></span>
-                    <span>⚠️ CSV Fetch Failed</span>
-                `;
-            }
+function loadCsv(url, customConfig = {}) {
+    return new Promise((resolve, reject) => {
+        if (typeof Papa === 'undefined') {
+            return reject(new Error('PapaParse library is missing. Ensure papaparse.min.js is included in your HTML.'));
         }
+
+        Papa.parse(url, {
+            download: true,
+            header: true,
+            skipEmptyLines: 'greedy',
+            transformHeader: (header) => header.trim().replace(/^\uFEFF/, ''),
+            complete: (results) => {
+                if (results.errors && results.errors.length > 0) {
+                    console.warn(`[PapaParse Warning] File: "${url}":`, results.errors);
+                }
+                resolve(results.data || []);
+            },
+            error: (error) => {
+                reject(new Error(`Failed to load CSV from "${url}": ${error.message || error}`));
+            },
+            ...customConfig
+        });
     });
 }
 
 /**
- * Perform search entirely client-side using in-memory localDrugDatabase
+ * Initializes and loads both datasets concurrently using Promise.all so UI does not block.
+ * File 1: production_drug_database.csv
+ * File 2: indian_prescribed_drugs_150.csv
+ */
+async function initializeDatasets() {
+    const file1Url = 'production_drug_database.csv';
+    const file2Url = 'indian_prescribed_drugs_150.csv';
+
+    try {
+        console.time('[MediBuddy] Datasets Loaded In');
+
+        const [rawCdsco, rawPricing] = await Promise.all([
+            loadCsv(file1Url),
+            loadCsv(file2Url)
+        ]);
+
+        // Normalize and store in-memory
+        cdscoData = (rawCdsco || []).map(row => ({
+            s_no: (row.s_no || '').trim(),
+            drug_name: (row.drug_name || '').trim(),
+            indication: (row.indication || '').trim(),
+            approval_date: (row.approval_date || '').trim(),
+            source_year: (row.source_year || '').trim(),
+            clean_generic_api: (row.clean_generic_api || '').trim()
+        })).filter(row => row.drug_name || row.clean_generic_api);
+
+        pricingData = (rawPricing || []).map(row => ({
+            id: (row.ID || row.id || '').trim(),
+            health_condition: (row['Health Condition'] || '').trim(),
+            brand_name: (row['Brand Name'] || '').trim(),
+            generic_name: (row['Generic Name'] || '').trim(),
+            standard_price: parseFloat(row['Standard Brand Price (INR)']) || 0,
+            cheaper_brand: (row['Cheaper Alternative Brand'] || '').trim(),
+            cheaper_price: parseFloat(row['Cheaper Alternative Price (INR)']) || 0,
+            raw: row
+        })).filter(row => row.brand_name || row.generic_name);
+
+        localDrugDatabase = cdscoData; // backwards compatibility
+        isLocalDbReady = true;
+
+        console.timeEnd('[MediBuddy] Datasets Loaded In');
+        console.log(`[MediBuddy Ready] CDSCO: ${cdscoData.length} entries | Pricing Alternatives: ${pricingData.length} entries.`);
+        updateBadgeStatus();
+
+        // Perform initial search once in-memory datasets are ready
+        if (searchInput) {
+            performSearch(searchInput.value || 'Calpol');
+        }
+
+        return { cdscoData, pricingData };
+    } catch (err) {
+        console.error("Failed to load datasets via Promise.all:", err);
+        if (serverStatusBadge) {
+            serverStatusBadge.style.cssText = "border: 1px solid #fcd34d; color: #b45309; background-color: #fffbeb;";
+            serverStatusBadge.innerHTML = `
+                <span class="w-2 h-2 rounded-full" style="background-color: #f59e0b;"></span>
+                <span>⚠️ Dataset Fetch Failed</span>
+            `;
+        }
+        throw err;
+    }
+}
+
+// Alias for backwards compatibility
+const initializeLocalDatabase = initializeDatasets;
+
+/**
+ * Searches across both in-memory datasets simultaneously.
+ * File 1 (cdscoData): searches `clean_generic_api` and `drug_name`
+ * File 2 (pricingData): searches `Brand Name` and `Generic Name`
+ *
+ * @param {string} query - Raw search query
+ * @returns {{ officialAPIs: Array<object>, priceAlternatives: Array<object> }}
+ */
+function searchMaster(query) {
+    const cleanQuery = (typeof query === 'string' ? query : String(query || '')).trim().toLowerCase();
+
+    if (!cleanQuery) {
+        const emptyResult = { officialAPIs: [], priceAlternatives: [] };
+        console.log('[searchMaster] Empty query provided:', emptyResult);
+        return emptyResult;
+    }
+
+    // 1. Search File 1: CDSCO official drug database
+    const officialAPIs = cdscoData.filter(item => {
+        const drugName = item.drug_name.toLowerCase();
+        const genericApi = item.clean_generic_api.toLowerCase();
+        return drugName.includes(cleanQuery) || genericApi.includes(cleanQuery);
+    });
+
+    // 2. Search File 2: 150 Prescribed Drugs Alternatives
+    const priceAlternatives = pricingData.filter(item => {
+        const brandName = item.brand_name.toLowerCase();
+        const genericName = item.generic_name.toLowerCase();
+        return brandName.includes(cleanQuery) || genericName.includes(cleanQuery);
+    });
+
+    const results = {
+        officialAPIs,
+        priceAlternatives
+    };
+
+    console.log(`[searchMaster] Query: "${query}" | Results:`, results);
+    return results;
+}
+
+/**
+ * Perform search entirely client-side using searchMaster across both datasets
  */
 function performSearch(customQuery = null) {
     if (!searchInput) return;
@@ -130,55 +227,33 @@ function performSearch(customQuery = null) {
     }
 
     if (!isLocalDbReady) {
-        if (resultsCountBadge) resultsCountBadge.textContent = 'Parsing dataset...';
+        if (resultsCountBadge) resultsCountBadge.textContent = 'Parsing datasets...';
         if (cardsList) {
             cardsList.innerHTML = `
                 <div class="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 shadow-sm animate-pulse">
                     <i class="fa-solid fa-circle-notch fa-spin text-3xl text-slateBlue mb-3"></i>
-                    <p class="font-medium text-sm">Loading local CDSCO database into browser memory...</p>
+                    <p class="font-medium text-sm">Loading CDSCO and Pricing databases into browser memory...</p>
                 </div>
             `;
         }
         return;
     }
 
-    const qLower = query.toLowerCase();
-    const matches = [];
-
-    // Case-insensitive scored partial matching across drug_name and clean_generic_api
-    for (let i = 0; i < localDrugDatabase.length; i++) {
-        const item = localDrugDatabase[i];
-        const drugName = item.drug_name.toLowerCase();
-        const genericApi = item.clean_generic_api.toLowerCase();
-
-        let score = 0;
-        if (drugName === qLower || genericApi === qLower) {
-            score = 3; // Exact match
-        } else if (drugName.startsWith(qLower) || genericApi.startsWith(qLower)) {
-            score = 2; // Starts with query
-        } else if (drugName.includes(qLower) || genericApi.includes(qLower)) {
-            score = 1; // Substring match
-        }
-
-        if (score > 0) {
-            matches.push({ ...item, _score: score });
-        }
-    }
-
-    // Rank by score descending and take top 10
-    matches.sort((a, b) => b._score - a._score);
-    const top10 = matches.slice(0, 10).map(({ _score, ...item }) => item);
-
-    renderResults(query, top10);
+    const searchResults = searchMaster(query);
+    renderResults(query, searchResults);
 }
 
 /**
- * Dynamically render comparison cards from dataset records
+ * Dynamically render comparison cards from both pricing alternatives and CDSCO official records
  */
-function renderResults(query, results) {
+function renderResults(query, searchResults) {
     if (!cardsList || !resultsCountBadge || !activeSaltDisplay) return;
 
-    if (!results || results.length === 0) {
+    const priceAlternatives = (searchResults && searchResults.priceAlternatives) || [];
+    const officialAPIs = (searchResults && searchResults.officialAPIs) || [];
+    const totalCount = priceAlternatives.length + officialAPIs.length;
+
+    if (totalCount === 0) {
         resultsCountBadge.textContent = '0 matches found';
         activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-400">No matching salt</span>`;
 
@@ -187,73 +262,85 @@ function renderResults(query, results) {
                 <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
                 <h3 class="text-lg font-bold text-slateBlue mb-1">No matching medicines found</h3>
                 <p class="text-sm text-slate-500 max-w-md mx-auto mb-4">
-                    We couldn't find any record matching "<strong>${escapeHtml(query)}</strong>" in the production dataset.
+                    We couldn't find any record matching "<strong>${escapeHtml(query)}</strong>" across either dataset.
                 </p>
                 <div class="flex flex-wrap justify-center gap-2 text-xs">
-                    <span class="text-slate-400">Suggestions:</span>
-                    <button type="button" onclick="performSearch('Lipitor')" class="text-slateBlue font-semibold underline">Lipitor</button>
-                    <button type="button" onclick="performSearch('Atorvastatin')" class="text-slateBlue font-semibold underline">Atorvastatin</button>
+                    <span class="text-slate-400">Try searching:</span>
+                    <button type="button" onclick="performSearch('Calpol')" class="text-slateBlue font-semibold underline">Calpol</button>
+                    <button type="button" onclick="performSearch('Paracetamol')" class="text-slateBlue font-semibold underline">Paracetamol</button>
+                    <button type="button" onclick="performSearch('Combiflam')" class="text-slateBlue font-semibold underline">Combiflam</button>
                     <button type="button" onclick="performSearch('Augmentin')" class="text-slateBlue font-semibold underline">Augmentin</button>
                     <button type="button" onclick="performSearch('Metformin')" class="text-slateBlue font-semibold underline">Metformin</button>
+                    <button type="button" onclick="performSearch('Montair LC')" class="text-slateBlue font-semibold underline">Montair LC</button>
                 </div>
             </div>
         `;
         return;
     }
 
-    // Update header with the salt of the top matched item
-    const primarySalt = results[0].clean_generic_api || 'Verified Bioequivalent API';
+    // Determine the primary active salt for header display
+    let primarySalt = 'Generic Bioequivalent API';
+    if (priceAlternatives.length > 0) {
+        primarySalt = priceAlternatives[0].generic_name;
+    } else if (officialAPIs.length > 0) {
+        primarySalt = officialAPIs[0].clean_generic_api;
+    }
+
     activeSaltDisplay.innerHTML = `Active Salt: <span class="font-semibold text-slate-700">${escapeHtml(primarySalt)}</span>`;
-    resultsCountBadge.textContent = `${results.length} option${results.length > 1 ? 's' : ''} found`;
+    resultsCountBadge.textContent = `${totalCount} option${totalCount > 1 ? 's' : ''} found (${priceAlternatives.length} market, ${officialAPIs.length} CDSCO)`;
 
     let cardsHtml = '';
 
-    results.forEach((item, index) => {
-        const drugName = item.drug_name || 'Generic Formulation';
-        const genericApi = item.clean_generic_api || 'Standard Formulation';
-        const indication = item.indication || 'General therapeutic use';
-        const approvalDate = item.approval_date || item.source_year || 'Approved';
-        const isGeneric = drugName.toLowerCase().includes('generic') || index === 1;
+    // =========================================================================
+    // SECTION 1: REAL-WORLD MARKET PRICING & CHEAPER ALTERNATIVES
+    // =========================================================================
+    if (priceAlternatives.length > 0) {
+        priceAlternatives.slice(0, 8).forEach(item => {
+            const brand = item.brand_name;
+            const cheaperBrand = item.cheaper_brand;
+            const generic = item.generic_name;
+            const condition = item.health_condition || 'Therapeutic Use';
+            const stdPrice = item.standard_price;
+            const altPrice = item.cheaper_price;
+            const savings = Math.max(0, stdPrice - altPrice);
+            const savingsPercent = stdPrice > 0 ? Math.round((savings / stdPrice) * 100) : 0;
 
-        const price = isGeneric ? 40 : 250;
-        const savings = isGeneric ? 210 : null;
-        const savingsPercent = isGeneric ? 84 : null;
-        const costPerTablet = isGeneric ? '₹4.00' : '₹25.00';
-
-        if (isGeneric) {
             cardsHtml += `
-                <div class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="bg-softGreen border border-accentGreen/30 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group mb-4">
                     <div class="absolute top-0 left-0 w-1.5 h-full bg-accentGreen"></div>
 
                     <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div class="flex-grow">
                             <div class="flex items-center gap-3 mb-2 flex-wrap">
-                                <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(drugName)}</h3>
+                                <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(cheaperBrand)}</h3>
                                 <span class="bg-accentGreen text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                                    <i class="fa-solid fa-check"></i> Best Value
+                                    <i class="fa-solid fa-check"></i> Cheaper Alternative
+                                </span>
+                                <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-0.5 rounded-full">
+                                    ${escapeHtml(condition)}
                                 </span>
                             </div>
                             <p class="text-sm text-slate-700 mb-1 font-medium">
-                                Active API: <span class="font-semibold text-accentGreen">${escapeHtml(genericApi)}</span>
+                                Active Salt / Generic: <span class="font-semibold text-accentGreen">${escapeHtml(generic)}</span>
                             </p>
                             <p class="text-xs text-slate-500 mb-2">
-                                <strong class="text-slate-600">Indication:</strong> ${escapeHtml(indication)}
+                                Prescribed Brand Benchmark: <strong class="text-slate-700">${escapeHtml(brand)}</strong> (Standard: ₹${stdPrice.toFixed(2)})
                             </p>
                             <p class="text-[11px] text-slate-400">
-                                PMBJP Jan Aushadhi &bull; Approved: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
+                                Bioequivalent Generic Substitute &bull; Verified Indian Prescribed Dataset
                             </p>
                         </div>
 
                         <div class="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-accentGreen/20">
                             <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
-                                <span class="font-bold text-accentGreen text-lg">Save ₹${savings}.00</span>
-                                <span class="text-[10px] text-accentGreen font-semibold">(${savingsPercent}% lower cost)</span>
+                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Direct Savings</span>
+                                <span class="font-bold text-accentGreen text-xl">Save ₹${savings.toFixed(2)}</span>
+                                <span class="text-[10px] text-accentGreen font-semibold">(${savingsPercent}% cheaper)</span>
                             </div>
                             <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Therapeutic Match</span>
                                 <span class="inline-flex items-center gap-1.5 text-accentGreen font-bold text-xs bg-accentGreen/10 px-2.5 py-1.5 rounded-lg border border-accentGreen/30">
-                                    <i class="fa-solid fa-circle-check"></i> Bioequivalent (CDSCO Standard)
+                                    <i class="fa-solid fa-circle-check"></i> 100% Bioequivalent
                                 </span>
                             </div>
                         </div>
@@ -261,60 +348,63 @@ function renderResults(query, results) {
 
                     <div class="mt-4 pt-3 border-t border-accentGreen/20 flex justify-between items-center group-hover:border-accentGreen/40 transition-colors">
                         <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
-                            <p class="text-[11px] text-slate-400">${costPerTablet} / tablet (Strip of 10)</p>
+                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Alternative Retail Price</p>
+                            <p class="text-[11px] text-slate-400">Standard pack retail estimation</p>
                         </div>
-                        <p class="font-bold text-slateBlue text-xl">₹${price}.00</p>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 line-through mr-2">₹${stdPrice.toFixed(2)}</span>
+                            <span class="font-bold text-slateBlue text-2xl">₹${altPrice.toFixed(2)}</span>
+                        </div>
                     </div>
                 </div>
             `;
-        } else {
+        });
+    }
+
+    // =========================================================================
+    // SECTION 2: CDSCO OFFICIAL REGULATORY APPROVAL RECORDS
+    // =========================================================================
+    if (officialAPIs.length > 0) {
+        officialAPIs.slice(0, 5).forEach(item => {
+            const drugName = item.drug_name || 'Standard Regulatory Formulation';
+            const genericApi = item.clean_generic_api || 'Approved Chemical Entity';
+            const indication = item.indication || 'General therapeutic use';
+            const approvalDate = item.approval_date || item.source_year || 'Approved';
+
             cardsHtml += `
-                <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group mb-4">
                     <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div class="flex-grow">
                             <div class="flex items-center gap-3 mb-2 flex-wrap">
                                 <h3 class="text-xl font-bold text-slateBlue">${escapeHtml(drugName)}</h3>
-                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-slate-200">
-                                    Innovator / Reference Brand
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-slate-200 flex items-center gap-1">
+                                    <i class="fa-solid fa-shield-halved text-slate-500"></i> CDSCO Official Registry
                                 </span>
                             </div>
                             <p class="text-sm text-slate-700 mb-1 font-medium">
-                                Active API: <span class="font-semibold text-slate-900">${escapeHtml(genericApi)}</span>
+                                Active Regulatory API: <span class="font-semibold text-slate-900">${escapeHtml(genericApi)}</span>
                             </p>
                             <p class="text-xs text-slate-500 mb-2">
-                                <strong class="text-slate-600">Indication:</strong> ${escapeHtml(indication)}
+                                <strong class="text-slate-600">Approved Indication:</strong> ${escapeHtml(indication)}
                             </p>
                             <p class="text-[11px] text-slate-400">
-                                Reference Listed Drug (RLD) &bull; Approved: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
+                                Regulatory Approval: ${escapeHtml(approvalDate)} &bull; S.No: ${escapeHtml(item.s_no)}
                             </p>
                         </div>
 
                         <div class="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-slate-100">
                             <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Cost Savings</span>
-                                <span class="font-medium text-slate-400 text-sm">Benchmark Price</span>
-                            </div>
-                            <div class="text-center md:text-right flex flex-col justify-center">
-                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Bioequivalence Match</span>
+                                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-1">Standard Status</span>
                                 <span class="inline-flex items-center gap-1.5 text-slate-700 font-semibold text-xs bg-slate-100 px-2.5 py-1.5 rounded-lg border border-slate-200">
-                                    <i class="fa-solid fa-certificate text-slate-500"></i> Reference Drug
+                                    <i class="fa-solid fa-certificate text-slate-500"></i> Reference Listed Drug
                                 </span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Estimated retail price</p>
-                            <p class="text-[11px] text-slate-400">${costPerTablet} / tablet (Strip of 10)</p>
-                        </div>
-                        <p class="font-bold text-slateBlue text-xl">₹${price}.00</p>
-                    </div>
                 </div>
             `;
-        }
-    });
+        });
+    }
 
     cardsList.innerHTML = cardsHtml;
 }

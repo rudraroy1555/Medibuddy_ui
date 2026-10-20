@@ -1,0 +1,151 @@
+ID,Health Condition,Brand Name,Generic Name,Standard Brand Price (INR),Cheaper Alternative Brand,Cheaper Alternative Price (INR)
+1,Pain & Fever,Calpol 650mg,Paracetamol,33.0,Paracip 650mg,20.0
+2,Pain & Fever,Crocin Advance,Paracetamol,25.0,P-650,18.0
+3,Pain & Inflammation,Combiflam,Ibuprofen + Paracetamol,51.0,Ibugesic Plus,28.0
+4,Severe Pain,Zerodol-P,Aceclofenac + Paracetamol,65.0,Hifenac-P,42.0
+5,Muscle Pain,Ultracet,Tramadol + Paracetamol,120.0,Tramazac PD,65.0
+6,Pain & Inflammation,Voveran SR 100,Diclofenac,105.0,Diclogesic,45.0
+7,Spasmodic Pain,Meftal-Spas,Mefenamic Acid + Dicyclomine,53.0,Dysmen,25.0
+8,Fever & Inflammation,Nise,Nimesulide,102.0,Nimulid,50.0
+9,Nerve Pain,Pregalin M 75,Pregabalin + Methylcobalamin,195.0,Mahagaba M,98.0
+10,Chronic Pain,Naprosyn 500,Naproxen,72.0,Xenobid,38.0
+11,Pain & Swelling,Chymoral Forte,Trypsin Chymotrypsin,450.0,Chymonac,210.0
+12,Joint Pain,Zerodol-SP,Aceclofenac + Paracetamol + Serratiopeptidase,122.0,Aceclo-SP,75.0
+13,Headache/Migraine,Vasograin,Ergotamine + Caffeine + Paracetamol + Prochlorperazine,145.0,Migranil,80.0
+14,Mild Pain,Dolo 650,Paracetamol,34.0,Sumo L 650,21.0
+15,Arthritis Pain,Etoshine 90,Etoricoxib,155.0,Etozox 90,85.0
+16,Dry Cough,Ascoril D Plus,Phenylephrine + Chlorpheniramine + Dextromethorphan,139.0,Alex Cough Syrup,95.0
+17,Wet Cough,Ascoril LS,Levosalbutamol + Ambroxol + Guaifenesin,128.0,Bro-Zedex LS,88.0
+18,Wet Cough,Grilinctus BM,Terbutaline + Bromhexine,115.0,Torex BR,70.0
+19,Dry Cough,Benadryl DR,Dextromethorphan,145.0,Topex DX,85.0
+20,Allergic Cough/Cold,Solvin Cold,Paracetamol + Phenylephrine + Chlorpheniramine,62.0,Febrex Plus,40.0
+21,Cold & Congestion,Sinarest,Paracetamol + Phenylephrine + Chlorpheniramine,65.0,Wikoryl,42.0
+22,Allergy & Cold,Cetin 10mg,Cetirizine,42.0,Alerid,18.0
+23,Allergic Rhinitis,Allegra 120mg,Fexofenadine,238.0,Fexo 120,110.0
+24,Allergy & Asthma,Montair LC,Montelukast + Levocetirizine,250.0,Telekast L,135.0
+25,Severe Allergy,Avil 25mg,Pheniramine Maleate,12.0,Fenamin,6.0
+26,Contraception,Mala-D,Ethinyl Estradiol + Levonorgestrel,50.0,Mala-N,5.0
+27,Emergency Contraception,i-Pill,Levonorgestrel,110.0,Unwanted-72,90.0
+28,Contraception,Yasmin,Drospirenone + Ethinyl Estradiol,620.0,Crisanta,395.0
+29,Contraception (Non-Hormonal),Saheli,Centchroman (Ormeloxifene),30.0,Chhaya (Govt Supply),0.0
+30,Contraception,Overal-L,Levonorgestrel + Ethinyl Estradiol,85.0,Regulon,60.0
+31,Vitamin D Deficiency,Calcirol Sachet,Cholecalciferol (Vitamin D3),62.0,D3-Must,30.0
+32,Vitamin B12 / Nerve,Neurobion Forte,Vitamin B-Complex + Vitamin B12,41.0,Optineuron,25.0
+33,Multivitamin,Becosules Capsules,Vitamin B-Complex + Vitamin C,55.0,Surbex Gold,40.0
+34,Iron Deficiency,Dexorange Syrup,Ferric Ammonium Citrate + Vit B12 + Folic Acid,175.0,Rubired Syrup,110.0
+35,Calcium Deficiency,Shelcal 500,Calcium + Vitamin D3,135.0,Cipcal 500,90.0
+36,Immunity / Vitamin C,Limcee 500mg,Vitamin C (Ascorbic Acid),28.0,Celin 500,16.0
+37,Antioxidant,Evion 400,Vitamin E,42.0,E-Cap 400,25.0
+38,Pregnancy Supplement,Autrin,Folic Acid + Vitamin B12 + Iron,160.0,Fefol,95.0
+39,Hair & Skin Vitamin,Keraglo Men,Biotin + Minerals + Amino Acids,650.0,Biotin Forte,280.0
+40,Coenzyme Q10 Deficiency,Maxepa,Omega-3 Fatty Acids,310.0,Seacod,180.0
+41,Diarrhoea,Lomotil,Diphenoxylate + Atropine,28.0,Lomofen,15.0
+42,Loose Motions,Imodium,Loperamide,25.0,Stop-Not,12.0
+43,Stomach Infection,OFLOX-OZ,Ofloxacin + Ornidazole,165.0,O2 Tablet,110.0
+44,Dehydration,Electral Powder,Oral Rehydration Salts (ORS),22.0,Walyte ORS,15.0
+45,Probiotic / Gut Health,Enterogermina,Bacillus clausii,60.0,Tufpro,35.0
+46,Probiotic,Darolac,Lactobacillus Acidophilus,115.0,Sporlac DS,65.0
+47,Amoebic Diarrhoea,Flagyl 400,Metronidazole,24.0,Metrogyl 400,15.0
+48,Bacterial Diarrhoea,Norflox TZ,Norfloxacin + Tinidazole,112.0,Nordys,70.0
+49,Diarrhoea in Kids,Racekadotril (Enuff),Racecadotril,140.0,Cadotril,85.0
+50,Intestinal Worms,Zentel 400mg,Albendazole,9.0,Bandy 400,5.0
+51,Acidity & Heartburn,Pantocid 40,Pantoprazole,160.0,Pantodac,95.0
+52,Acidity / GERD,Pan-D,Pantoprazole + Domperidone,210.0,Pantocid-D,130.0
+53,Gas & Bloating,Omez 20,Omeprazole,65.0,Omecip 20,35.0
+54,Severe Acidity,Rantac 150,Ranitidine,45.0,Aciloc 150,25.0
+55,Acidity Reflux,Rabekind 20,Rabeprazole,110.0,Razo 20,60.0
+56,Nausea & Vomiting,Ondem 4mg,Ondansetron,55.0,Emeset 4,30.0
+57,Antacid Gel,Digene Liquid,Magnesium Hydroxide + Aluminium Hydroxide + Simethicone,165.0,Gelusil,120.0
+58,Stomach Ulcer,Sucrafil Suspension,Sucralfate,230.0,Sucrace,140.0
+59,Indigestion,Aristozyme Liquid,Diastase + Pepsin,140.0,Zymenet,90.0
+60,Constipation,Cremaffin Liquid,Liquid Paraffin + Milk of Magnesia,280.0,Laxil,170.0
+61,High Blood Pressure,Telma 40,Telmisartan,105.0,Telmikind 40,45.0
+62,High Blood Pressure,Amlong 5,Amlodipine,42.0,Amlokind 5,18.0
+63,Hypertension / Heart,Cilacar 10,Cilnidipine,145.0,Cilnikind 10,75.0
+64,High BP Combo,Telma-AM,Telmisartan + Amlodipine,220.0,Telmikind-AM,85.0
+65,High Blood Pressure,Concor 5,Bisoprolol,125.0,Biselect 5,60.0
+66,Diabetes,Glycomet 500,Metformin,52.0,Metokind 500,22.0
+67,Diabetes,Jalra 50,Vildagliptin,310.0,Vildamate,140.0
+68,Diabetes Combo,Glycomet Trio 2,Metformin + Glimepiride + Voglibose,250.0,Glimisave Trio 2,145.0
+69,Diabetes,Amaryl 2mg,Glimepiride,135.0,Glimer 2,60.0
+70,Diabetes,Forxiga 10mg,Dapagliflozin,850.0,Dapnat 10,320.0
+71,Bacterial Infection,Augmentin 625 DUO,Amoxicillin + Clavulanic Acid,223.0,Moxikind-CV 625,140.0
+72,Typhoid / Infection,Monocef 1g Inj,Ceftriaxone,65.0,Cefaxone 1g,35.0
+73,Throat Infection,Azithral 500,Azithromycin,132.0,Azee 500,85.0
+74,Urinary Tract Infection,Cifran 500,Ciprofloxacin,45.0,Ciprobid 500,26.0
+75,Skin Infection,Cephadex 500,Cephalexin,185.0,Phexin 500,110.0
+76,Pain & Fever,Pacimol 500,Paracetamol 500mg,20.0,Pyrigesic,11.0
+77,Pain & Fever,Nucoxia 120,Etoricoxib 120mg,240.0,Etoshine 120,160.0
+78,Muscle Relaxant,Zerodol-TH,Thiocolchicoside + Aceclofenac,260.0,Myoril Plus,150.0
+79,Nerve Pain,Gabapin ME,Gabapentin + Methylcobalamin,310.0,Gaba-M,170.0
+80,Spasmodic Pain,Drotin-M,Drotaverine + Mefenamic Acid,185.0,Drotafam-M,95.0
+81,Dry Cough,Corex Syrup,Codeine + Chlorpheniramine,160.0,Toxir Syrup,100.0
+82,Wet Cough,Mucolite,Ambroxol + Guaifenesin + Menthol,98.0,Ambrolite,60.0
+83,Allergy,Levocet 5mg,Levocetirizine,65.0,Teczine 5,38.0
+84,Allergic Rhinitis,Flomist,Fluticasone Nasal Spray,390.0,Furamist,240.0
+85,Asthma / COPD,Budesonide,Budecort Inhaler,420.0,Budetrol,290.0
+86,Contraception,Novelon,Desogestrel + Ethinyl Estradiol,280.0,Femilon,195.0
+87,Contraception (Injectable),Depo-Provera,Medroxyprogesterone Acetate,350.0,Antara,180.0
+88,Vitamin D3,Arachitol Nano,Cholecalciferol 60k Drops,110.0,D3-Shot,65.0
+89,Vitamin B-Complex,B-Complex Combo,Cobadex Forte,60.0,Becozyme C Forte,35.0
+90,Iron Supplement,Orofer-XT,Ferrous Ascorbate + Folic Acid,195.0,Feronia-XT,120.0
+91,Calcium & Zinc,Calcium + Calcitriol,Shelcal-CT,320.0,Gemcal,190.0
+92,Antioxidant,LycoRed,Lycopene + Multivitamins,245.0,Lyco-Oats,130.0
+93,Diarrhoea / Dysentery,Cifran CT,Ciprofloxacin + Tinidazole,165.0,Ciplox TZ,105.0
+94,Diarrhoea / IBS,Rcifax 400,Rifaximin 400mg,380.0,Rifagut 400,220.0
+95,Probiotic,Econorm,Saccharomyces boulardii,320.0,Florastor,180.0
+96,Acidity / GERD,Nexpro 40,Esomeprazole 40mg,175.0,Sompraz 40,100.0
+97,Acidity Combo,Nexpro RD 40,Esomeprazole + Domperidone,240.0,Sompraz D,150.0
+98,Heartburn / Gas,Veloz-L,Rabeprazole + Levosulpiride,290.0,Rablet-L,180.0
+99,Laxative,Duphalac,Lactulose Solution,350.0,Lose Syrup,210.0
+100,Stomach Spasm,Cyclopam,Dicyclomine 10mg,55.0,Spasmo-Proxyvon,32.0
+101,High Cholesterol,Lipivas 10,Atorvastatin 10mg,95.0,Atorva 10,50.0
+102,High Cholesterol,Rosuvas 10,Rosuvastatin 10mg,185.0,Rozavel 10,95.0
+103,Blood Thinner,Plavix 75,Clopidogrel 75mg,120.0,Clopilet 75,45.0
+104,Blood Thinner,Ecosprin 75,Aspirin 75mg,7.0,Colsprin 75,4.0
+105,Diabetes,Januvia 100,Sitagliptin 100mg,420.0,Sitakeep 100,160.0
+106,Diabetes,Pioz 15,Pioglitazone 15mg,65.0,Pioglit 15,35.0
+107,Antibiotic,Tarivid 200,Ofloxacin 200mg,90.0,Zenflox 200,48.0
+108,Antibiotic,Taxim-O 200,Cefixime 200mg,125.0,Zifi 200,85.0
+109,Antibiotic,Lizomac 600,Linezolid 600mg,410.0,Linox 600,250.0
+110,Antifungal,Forcan 150,Fluconazole 150mg,45.0,Syscan 150,22.0
+111,Antifungal,Canditral 100,Itraconazole 100mg,210.0,Itaspor 100,120.0
+112,Antiviral,Zovirax 400,Acyclovir 400mg,180.0,Acivir 400,95.0
+113,Thyroid,Eltroxin 50,Levothyroxine 50mcg,145.0,Thyronorm 50,115.0
+114,Asthma / Allergy,Atarax 25,Hydroxyzine 25mg,95.0,Hicope 25,50.0
+115,Liver Tonic,Udiliv 300,Ursodeoxycholic Acid 300mg,450.0,Ursocol 300,280.0
+116,Kidney Stones,K-Cit Liquid,Potassium Citrate + Citric Acid,190.0,Alkarate,110.0
+117,Gout,Febutaz 40,Febuxostat 40mg,165.0,Febucip 40,95.0
+118,Vertigo,Vertin 16,Betahistine 16mg,210.0,Betavert 16,115.0
+119,Anxiety,Clonez 0.5,Clonazepam 0.5mg,60.0,Lonazep 0.5,32.0
+120,Depression,Nexito 10,Escitalopram 10mg,115.0,Cipralex 10,65.0
+121,Erectile Dysfunction,Viagra 100,Sildenafil 100mg,600.0,Manforce 100,150.0
+122,Prostate Enlargement,Urimax 0.4,Tamsulosin 0.4mg,320.0,Tamflo 0.4,180.0
+123,Hair Loss,Mintop 5%,Minoxidil 5% Topical,850.0,Hair 4 U 5%,490.0
+124,Dry Eyes,Refresh Tears,Carboxymethylcellulose Eye Drops,165.0,Eco Tears,95.0
+125,Glaucoma,Xalatan,Latanoprost Eye Drops,650.0,Latoprost,320.0
+126,Pain & Fever,Premium-Calpol 650mg,Paracetamol (Varying Dose/Form),36.3,Generic-Paracip 650mg,18.0
+127,Pain & Fever,Premium-Crocin Advance,Paracetamol (Varying Dose/Form),27.5,Generic-P-650,16.2
+128,Pain & Inflammation,Premium-Combiflam,Ibuprofen + Paracetamol (Varying Dose/Form),56.1,Generic-Ibugesic Plus,25.2
+129,Severe Pain,Premium-Zerodol-P,Aceclofenac + Paracetamol (Varying Dose/Form),71.5,Generic-Hifenac-P,37.8
+130,Muscle Pain,Premium-Ultracet,Tramadol + Paracetamol (Varying Dose/Form),132.0,Generic-Tramazac PD,58.5
+131,Pain & Inflammation,Premium-Voveran SR 100,Diclofenac (Varying Dose/Form),115.5,Generic-Diclogesic,40.5
+132,Spasmodic Pain,Premium-Meftal-Spas,Mefenamic Acid + Dicyclomine (Varying Dose/Form),58.3,Generic-Dysmen,22.5
+133,Fever & Inflammation,Premium-Nise,Nimesulide (Varying Dose/Form),112.2,Generic-Nimulid,45.0
+134,Nerve Pain,Premium-Pregalin M 75,Pregabalin + Methylcobalamin (Varying Dose/Form),214.5,Generic-Mahagaba M,88.2
+135,Chronic Pain,Premium-Naprosyn 500,Naproxen (Varying Dose/Form),79.2,Generic-Xenobid,34.2
+136,Pain & Swelling,Premium-Chymoral Forte,Trypsin Chymotrypsin (Varying Dose/Form),495.0,Generic-Chymonac,189.0
+137,Joint Pain,Premium-Zerodol-SP,Aceclofenac + Paracetamol + Serratiopeptidase (Varying Dose/Form),134.2,Generic-Aceclo-SP,67.5
+138,Headache/Migraine,Premium-Vasograin,Ergotamine + Caffeine + Paracetamol + Prochlorperazine (Varying Dose/Form),159.5,Generic-Migranil,72.0
+139,Mild Pain,Premium-Dolo 650,Paracetamol (Varying Dose/Form),37.4,Generic-Sumo L 650,18.9
+140,Arthritis Pain,Premium-Etoshine 90,Etoricoxib (Varying Dose/Form),170.5,Generic-Etozox 90,76.5
+141,Dry Cough,Premium-Ascoril D Plus,Phenylephrine + Chlorpheniramine + Dextromethorphan (Varying Dose/Form),152.9,Generic-Alex Cough Syrup,85.5
+142,Wet Cough,Premium-Ascoril LS,Levosalbutamol + Ambroxol + Guaifenesin (Varying Dose/Form),140.8,Generic-Bro-Zedex LS,79.2
+143,Wet Cough,Premium-Grilinctus BM,Terbutaline + Bromhexine (Varying Dose/Form),126.5,Generic-Torex BR,63.0
+144,Dry Cough,Premium-Benadryl DR,Dextromethorphan (Varying Dose/Form),159.5,Generic-Topex DX,76.5
+145,Allergic Cough/Cold,Premium-Solvin Cold,Paracetamol + Phenylephrine + Chlorpheniramine (Varying Dose/Form),68.2,Generic-Febrex Plus,36.0
+146,Cold & Congestion,Premium-Sinarest,Paracetamol + Phenylephrine + Chlorpheniramine (Varying Dose/Form),71.5,Generic-Wikoryl,37.8
+147,Allergy & Cold,Premium-Cetin 10mg,Cetirizine (Varying Dose/Form),46.2,Generic-Alerid,16.2
+148,Allergic Rhinitis,Premium-Allegra 120mg,Fexofenadine (Varying Dose/Form),261.8,Generic-Fexo 120,99.0
+149,Allergy & Asthma,Premium-Montair LC,Montelukast + Levocetirizine (Varying Dose/Form),275.0,Generic-Telekast L,121.5
+150,Severe Allergy,Premium-Avil 25mg,Pheniramine Maleate (Varying Dose/Form),13.2,Generic-Fenamin,5.4
