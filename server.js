@@ -19,6 +19,38 @@ const CSV_FILE_PATH = path.join(__dirname, 'production_drug_database.csv');
 // In-memory cache for all drug records from the CSV
 let drugDatabase = [];
 let isDatabaseLoaded = false;
+// ===========================================================================
+// GEMINI API CONFIGURATION (server-side only — never exposed to browser)
+// ===========================================================================
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_PRIMARY_MODEL = 'gemini-3.6-flash';
+const GEMINI_FALLBACK_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash'];
+
+// Strict System Prompt (Enforces 2-3 short sentences, bite-sized, no long paragraphs)
+const GEMINI_SYSTEM_INSTRUCTION =
+  'You are MediBuddy Rx, a medical assistant. You must answer questions in a maximum of 2 to 3 short sentences. Keep it extremely concise, bite-sized, and easy to read in a small chat widget. Never write long paragraphs or essays.\n\n' +
+  'Clinical Guidelines:\n' +
+  '1. Bioequivalence: Explain that certified Indian generic formulations match the Reference Listed Drug (RLD) within CDSCO 80%–125% 90% confidence interval for Cmax and AUC with identical clinical efficacy.\n' +
+  '2. Cost Savings: Highlight that generics offer 60%–85% savings in Indian Rupees (₹) due to expired patents.\n' +
+  '3. Safety: Always advise consulting a qualified physician or pharmacist before modifying prescriptions. Never prescribe or diagnose.';
+
+// Rate limiter: max 30 requests per IP per minute
+const rateLimitMap = new Map();
+function chatRateLimit(req, res, next) {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
+    return next();
+  }
+  if (entry.count >= 30) {
+    return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
+  }
+  entry.count++;
+  next();
+}
+
 
 // Middleware
 app.use(cors()); // Allow cross-origin requests from frontend (Live Server, GitHub Pages, etc.)
@@ -174,6 +206,146 @@ app.post('/reload', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/chat-status
+ * Returns whether the Gemini API key is configured server-side.
+ * The key value is NEVER exposed in the response.
+ */
+app.get('/api/chat-status', (req, res) => {
+  res.json({ configured: Boolean(GEMINI_API_KEY) });
+});
+
+/**
+ * POST /api/chat
+ * Secure server-side proxy to Google Gemini API.
+ * Injects strict system instruction and generationConfig (maxOutputTokens: 250, temperature: 0.3)
+ */
+app.post('/api/chat', chatRateLimit, async (req, res) => {
+  const { history, message } = req.body || {};
+
+  if (!message || typeof message !== 'string' || message.trim().length === 0) {
+    return res.status(400).json({ error: 'Missing or invalid message field.' });
+  }
+  if (message.length > 4000) {
+    return res.status(400).json({ error: 'Message too long (max 4000 characters).' });
+  }
+
+  // Sanitise and cap conversation history to last 16 turns
+  let safeHistory = [];
+  if (Array.isArray(history)) {
+    safeHistory = history
+      .filter(t => t && (t.role === 'user' || t.role === 'model') && Array.isArray(t.parts))
+      .slice(-16)
+      .map(t => ({ role: t.role, parts: t.parts.map(p => ({ text: String(p.text || '').slice(0, 4000) })) }));
+  }
+
+  // Ensure contents has at least the latest user query so Gemini API never receives empty contents
+  if (safeHistory.length === 0 && message) {
+    safeHistory = [{ role: 'user', parts: [{ text: message }] }];
+  }
+
+  // Strict Payload with generationConfig: maxOutputTokens: 250, temperature: 0.3
+  const payload = {
+    system_instruction: { parts: [{ text: GEMINI_SYSTEM_INSTRUCTION }] },
+    contents: safeHistory,
+    generationConfig: {
+      temperature: 0.3,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 250,
+      thinkingConfig: {
+        thinkingBudget: 0
+      }
+    }
+  };
+
+  const modelsToTry = [GEMINI_PRIMARY_MODEL, ...GEMINI_FALLBACK_MODELS];
+  let lastError = null;
+
+  for (const model of modelsToTry) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent` +
+                  `?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
+      let responseText;
+      if (typeof fetch === 'function') {
+        const geminiRes = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        responseText = await geminiRes.text();
+        if (!geminiRes.ok) {
+          let errMsg = `HTTP ${geminiRes.status}`;
+          try {
+            const parsed = JSON.parse(responseText);
+            errMsg = parsed?.error?.message || errMsg;
+          } catch (e) {}
+          if (geminiRes.status === 404 || geminiRes.status === 503) {
+            lastError = new Error(errMsg);
+            continue;
+          }
+          return res.status(geminiRes.status).json({ error: errMsg });
+        }
+      } else {
+        responseText = await new Promise((resolve, reject) => {
+          const https = require('https');
+          const urlObj = new URL(url);
+          const postData = JSON.stringify(payload);
+          const options = {
+            hostname: urlObj.hostname,
+            path: urlObj.pathname + urlObj.search,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(postData)
+            }
+          };
+          const req2 = https.request(options, (r) => {
+            let data = '';
+            r.on('data', chunk => data += chunk);
+            r.on('end', () => resolve({ status: r.statusCode, body: data }));
+          });
+          req2.on('error', reject);
+          req2.write(postData);
+          req2.end();
+        });
+        if (typeof responseText === 'object') {
+          const { status, body } = responseText;
+          responseText = body;
+          if (status === 404 || status === 503) {
+            lastError = new Error(`HTTP ${status}`);
+            continue;
+          }
+          if (status >= 400) {
+            let errMsg = `HTTP ${status}`;
+            try {
+              const parsed = JSON.parse(body);
+              errMsg = parsed?.error?.message || errMsg;
+            } catch (e) {}
+            return res.status(status).json({ error: errMsg });
+          }
+        }
+      }
+
+      const data = JSON.parse(responseText);
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        return res.status(502).json({ error: 'Empty response from Gemini API.' });
+      }
+
+      return res.json({ text });
+    } catch (err) {
+      lastError = err;
+      console.warn(`[MediBuddy] Gemini model ${model} failed:`, err.message);
+    }
+  }
+
+  const msg = lastError?.message || 'Unable to reach Gemini API.';
+  console.error('[MediBuddy] All Gemini models exhausted:', msg);
+  return res.status(502).json({ error: msg });
+});
+
 // Boot the server
 async function startServer() {
   try {
@@ -190,5 +362,6 @@ async function startServer() {
     console.log(`======================================================\n`);
   });
 }
+
 
 startServer();

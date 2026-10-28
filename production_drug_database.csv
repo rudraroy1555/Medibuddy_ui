@@ -90,7 +90,7 @@ s_no,drug_name,indication,approval_date,source_year,clean_generic_api
 89.0,Escitalopram 10Mg + Clonazepam 0.5Mg Tablet,Combination for comorbid depression with acute anxiety panic attacks.,12.12.07,2007,Escitalopram + Clonazepam
 90.0,Tadalafil 5Mg/10Mg/20Mg Tablet,PDE-5 inhibitor for erectile dysfunction and pulmonary arterial hypertension.,11-09-2003,2003,Tadalafil
 91.0,Aceclofenac 100Mg Tablet,NSAID for relief of pain and inflammation in osteoarthritis and ankylosing spondylitis.,15-09-2003,2003,Aceclofenac
-92.0,Aceclofenac 100Mg + Paracetamol 325Mg + Serratiopeptidase 15Mg Tablet,Triple action anti-inflammatory, analgesic, and enzymatic wound debridement.,15-09-2003,2003,Aceclofenac + Paracetamol + Serratiopeptidase
+92.0,Aceclofenac 100Mg + Paracetamol 325Mg + Serratiopeptidase 15Mg Tablet,"Triple action anti-inflammatory, analgesic, and enzymatic wound debridement.",15-09-2003,2003,Aceclofenac + Paracetamol + Serratiopeptidase
 93.0,Pregabalin 75Mg/150Mg Capsule,GABA analogue for neuropathic pain associated with diabetic neuropathy and fibromyalgia.,29.04.08,2008,Pregabalin
 94.0,Pregabalin 75Mg + Methylcobalamin 750Mcg Capsule,Comprehensive nerve rejuvenation and neuropathic pain relief.,08.05.08,2008,Pregabalin + Methylcobalamin
 95.0,Sitagliptin Phosphate 25Mg/50Mg/100Mg Tablet,DPP-4 inhibitor for type 2 diabetes glycemic control without hypoglycemia.,30-10-2007,2007,Sitagliptin
