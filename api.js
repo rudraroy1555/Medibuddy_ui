@@ -94,40 +94,113 @@ export function registerToastDispatcher(fn) {
 }
 
 /**
- * Asynchronous fetch call to server-side Gemini proxy (/api/chat).
- * No API key is ever present on the client.
- * Wrapped in strict try/catch with granular error responses.
+ * System instruction enforcing the MediBuddy Rx persona.
+ * Keeps AI responses to 2-3 short sentences max.
+ */
+const GEMINI_SYSTEM_INSTRUCTION =
+    'You are MediBuddy Rx, a medical assistant. You must answer questions in a maximum of 2 to 3 short sentences. Keep it extremely concise, bite-sized, and easy to read in a small chat widget. Never write long paragraphs or essays.\n\n' +
+    'Clinical Guidelines:\n' +
+    '1. Bioequivalence: Explain that certified Indian generic formulations match the Reference Listed Drug (RLD) within CDSCO 80%–125% 90% confidence interval for Cmax and AUC with identical clinical efficacy.\n' +
+    '2. Cost Savings: Highlight that generics offer 60%–85% savings in Indian Rupees (₹) due to expired patents.\n' +
+    '3. Safety: Always advise consulting a qualified physician or pharmacist before modifying prescriptions. Never prescribe or diagnose.';
+
+/**
+ * Ordered model fallback chain for client-side Gemini API calls.
+ */
+const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+
+/**
+ * Direct client-side fetch to the Google Generative Language REST API.
+ * API key is retrieved from localStorage('medibuddy_gemini_key').
  *
- * @param {string} message
- * @param {Array<object>} history
- * @returns {Promise<string>}
+ * @param {string} message - The user's latest message
+ * @param {Array<object>} history - Multi-turn conversation history
+ * @returns {Promise<string>} - The AI response text
  */
 export async function callGeminiApi(message, history = []) {
-    try {
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: message,
-                history: history
-            })
-        });
-
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-            const serverMsg = data?.error || `Service returned status ${response.status}`;
-            throw new Error(serverMsg);
-        }
-
-        if (!data || !data.text || typeof data.text !== 'string' || data.text.trim().length === 0) {
-            throw new Error('AI service returned an empty response. Please retry.');
-        }
-
-        return data.text.trim();
-    } catch (networkOrServerErr) {
-        throw new Error(networkOrServerErr.message || 'Unable to connect to the medical assistant service.');
+    const apiKey = getStorageItem('medibuddy_gemini_key', '');
+    if (!apiKey) {
+        throw new Error(
+            'Gemini API key not configured. Open browser console and run: ' +
+            'localStorage.setItem("medibuddy_gemini_key", "YOUR_KEY")'
+        );
     }
+
+    // Sanitise and cap conversation history to last 16 turns
+    let safeHistory = [];
+    if (Array.isArray(history)) {
+        safeHistory = history
+            .filter(t => t && (t.role === 'user' || t.role === 'model') && Array.isArray(t.parts))
+            .slice(-16)
+            .map(t => ({
+                role: t.role,
+                parts: t.parts.map(p => ({ text: String(p.text || '').slice(0, 4000) }))
+            }));
+    }
+
+    // Ensure contents array has at least the latest user query
+    if (safeHistory.length === 0) {
+        safeHistory = [{ role: 'user', parts: [{ text: message }] }];
+    }
+
+    const payload = {
+        system_instruction: { parts: [{ text: GEMINI_SYSTEM_INSTRUCTION }] },
+        contents: safeHistory,
+        generationConfig: {
+            temperature: 0.3,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 250
+        }
+    };
+
+    let lastError = null;
+
+    for (const model of GEMINI_MODELS) {
+        try {
+            const url =
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const responseText = await response.text();
+
+            if (!response.ok) {
+                let errMsg = `HTTP ${response.status}`;
+                try {
+                    const parsed = JSON.parse(responseText);
+                    errMsg = parsed?.error?.message || errMsg;
+                } catch (_) { /* ignore parse failure */ }
+
+                // Retry next model on 404 (model not found) or 503 (overloaded)
+                if (response.status === 404 || response.status === 503) {
+                    lastError = new Error(errMsg);
+                    continue;
+                }
+                throw new Error(errMsg);
+            }
+
+            const data = JSON.parse(responseText);
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text || typeof text !== 'string' || text.trim().length === 0) {
+                throw new Error('AI service returned an empty response. Please retry.');
+            }
+
+            return text.trim();
+        } catch (err) {
+            lastError = err;
+            // Only continue to next model on retriable errors; otherwise rethrow
+            if (err.message && !err.message.startsWith('HTTP 404') && !err.message.startsWith('HTTP 503')) {
+                throw err;
+            }
+        }
+    }
+
+    throw new Error(lastError?.message || 'Unable to connect to the medical assistant service.');
 }
 
 /**
